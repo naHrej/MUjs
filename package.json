@@ -1,0 +1,20 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^29.2.0"
+  },
+  "dependencies": {
+    "ansi_up": "^6.0.2",
+    "ansi-to-html": "^0.7.2",
+    "node-ansiparser": "^2.2.1"
+  }
+}
