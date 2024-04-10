@@ -102,31 +102,33 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
 
 
-    // Add an event listener for the 'received-data' event
-    document.addEventListener('received-data', (event) => {
-        // Get the console element
-        let consoleElement = document.querySelector('.console');
+// Add an event listener for the 'received-data' event
+document.addEventListener('received-data', (event) => {
+    // Get the console element
+    let consoleElement = document.querySelector('.console');
 
-        // Convert the ANSI escape codes to HTML tags
-        let html = window.api.ansi_to_html(event.detail);
+    // Convert the ANSI escape codes to HTML tags
+    let html = window.api.ansi_to_html(event.detail);
 
-        // Create a new div element
-        let newElement = document.createElement('div');
+    // Create a new div element
+    let newElement = document.createElement('div');
 
-        // Set the innerHTML of the new element
-        newElement.innerHTML = html;
+    // Set the innerHTML of the new element
+    newElement.innerHTML = html;
 
-        // Append the new element to the console element
-        consoleElement.appendChild(newElement);
+    // Append the new element to the console element
+    consoleElement.appendChild(newElement);
 
-        // Create a new br element
-        let brElement = document.createElement('br');
+    // // Create a new br element
+    // let brElement = document.createElement('br');
 
-        // Append the br element to the console element
-        consoleElement.appendChild(brElement);
+    // // Append the br element to the console element
+    // consoleElement.appendChild(brElement);
+
+    // Use requestAnimationFrame to ensure that scrollTop is set after the DOM has finished updating
         consoleElement.scrollTop = consoleElement.scrollHeight;
 
-    });
+});
 
     window.api.on('close', () => {
         console.log('Connection closed');

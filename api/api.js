@@ -1,12 +1,18 @@
 // api.js
 const { ipcRenderer } = require('electron');
 const { calculateCharCount } = require('./../utils');
+
 const net = require('net');
-const Convert = require('ansi-to-html');
-const convert = new Convert();
 const SystemFonts = require('system-font-families').default;
 let client = new net.Socket();
 let naws = false;
+
+let ansi;
+
+import('ansi_up').then((module) => {
+    ansi = new module.AnsiUp();
+});
+
 
 const api = {
     calculateCharCount: () => {
@@ -18,9 +24,9 @@ const api = {
         }
     },
     ansi_to_html: (data) => {
-        let html = convert.toHtml(data);
+        let html = ansi.ansi_to_html(data);
         // Replace newline characters with <br> tags
-        html = html.replace(/\n/g, '');
+        html = html.replace(/\n/g, '<br/>').replace(/\r/g, '');
         return html;
     },
     naws: () => {
