@@ -42,6 +42,13 @@ ipcMain.on('electron-store-set', async (event, key, val) => {
     store.set(key, val);
 });
 
+ipcMain.on('settings-updated', () => {
+    // mainWindow is the BrowserWindow instance for your main window
+    BrowserWindow.getAllWindows().forEach(win => {
+        win.webContents.send('settings-updated');
+    });
+});
+
 
 
 
@@ -57,7 +64,6 @@ const createSettingsWindow = () => {
             preload: path.join(__dirname, 'preload.js')
         }
     })
-    win.openDevTools();
 
     win.loadFile('settings.html')
 }
@@ -118,13 +124,7 @@ const createWindow = () => {
 }
 
 
-ipcMain.on('settings-updated', () => {
-    // mainWindow is the BrowserWindow instance for your main window
-    console.log('Settings updated');
-    BrowserWindow.getAllWindows().forEach(win => {
-        win.webContents.send('settings-updated');
-    });
-});
+
 
 app.whenReady().then(() => {
     createWindow()
