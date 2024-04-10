@@ -1,5 +1,7 @@
 // preload.js
-const { contextBridge, ipcRenderer } = require('electron')
+const { contextBridge, ipcRenderer } = require('electron');
+const fs = require('fs');
+var SystemFonts = require('system-font-families').default;
 const net = require('net');
 
 const Convert = require('ansi-to-html');
@@ -14,12 +16,13 @@ let naws = false;
 
 contextBridge.exposeInMainWorld(
     'api', {
+
     calculateCharCount: () => {
         return calculateCharCount();
     },
     send_naws: (byte1, byte2) => {
-        if(naws){
-        sendNAWS(byte1, byte2);
+        if (naws) {
+            sendNAWS(byte1, byte2);
         }
     },
     ansi_to_html: (data) => {
@@ -30,18 +33,13 @@ contextBridge.exposeInMainWorld(
     },
     naws: () => {
     },
-    send: (channel, data) => {
+    send: (channel, data) => {   
         ipcRenderer.send(channel, data);
-    },
-    receive: (channel, func) => {
-        ipcRenderer.on(channel, (event, ...args) => func(...args));
     },
     connect: (port, host) => {
         client.connect(port, host);
     },
-    on: (event, func) => {
-        client.on(event, func);
-    },
+    on: (channel, func) => ipcRenderer.on (channel, func),
     write: (data) => {
         // Append a newline character to the data
         data += '\n';
@@ -53,8 +51,63 @@ contextBridge.exposeInMainWorld(
     end: () => {
         client.end();
     },
-}
-)
+    settings: {
+        getFonts: async () => {
+
+            return getFonts();
+        },
+        load: () => {
+            return loadSettings();
+        },
+        save: (data) => {
+            saveSettings(data);
+        }
+    }
+});
+
+function loadSettings() {
+    const defaultSettings = {
+        fontFamily: 'Consolas-pIqaD',
+        fontSize: 14,
+    };
+
+    // Check if the settings.json file exists
+    if (!fs.existsSync('settings.json')) {
+        // If the file doesn't exist, return the default settings
+        return defaultSettings;
+    }
+
+    // If the file exists, read it
+    let settings = fs.readFileSync('settings.json', 'utf8');
+
+    // If the file is empty, return the default settings
+    if (!settings) {
+        return defaultSettings;
+    }
+
+    // If the file is not empty, parse it and return the settings
+    return JSON.parse(settings);
+};
+
+
+// save settings to settings.json
+function saveSettings(data) {
+    // Convert the data to a JSON string
+    let settings = JSON.stringify(data);
+    // Save the settings to the settings.json file
+    fs.writeFileSync('settings.json', settings);
+};
+
+const getFonts = () => {
+    const sff = new SystemFonts();
+    const fonts = sff.getFontsSync();
+    console.log(fonts); // Log the fonts
+    return fonts;
+};
+
+
+
+
 
 client.on('data', (data) => {
     // Convert the data to a Buffer
@@ -73,9 +126,9 @@ client.on('data', (data) => {
             newBuffer.push(buffer[i]);
         }
     }
-        let uint8array = Buffer.from(newBuffer); // replace this with your Uint8Array
-        let decoder = new TextDecoder('utf-8');
-        let unicodeString = decoder.decode(uint8array);
+    let uint8array = Buffer.from(newBuffer); // replace this with your Uint8Array
+    let decoder = new TextDecoder('utf-8');
+    let unicodeString = decoder.decode(uint8array);
     let event = new CustomEvent('received-data', { detail: unicodeString });
     document.dispatchEvent(event);
 });
@@ -116,7 +169,7 @@ function handleIACCommand(command, option) {
 
                 naws = true;
                 // Calculate the width of the console
-                let width = calculateCharCount()-2;
+                let width = calculateCharCount() - 2;
 
                 // Convert the width to two bytes
                 let byte1 = Math.floor(width / 256);
@@ -132,4 +185,5 @@ function handleIACCommand(command, option) {
             console.log('Unknown IAC command:', command);
             break;
     }
-}
+};
+

@@ -13,6 +13,7 @@ let currentInputIndex = -1;
     let inputField = document.querySelector('.textbox'); // Changed '.input' to '.textbox'
     inputField.addEventListener('keydown', (event) => {
         // Check if the Enter key was pressed
+    
         if (event.key === 'Enter') {
             // Prevent the default action to stop the form from being submitted
             event.preventDefault();
@@ -60,6 +61,17 @@ let currentInputIndex = -1;
         }
     });
 
+    // We should get the settings from the main process
+    let settings = window.api.settings.load();
+    // Apply them
+    let consoleElements = document.querySelectorAll('.console');
+    consoleElements.forEach(element => {
+        element.style.setProperty('font-family', settings.fontFamily, 'important');
+        element.style.setProperty('font-size', settings.fontSize + 'px', 'important');
+    });
+
+
+
     window.api.connect(port, host);
     console.log('Connected');
 
@@ -67,16 +79,16 @@ let currentInputIndex = -1;
     window.api.on('connect', () => {
         console.log('Connected to the server');
     });
-    
-    // Set up the event listener for the 'received-data' event
-    window.api.receive('received-data', (buffer) => {
-        // Convert the Buffer to a string
-        let dataString = buffer;
 
-
-        // Emit the 'received-data' event with the received data
-        let event = new CustomEvent('received-data', { detail: unicodeString });
-        document.dispatchEvent(event);
+    window.api.on('settings-updated', (event, settings)=> {
+        console.log('Applying settings');
+        // Apply the settings
+        let consoleElements = document.querySelectorAll('.console');
+        consoleElements.forEach(element => {
+            
+            element.style.setProperty('font-family', settings.fontFamily, 'important');
+            element.style.setProperty('font-size', settings.fontSize + 'px', 'important');
+        });
     });
 
     // Add an event listener for window-resize event
@@ -95,6 +107,8 @@ let currentInputIndex = -1;
 
         
     });
+
+
 
     // Add an event listener for the 'received-data' event
     document.addEventListener('received-data',  (event) => {
@@ -129,4 +143,5 @@ let currentInputIndex = -1;
     window.addEventListener('beforeunload', (event) => {
         window.api.end();
     });
+
 });
