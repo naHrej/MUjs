@@ -35,17 +35,16 @@ const store = new Store(
 
 
 // IPC listener
-ipcMain.on('electron-store-get', async (event, val) => {
-    event.returnValue = store.get(val);
+ipcMain.handle('electron-store-get', (event, key) => {
+    return store.get(key);
 });
 ipcMain.on('electron-store-set', async (event, key, val) => {
     store.set(key, val);
 });
 
-ipcMain.on('settings-updated', (event) => {
-    // mainWindow is the BrowserWindow instance for your main window
-    ipcMain.send('settings-updated');
-});
+
+
+
 
 
 const createSettingsWindow = () => {
@@ -114,7 +113,18 @@ const createWindow = () => {
     win.loadFile('index.html')
 
 
+
+
 }
+
+
+ipcMain.on('settings-updated', () => {
+    // mainWindow is the BrowserWindow instance for your main window
+    console.log('Settings updated');
+    BrowserWindow.getAllWindows().forEach(win => {
+        win.webContents.send('settings-updated');
+    });
+});
 
 app.whenReady().then(() => {
     createWindow()
