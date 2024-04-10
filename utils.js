@@ -1,5 +1,5 @@
 // utils.js
-function calculateCharCount() {
+module.exports.calculateCharCount = function calculateCharCount() {
     // Get the console element
     let consoleElement = document.querySelector('.console');
 
@@ -25,6 +25,4 @@ function calculateCharCount() {
     let numChars = Math.floor(consoleWidth / charWidth);
 
     return numChars; // This will return the number of characters that can fit horizontally across the console
-}
-
-module.exports = calculateCharCount;
+};

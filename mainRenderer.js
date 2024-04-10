@@ -6,28 +6,31 @@ document.addEventListener('DOMContentLoaded', (event) => {
     const host = "code.deanpool.net";
     const port = 1701;
     let inputHistory = [];
-let currentInputIndex = -1;
+    let currentInputIndex = -1;
 
-    
+    // When we load we apply any user stored settings.
+    ApplySettings();
+
+
     // Get the input field
     let inputField = document.querySelector('.textbox'); // Changed '.input' to '.textbox'
     inputField.addEventListener('keydown', (event) => {
         // Check if the Enter key was pressed
-    
+
         if (event.key === 'Enter') {
             // Prevent the default action to stop the form from being submitted
             event.preventDefault();
-    
+
             // Get the text from the input field
             let text = inputField.value;
-    
+
             // Add the text to the input history and reset the current input index
             inputHistory.push(text);
             currentInputIndex = -1;
-    
+
             // Clear the input field
             inputField.value = '';
-    
+
             console.log("Input text:" + text);
             // Send the text to the server
             window.api.write(text);
@@ -37,7 +40,7 @@ let currentInputIndex = -1;
                 // Increment the current input index
                 currentInputIndex++;
                 // Set the value of the input field to the previous input
-                inputField.value  = inputHistory[inputHistory.length - 1 - currentInputIndex];
+                inputField.value = inputHistory[inputHistory.length - 1 - currentInputIndex];
                 // Prevent the default action
                 event.preventDefault();
             }
@@ -47,7 +50,7 @@ let currentInputIndex = -1;
                 // Decrement the current input index
                 currentInputIndex--;
                 // Set the value of the input field to the next input
-                inputField.value  = inputHistory[inputHistory.length - 1 - currentInputIndex];
+                inputField.value = inputHistory[inputHistory.length - 1 - currentInputIndex];
                 // Prevent the default action
                 event.preventDefault();
             } else if (currentInputIndex === 0) {
@@ -61,14 +64,8 @@ let currentInputIndex = -1;
         }
     });
 
-    // We should get the settings from the main process
-    let settings = window.api.settings.load();
-    // Apply them
-    let consoleElements = document.querySelectorAll('.console');
-    consoleElements.forEach(element => {
-        element.style.setProperty('font-family', settings.fontFamily, 'important');
-        element.style.setProperty('font-size', settings.fontSize + 'px', 'important');
-    });
+
+  
 
 
 
@@ -80,38 +77,33 @@ let currentInputIndex = -1;
         console.log('Connected to the server');
     });
 
-    window.api.on('settings-updated', (event, settings)=> {
+    window.api.on('settings-updated', (event) => {
         console.log('Applying settings');
         // Apply the settings
-        let consoleElements = document.querySelectorAll('.console');
-        consoleElements.forEach(element => {
-            
-            element.style.setProperty('font-family', settings.fontFamily, 'important');
-            element.style.setProperty('font-size', settings.fontSize + 'px', 'important');
-        });
+        ApplySettings();
     });
 
     // Add an event listener for window-resize event
     window.addEventListener('resize', () => {
         // Calculate how many characters can fit on a line
-        let columns = window.api.calculateCharCount()-2;
+        let columns = window.api.calculateCharCount() - 2;
         let byte1 = Math.floor(columns / 256);
         let byte2 = columns % 256;
         // Send the window size to the server
 
-        window.api.send_naws(byte1, byte2); 
+        window.api.send_naws(byte1, byte2);
 
         // set scrollbar to bottom
         let consoleElement = document.querySelector('.console');
         consoleElement.scrollTop = consoleElement.scrollHeight;
 
-        
+
     });
 
 
 
     // Add an event listener for the 'received-data' event
-    document.addEventListener('received-data',  (event) => {
+    document.addEventListener('received-data', (event) => {
         // Get the console element
         let consoleElement = document.querySelector('.console');
 
@@ -133,7 +125,7 @@ let currentInputIndex = -1;
         // Append the br element to the console element
         consoleElement.appendChild(brElement);
         consoleElement.scrollTop = consoleElement.scrollHeight;
-        
+
     });
 
     window.api.on('close', () => {
@@ -145,3 +137,16 @@ let currentInputIndex = -1;
     });
 
 });
+
+
+
+async function ApplySettings() {
+    let consoleElements = document.querySelectorAll('.console');
+    consoleElements.forEach(async element => {
+        let font = await window.store.get('settings.fontFamily');
+        let size = await window.store.get('settings.fontSize');
+
+        element.style.setProperty('font-family', font, 'important');
+        element.style.setProperty('font-size', size + 'px', 'important');
+    });
+}

@@ -1,9 +1,7 @@
 window.onload = async function() {
-    const fonts = await window.api.settings.getFonts();
+    console.log(window.APIStore);
+    const fonts = await window.api.getFonts();
     console.log(fonts); // Log the fonts
-
-    const settings = window.api.settings.load();
-
     const select = document.getElementById('FontFamily');
     console.log(select); // Log the select element
 
@@ -14,15 +12,16 @@ window.onload = async function() {
         select.appendChild(option);
     });
 
-    select.value = settings.fontFamily;
-    document.getElementById('FontSize').value = settings.fontSize;
+    let fontFamily = await window.store.get('settings.fontFamily');
+    let fontSize = await window.store.get('settings.fontSize');
+    select.value = fontFamily;
+    document.getElementById('FontSize').value = fontSize;
 
 
     document.getElementById('saveButton').addEventListener('click', function() {
-        settings.fontFamily = select.value;
-        settings.fontSize = document.getElementById('FontSize').value;
-        window.api.settings.save(settings);
-        window.api.send('settings-updated', settings);
+        window.store.set("settings.fontFamily",select.value);
+        window.store.set("settings.fontSize",document.getElementById('FontSize').value);
+        window.api.send('settings-updated');
     });
 
 }

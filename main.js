@@ -1,7 +1,52 @@
 const { ipcMain } = require('electron');
 // main.js
-const { app, BrowserWindow, Menu } = require('electron')
-const path = require('path')
+const { app, BrowserWindow, Menu } = require('electron');
+const Store = require('electron-store');
+const path = require('path');
+
+app.setPath("userData", path.join(__dirname, 'data'));
+
+const store = new Store(
+    {
+        defaults: {
+            settings: {
+                fontFamily: 'Consolas-pIqaD',
+                fontSize: 14
+            },
+            timers: {
+                timer1: {
+                    name: 'Timer 1',
+                    duration: 10,
+                    remaining: 10,
+                    running: false
+                },
+                timer2: {
+                    name: 'Timer 2',
+                    duration: 5,
+                    remaining: 5,
+                    running: false
+                }
+            }
+        }
+    }
+
+);
+
+
+
+// IPC listener
+ipcMain.on('electron-store-get', async (event, val) => {
+    event.returnValue = store.get(val);
+});
+ipcMain.on('electron-store-set', async (event, key, val) => {
+    store.set(key, val);
+});
+
+ipcMain.on('settings-updated', (event) => {
+    // mainWindow is the BrowserWindow instance for your main window
+    ipcMain.send('settings-updated');
+});
+
 
 const createSettingsWindow = () => {
     const win = new BrowserWindow({
@@ -68,10 +113,7 @@ const createWindow = () => {
 
     win.loadFile('index.html')
 
-    ipcMain.on('settings-updated', (event, settings) => {
-        // mainWindow is the BrowserWindow instance for your main window
-        win.webContents.send('settings-updated', settings);
-    });
+
 }
 
 app.whenReady().then(() => {
