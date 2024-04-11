@@ -16,6 +16,7 @@
     "ansi_up": "^6.0.2",
     "bootstrap": "^5.3.3",
     "electron-store": "^8.2.0",
+    "image-js": "^0.35.5",
     "node-ansiparser": "^2.2.1",
     "system-font-families": "^0.6.0"
   }
