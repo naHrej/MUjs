@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
     // When we load we apply any user stored settings.
     ApplySettings();
 
+    // Focus the input field
+    document.querySelector('.textbox').focus();
+
 
     // Get the input field
     let inputField = document.querySelector('.textbox'); // Changed '.input' to '.textbox'
@@ -206,17 +209,22 @@ canvas.height = heightmap.length * scaleFactor;
 
         // If there is a next range, interpolate between the current color and the next color
         let color2 = color1;
+        let color3 = color1;
         if (rangeIndex !== -1 && rangeIndex < colorRanges.length - 1) {
             let nextHeight = colorRanges[rangeIndex + 1].min;
             let t = (height - colorRanges[rangeIndex].min) / (nextHeight - colorRanges[rangeIndex].min);      
             color2 = colorRanges[rangeIndex + 1].color;
+            color3 = color2;
             color1 = cssColorToRgb(color1);
             color2 = cssColorToRgb(color2);
             color1 = interpolateColor(color1, color2, t);
         }
 
-        // Draw a rectangle on the canvas with the interpolated color
-        ctx.fillStyle = color1;
+        let gradient = ctx.createLinearGradient(j * scaleFactor, i * scaleFactor, (j + 1) * scaleFactor, (i + 1) * scaleFactor);
+        gradient.addColorStop(0, color1);
+        gradient.addColorStop(0.5, color3);
+        gradient.addColorStop(1, color1);
+        ctx.fillStyle = gradient;
         ctx.fillRect(j * scaleFactor, i * scaleFactor, scaleFactor, scaleFactor);
         }
     }
