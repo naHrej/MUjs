@@ -1,10 +1,10 @@
 const { ipcMain } = require('electron');
-// main.js
 const { app, BrowserWindow, Menu } = require('electron');
 const Store = require('electron-store');
 const path = require('path');
+const preloadPath = path.resolve('src/preload/preload.js');
 
-app.setPath("userData", path.join(__dirname, 'data'));
+app.setPath("userData", path.join(__dirname, '../../data'));
 
 const store = new Store(
     {
@@ -61,7 +61,7 @@ const createSettingsWindow = () => {
         webPreferences: {
             contextIsolation: true,
             sandbox: false,
-            preload: path.join(__dirname, 'preload.js')
+            preload: preloadPath
         }
     })
 
@@ -70,7 +70,6 @@ const createSettingsWindow = () => {
 
 const createWindow = () => {
     // Get the path to the preload script
-    const preloadPath = path.join(__dirname, 'preload.js');
     console.log('Preload path: ', preloadPath); // Log the preload path
     const menu = Menu.buildFromTemplate([
         {

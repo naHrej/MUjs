@@ -1,6 +1,6 @@
 // api.js
 const { ipcRenderer } = require('electron');
-const { calculateCharCount } = require('./../utils');
+const { calculateCharCount } = require('./../../utils');
 
 const net = require('net');
 const SystemFonts = require('system-font-families').default;
