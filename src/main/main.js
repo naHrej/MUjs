@@ -65,7 +65,7 @@ const createSettingsWindow = () => {
         }
     })
 
-    win.loadFile('settings.html')
+    win.loadFile('public/settings.html')
 }
 
 const createWindow = () => {
@@ -97,7 +97,9 @@ const createWindow = () => {
             submenu: [
                 {
                     label: 'Open Developer Tools',
-                    click: () => win.webContents.openDevTools()
+                    click: () => {
+                        BrowserWindow.getFocusedWindow().webContents.openDevTools();
+                    }
                 }
             ]
         }
@@ -115,7 +117,7 @@ const createWindow = () => {
         }
     })
 
-    win.loadFile('index.html')
+    win.loadFile('public/index.html')
 
 
 

@@ -1,0 +1,37 @@
+<html lang="en" data-bs-theme="dark">
+    <head>
+        <meta charset="UTF-8" />
+        <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+        
+        <title>MU*JS</title>
+        <!-- Include the style sheet style.css -->
+        <link rel="stylesheet" href="style.css" />
+        <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    </head>
+    <body>
+      <div id="settings" class="container py-5">
+        <form @submit.prevent="saveSettings" class="row g-3">
+          <div class="col-md-6">
+            <label for="font-family" class="form-label">Font Family:</label>
+            <select id="font-family" v-model="fontFamily" class="form-select">
+              <option v-for="font in fonts" :key="font" :value="font">
+                {{ font }}
+              </option>
+            </select>
+          </div>
+      
+          <div class="col-md-6">
+            <label for="font-size" class="form-label">Font Size:</label>
+            <input id="font-size" type="number" v-model="fontSize" class="form-control" />
+          </div>
+      
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary">Save</button>
+          </div>
+        </form>
+      </div>
+        <script src="../node_modules/vue/dist/vue.global.js"></script>
+        <script src="../src/render/settings.js"></script>
+    </body>
+</html>
