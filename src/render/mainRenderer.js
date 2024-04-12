@@ -55,13 +55,11 @@ const app = Vue.createApp({
         document.addEventListener('received-data', (event) => {
             if (event.detail.startsWith("canvas:")) {
                 let canvasData = event.detail.substring(7);
-                console.log("Canvas data: " + typeof canvasData);
                 initCanvas(canvasData);
 
                 this.terminal.scrollTop = this.terminal.scrollHeight;
                 return;
             }
-            console.log("Received data: " + event.detail);
             let html = window.api.ansi_to_html(event.detail);
             let newElement = document.createElement('div');
             newElement.innerHTML = html;
