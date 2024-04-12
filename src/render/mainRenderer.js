@@ -15,6 +15,10 @@ const app = Vue.createApp({
         this.terminal = document.querySelector('.console');
         this.ApplySettings();
         window.api.connect(this.port, this.host);
+           
+        setInterval(() => {
+            window.api.write('idle');
+        }, 60000);
         console.log('Connected');
         window.api.on('connect', () => {
             console.log('Connected to the server');
@@ -30,6 +34,11 @@ const app = Vue.createApp({
             this.terminal.scrollTop = this.terminal.scrollHeight;
         });
 
+        window.api.on('reconnect', () => {
+            console.log('Reconnecting');
+            window.api.connect(this.port, this.host);
+        });
+
         window.api.on('settings-updated', (event) => {
             console.log('Applying settings');
             // Apply the settings
@@ -38,6 +47,8 @@ const app = Vue.createApp({
         window.api.on('close', () => {
             console.log('Connection closed');
         });
+
+
         window.addEventListener('beforeunload', (event) => {
             window.api.end();
         });

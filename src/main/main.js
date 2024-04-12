@@ -5,6 +5,7 @@ const path = require('path');
 const preloadPath = path.resolve('src/preload/preload.js');
 
 app.setPath("userData", path.join(__dirname, '../../data'));
+const api = require('../preload/api/api.js');
 
 const store = new Store(
     {
@@ -73,8 +74,17 @@ const createWindow = () => {
     console.log('Preload path: ', preloadPath); // Log the preload path
     const menu = Menu.buildFromTemplate([
         {
-            label: 'File',
+            label: 'World',
             submenu: [
+                {
+                    label: 'Connect',
+                    id: "connect",
+                    enabled: false,
+                    click: () => {
+                        win.webContents.send('reconnect');
+                        
+                    }
+                },
                 {
                     label: 'Exit',
                     click: () => {
@@ -83,6 +93,7 @@ const createWindow = () => {
                 },
             ]
         },
+        
         {
             label: 'Configuration',
             submenu: [
@@ -106,6 +117,18 @@ const createWindow = () => {
     ]);
 
     Menu.setApplicationMenu(menu);
+
+    // Add a listener for the disconnected event
+    ipcMain.on('disconnected', () => {
+        // Re-enable the connect menu item
+        menu.getMenuItemById('connect').enabled = true;
+    });
+
+    // Add a listener for the connected event
+    ipcMain.on('connected', () => {
+        // Disable the connect menu item
+        menu.getMenuItemById('connect').enabled = false;
+    });
 
     const win = new BrowserWindow({
         width: 800,

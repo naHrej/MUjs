@@ -84,6 +84,18 @@ client.on('data', (data) => {
     document.dispatchEvent(event);
 });
 
+client.on('close', () => {
+    // emit a disconnected event
+    ipcRenderer.send('disconnected');
+    console.log('Connection closed');
+});
+
+client.on('connect', () => {
+    // emit a connected event
+    ipcRenderer.send('connected');
+    console.log('Connected');
+});
+
 
 function sendNAWS(byte1, byte2) {
     // Define the IAC commands
