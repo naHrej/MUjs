@@ -2,7 +2,8 @@ const conmgr = Vue.createApp({
     data() {
         return {
             sites: [],
-            showMgr: true
+            showMgr: true,
+            editingSiteKey: null,
             
         }
     },
@@ -17,6 +18,12 @@ const conmgr = Vue.createApp({
 
             // Save the sites
             await window.store.set('sites', plainSites);
+            this.editingSiteKey = null;
+
+        },
+        editSite: function(key) {
+            this.editingSiteKey = key; // Set editingSiteKey to the key of the site being edited
+            // ... other code
         },
         async deleteSite(key) {
             this.sites.splice(key, 1);

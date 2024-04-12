@@ -17,13 +17,21 @@
                 <div id="conmgr" v-show="showMgr">
                         <div>
                                 <div v-for="(site, key) in sites" :key="key" class="card mb-3">
-                                        <div class="card-body">
+                                        <div v-if="editingSiteKey === key">
+                                                <!-- Editable form -->
+                                                <input v-model="site.name" type="text">
+                                                <input v-model="site.host" type="text">
+                                                <input v-model="site.port" type="text">
+                                                <button @click="saveSite" class="btn btn-primary">Save</button>
+                                            </div>
+                                            <div v-else>
+                                                <!-- Site details -->
                                                 <h5 class="card-title">{{ site.name }}</h5>
                                                 <p class="card-text">{{ site.host }}:{{ site.port }}</p>
                                                 <button @click="selectSite(key)" class="btn btn-primary">Select</button>
                                                 <button @click="editSite(key)" class="btn btn-secondary">Edit</button>
                                                 <button @click="deleteSite(key)" class="btn btn-danger">Delete</button>
-                                        </div>
+                                            </div>
                                 </div>
                                 <button @click="addSite" class="btn btn-success">Add New Site</button>
                         </div>
