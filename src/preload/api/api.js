@@ -33,13 +33,15 @@ const api = {
     },
     naws: () => {
     },
-    send: (channel, data) => {   
-        ipcRenderer.send(channel, data);
+    send: (channel, ...args) => {   
+        ipcRenderer.send(channel, ...args);
     },
     connect: (port, host) => {
         client.connect(port, host);
     },
-    on: (channel, func) => ipcRenderer.on (channel, func),
+    on: (channel, func) => {
+        ipcRenderer.on(channel, func);
+    },
     write: (data) => {
         // Append a newline character to the data
         data += '\n';
@@ -80,8 +82,8 @@ client.on('data', (data) => {
     let uint8array = Buffer.from(newBuffer); // replace this with your Uint8Array
     let decoder = new TextDecoder('utf-8');
     let unicodeString = decoder.decode(uint8array);
-    let event = new CustomEvent('received-data', { detail: unicodeString });
-    document.dispatchEvent(event);
+    ipcRenderer.send('received-data', unicodeString);
+
 });
 
 client.on('close', () => {
@@ -92,8 +94,7 @@ client.on('close', () => {
 
 client.on('connect', () => {
     // emit a connected event
-    ipcRenderer.send('connected');
-    console.log('Connected');
+    ipcRenderer.send('connect');
 });
 
 

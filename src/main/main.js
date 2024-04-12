@@ -17,16 +17,25 @@ const store = new Store(
             timers: {
                 timer1: {
                     name: 'Timer 1',
-                    duration: 10,
-                    remaining: 10,
-                    running: false
+                    interval: 60000,
+                    enabled: false,
+                    send: "idle"
                 },
                 timer2: {
                     name: 'Timer 2',
-                    duration: 5,
-                    remaining: 5,
-                    running: false
+                    interval: 60000,
+                    enabled: false,
+                    send: "idle"
                 }
+            },
+            sites:
+            {
+                site1: {
+                    name: 'klinMoo',
+                    host: 'code.deanpool.net',
+                    port: 1701,
+                },
+
             }
         }
     }
@@ -50,8 +59,23 @@ ipcMain.on('settings-updated', () => {
     });
 });
 
+ipcMain.on('site-selected', (event, host, port) => {
+    BrowserWindow.getAllWindows().forEach(win => {
+        win.webContents.send('site-selected', host, port );
+    });
+});
 
+ipcMain.on('connect', () => {
+    BrowserWindow.getAllWindows().forEach(win => {
+        win.webContents.send('connect');
+    });
+});
 
+ipcMain.on('received-data', (event, data) => {
+    BrowserWindow.getAllWindows().forEach(win => {
+        win.webContents.send('received-data', data);
+    });
+});
 
 
 

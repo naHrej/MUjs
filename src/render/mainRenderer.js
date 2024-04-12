@@ -7,22 +7,32 @@ const app = Vue.createApp({
             inputHistory: [],
             currentInputIndex: -1,
             inputField: '',
-            terminal: null
+            terminal: null,
+            showApp: false
         };
     },
     mounted() {
         // get the terminal element
         this.terminal = document.querySelector('.console');
         this.ApplySettings();
-        window.api.connect(this.port, this.host);
-           
-        setInterval(() => {
-            window.api.write('idle');
-        }, 60000);
-        console.log('Connected');
-        window.api.on('connect', () => {
-            console.log('Connected to the server');
+
+        window.api.on('site-selected', (event, host, port) => {
+            
+            this.host = host;
+            this.port = port;
+            window.api.connect(this.port, this.host);
+
         });
+           
+        window.api.on('connect', () => {
+            this.showApp = true;
+            console.log('Connected to the server');
+            setInterval(() => {
+                window.api.write('idle');
+            }, 60000);
+        });
+
+
         window.addEventListener('resize', () => {
             // Calculate how many characters can fit on a line
             let columns = window.api.calculateCharCount() - 2;
@@ -52,20 +62,21 @@ const app = Vue.createApp({
         window.addEventListener('beforeunload', (event) => {
             window.api.end();
         });
-        document.addEventListener('received-data', (event) => {
-            if (event.detail.startsWith("canvas:")) {
-                let canvasData = event.detail.substring(7);
+        
+        window.api.on('received-data', (event, data) => {
+            console.log('Received data:', data);
+            if (data.startsWith("canvas:")) {
+                let canvasData = data.substring(7);
                 initCanvas(canvasData);
 
                 this.terminal.scrollTop = this.terminal.scrollHeight;
                 return;
             }
-            let html = window.api.ansi_to_html(event.detail);
+            let html = window.api.ansi_to_html(data);
             let newElement = document.createElement('div');
             newElement.innerHTML = html;
             this.terminal.appendChild(newElement);
             this.terminal.scrollTop = this.terminal.scrollHeight;
-
         });
 
     },
