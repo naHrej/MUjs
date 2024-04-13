@@ -94,12 +94,28 @@
                 <!-- end of timers -->
               </div>
             </div>
+            
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="headingMisc">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMisc" aria-expanded="false" aria-controls="collapseMisc">
+            Misc
+          </button>
+        </h2>
+        <div id="collapseMisc" class="accordion-collapse collapse" aria-labelledby="headingMisc" data-bs-parent="#accordionExample">
+          <div class="accordion-body">
+            <form @submit.prevent="updateWatchPath">
+              <div class="mb-3">
+                <label for="watchPath" class="form-label">Watch Path: {{ watchPath }}</label>
+                <button type="button" class="btn btn-primary" v-on:click="updateWatchPath">Folder Select</button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
     </div>
-
-
     <script src="../node_modules/vue/dist/vue.global.js"></script>
     <script src="../src/render/settings.js"></script>
 </body>

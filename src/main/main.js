@@ -1,4 +1,4 @@
-const { ipcMain } = require('electron');
+const { ipcMain, dialog } = require('electron');
 const { app, BrowserWindow, Menu } = require('electron');
 const Store = require('electron-store');
 const path = require('path');
@@ -7,12 +7,26 @@ const preloadPath = path.resolve('src/preload/preload.js');
 app.setPath("userData", path.join(__dirname, '../../data'));
 const api = require('../preload/api/api.js');
 
+
+ipcMain.handle('dialog:openDirectory', async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog(BrowserWindow.getFocusedWindow, {
+        properties: ['openDirectory']
+    })
+    if (canceled) {
+        return
+    } else {
+        return filePaths[0]
+    }
+})
+
+
 const store = new Store(
     {
         defaults: {
             settings: {
                 fontFamily: 'Consolas-pIqaD',
-                fontSize: 14
+                fontSize: 14,
+                watchPath: path.resolve('../../')
             },
             timers: {
                 timer1: {

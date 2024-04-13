@@ -1,8 +1,9 @@
 // api.js
-const { ipcRenderer } = require('electron');
+const { ipcRenderer, ipcMain} = require('electron');
 const { calculateCharCount } = require('./../../utils');
 
 const net = require('net');
+const { connected } = require('process');
 const SystemFonts = require('system-font-families').default;
 let client = new net.Socket();
 let naws = false;
@@ -17,6 +18,9 @@ import('ansi_up').then((module) => {
 const api = {
     calculateCharCount: () => {
         return calculateCharCount();
+    },
+    invoke: (channel, ...args) => {
+        return ipcRenderer.invoke(channel, ...args);
     },
     send_naws: (byte1, byte2) => {
         if (naws) {
@@ -38,6 +42,9 @@ const api = {
     },
     connect: (port, host) => {
         client.connect(port, host);
+    },
+    connected: () => {
+        return client.connected;
     },
     on: (channel, func) => {
         ipcRenderer.on(channel, func);
@@ -96,6 +103,8 @@ client.on('connect', () => {
     // emit a connected event
     ipcRenderer.send('connect');
 });
+
+
 
 
 function sendNAWS(byte1, byte2) {
