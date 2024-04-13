@@ -16,6 +16,11 @@ const app = Vue.createApp({
         this.terminal = document.querySelector('.console');
         this.ApplySettings();
 
+        // Get the input history from the store
+        window.store.get('inputHistory').then((inputHistory) => {
+            this.inputHistory = Object.values(inputHistory || {}) || [];
+        });
+
         window.api.on('site-selected', (event, host, port) => {
             
             this.host = host;
@@ -89,13 +94,27 @@ const app = Vue.createApp({
                 this.inputHistory.push(text);
                 this.currentInputIndex = -1;
                 this.inputField = '';
+
+                // save input history
+                window.store.set('inputHistory', Object.values(this.inputHistory || {}));
                 console.log("Input text:" + text);
                 window.api.write(text);
             } else if (event.key === 'ArrowUp') {
                 if (this.currentInputIndex < this.inputHistory.length - 1) {
                     this.currentInputIndex++;
+                    this.inputField = this.inputHistory[this.inputHistory.length - 1 - this.currentInputIndex];
+                }
+            } else if (event.key === 'ArrowDown') {
+                if (this.currentInputIndex > -1) {
+                    this.currentInputIndex--;
+                    if (this.currentInputIndex === -1) {
+                        this.inputField = '';
+                    } else {
+                        this.inputField = this.inputHistory[this.inputHistory.length - 1 - this.currentInputIndex];
+                    }
                 }
             }
+
         },
         async ApplySettings() {
                 let font = await window.store.get('settings.fontFamily');
