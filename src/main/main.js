@@ -9,7 +9,8 @@ const api = require('../preload/api/api.js');
 
 
 ipcMain.handle('dialog:openDirectory', async () => {
-    const { canceled, filePaths } = await dialog.showOpenDialog(BrowserWindow.getFocusedWindow, {
+    const { canceled, filePaths } = await dialog.showOpenDialog(BrowserWindow.getFocusedWindow(), {
+        title: "Select Directory",
         properties: ['openDirectory']
     })
     if (canceled) {
