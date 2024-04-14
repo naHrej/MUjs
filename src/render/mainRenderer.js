@@ -77,11 +77,40 @@ const app = Vue.createApp({
                 this.terminal.scrollTop = this.terminal.scrollHeight;
                 return;
             }
-            let html = window.api.ansi_to_html(data);
-            let newElement = document.createElement('div');
-            newElement.innerHTML = html;
-            this.terminal.appendChild(newElement);
-            this.terminal.scrollTop = this.terminal.scrollHeight;
+
+            if (data.startsWith('!@style:url:')) {
+                // Extract the URL from the data
+                let url = data.slice('!@style:url:'.length);
+            
+                // Fetch the CSS code from the URL
+                fetch(url)
+                    .then(response => response.text())
+                    .then(css => {
+
+                        // Remove the existing style tag
+                        let existingStyle = document.getElementById('dynamic-style');
+                        if (existingStyle) {
+                            existingStyle.remove();
+                        }
+                        // Create a new style tag
+                        let style = document.createElement('style');
+            
+                        // Set the innerHTML of the style tag to the CSS code
+                        style.innerHTML = css;
+            
+                        // Set the id of the style tag
+                        style.id = 'dynamic-style';
+            
+                        // Append the style tag to the head of the document
+                        document.head.appendChild(style);
+                    })
+                    .catch(error => console.error('Error:', error));
+            } else {
+                let newElement = document.createElement('div');
+                newElement.innerHTML = window.api.ansi_to_html(data);;
+                this.terminal.appendChild(newElement);
+                this.terminal.scrollTop = this.terminal.scrollHeight;
+            }
         });
 
     },
@@ -114,6 +143,27 @@ const app = Vue.createApp({
                     }
                 }
             }
+            window.api.invokeMenu([
+                {
+                    label: 'Copy',
+                    accelerator: 'CmdOrCtrl+C',
+                    click: () => {
+                        document.execCommand('copy');
+                    }
+                },
+                {
+                    label: 'Paste',
+                    accelerator: 'CmdOrCtrl+V',
+                    click: () => {
+                        document.execCommand('paste');
+                    }
+                }
+            ]);
+
+            // this.$refs.inputField.addEventListener('contextmenu', (e) => {
+            //     e.preventDefault();
+            //     window.electron.invokeMenu();
+            // }, false);
 
         },
         async ApplySettings() {

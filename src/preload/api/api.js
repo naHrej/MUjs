@@ -16,6 +16,7 @@ import('ansi_up').then((module) => {
 
 
 const api = {
+    invokeMenu: (template) => ipcRenderer.invoke('show-context-menu', template),
     calculateCharCount: () => {
         return calculateCharCount();
     },

@@ -43,7 +43,7 @@
                         <div v-show="showApp">
                         <div class="console">
                         </div>
-                        <textarea class="textbox" v-model="inputField" @keydown="handleKeydown"></textarea>
+                        <textarea ref="inputField" class="textbox" v-model="inputField" @keydown="handleKeydown"></textarea>
                 </div>
                 </div>
         

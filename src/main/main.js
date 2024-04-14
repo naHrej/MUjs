@@ -20,6 +20,11 @@ ipcMain.handle('dialog:openDirectory', async () => {
     }
 })
 
+ipcMain.handle('show-context-menu', (event, template) => {
+    const menu = Menu.buildFromTemplate(template);
+    menu.popup(BrowserWindow.fromWebContents(event.sender));
+});
+
 
 const store = new Store(
     {
