@@ -125,7 +125,7 @@ const app = Vue.createApp({
                 this.inputField = '';
 
                 // save input history
-                window.store.set('inputHistory', Object.values(this.inputHistory || {}));
+                //window.store.set('inputHistory', Object.values(this.inputHistory || {}));
                 console.log("Input text:" + text);
                 window.api.write(text);
             } else if (event.key === 'ArrowUp') {
