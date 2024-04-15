@@ -18,7 +18,7 @@ const app = Vue.createApp({
 
         // Get the input history from the store
         window.store.get('inputHistory').then((inputHistory) => {
-            this.inputHistory = Object.values(inputHistory || {}) || [];
+            this.inputHistory = Object.values(inputHistory || {});
         });
 
         window.api.on('site-selected', (event, host, port) => {
@@ -69,7 +69,6 @@ const app = Vue.createApp({
         });
         
         window.api.on('received-data', (event, data) => {
-            console.log('Received data:', data);
             if (data.startsWith("canvas:")) {
                 let canvasData = data.substring(7);
                 initCanvas(canvasData);
@@ -104,7 +103,7 @@ const app = Vue.createApp({
                         // Append the style tag to the head of the document
                         document.head.appendChild(style);
                     })
-                    .catch(error => console.error('Error:', error));
+                    .catch(error => window.api.write('update-style'));
             } else {
                 let newElement = document.createElement('div');
                 newElement.innerHTML = window.api.ansi_to_html(data);;
@@ -116,7 +115,6 @@ const app = Vue.createApp({
     },
     methods: {
         handleKeydown(event) {
-            console.log("Key pressed: " + event.key);
             if (event.key === 'Enter') {
                 event.preventDefault();
                 let text = this.inputField;
@@ -125,8 +123,7 @@ const app = Vue.createApp({
                 this.inputField = '';
 
                 // save input history
-                //window.store.set('inputHistory', Object.values(this.inputHistory || {}));
-                console.log("Input text:" + text);
+                window.store.set('inputHistory', Object.values(this.inputHistory || {}));
                 window.api.write(text);
             } else if (event.key === 'ArrowUp') {
                 if (this.currentInputIndex < this.inputHistory.length - 1) {
@@ -141,29 +138,19 @@ const app = Vue.createApp({
                     } else {
                         this.inputField = this.inputHistory[this.inputHistory.length - 1 - this.currentInputIndex];
                     }
+                } else if (event.key === 'v' && (event.ctrlKey || event.metaKey)) {
+                    navigator.clipboard.readText().then((text) => {
+                        this.inputField += text;
+                    })
+                } else if (event.key === 'c' && (event.ctrlKey || event.metaKey)) {
+                    // Handle 'Command' or 'Control' + 'C' here
+                    navigator.clipboard.writeText(this.inputField);
+                } else if (event.key === 'x' && (event.ctrlKey || event.metaKey)) {
+                    // Handle 'Command' or 'Control' + 'X' here
+                    navigator.clipboard.writeText(this.inputField);
+                    this.inputField = '';
                 }
             }
-            window.api.invokeMenu([
-                {
-                    label: 'Copy',
-                    accelerator: 'CmdOrCtrl+C',
-                    click: () => {
-                        document.execCommand('copy');
-                    }
-                },
-                {
-                    label: 'Paste',
-                    accelerator: 'CmdOrCtrl+V',
-                    click: () => {
-                        document.execCommand('paste');
-                    }
-                }
-            ]);
-
-            // this.$refs.inputField.addEventListener('contextmenu', (e) => {
-            //     e.preventDefault();
-            //     window.electron.invokeMenu();
-            // }, false);
 
         },
         async ApplySettings() {
