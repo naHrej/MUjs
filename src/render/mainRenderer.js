@@ -106,7 +106,18 @@ const app = Vue.createApp({
                     .catch(error => window.api.write('update-style'));
             } else {
                 let newElement = document.createElement('div');
-                newElement.innerHTML = window.api.ansi_to_html(data);;
+                
+                newElement.innerHTML = window.api.ansi_to_html(data);
+                // iterate newElement children and add click event if onCommand attribute is present
+                newElement.childNodes.forEach(node => {
+                    if (node instanceof Element && node.hasAttribute('onCommand')) {
+                        node.addEventListener('click', () => {
+                            this.handleCommandElement(node);
+                        });
+                    }
+                });
+
+
                 this.terminal.appendChild(newElement);
                 this.terminal.scrollTop = this.terminal.scrollHeight;
             }
@@ -114,6 +125,15 @@ const app = Vue.createApp({
 
     },
     methods: {
+        handleCommandElement(element) {
+            let command = element.getAttribute('onCommand');
+            this.inputField = command;
+            this.inputHistory.push(command);
+            this.currentInputIndex = -1;
+            window.api.write(command);
+            this.inputField = '';
+        },
+
         handleKeydown(event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
