@@ -16,13 +16,15 @@ ipcMain.on('window', (event, id, updateType, html) => {
     if (window) {
         // send the update event to the window
         if (updateType === 'append') {
-            window.webContents.executeJavaScript(`document.body.innerHTML += \`${html}\``);
+            windows[id].webContents.executeJavaScript(`document.querySelector('.container').innerHTML += \`${html}\``);
         } else if (updateType === 'replace') {
-            window.webContents.executeJavaScript(`document.body.innerHTML = \`${html}\``);
+            windows[id].webContents.executeJavaScript(`document.querySelector('.container').innerHTML = \`${html}\``);
         } else if (updateType === 'prepend') {
-            window.webContents.executeJavaScript(`document.body.innerHTML = \`${html}\` + document.body.innerHTML`);
+            windows[id].webContents.executeJavaScript(`document.querySelector('.container').innerHTML = \`${html}\` + document.querySelector('.container').innerHTML`);
         } else if (updateType === 'clear') {
-            window.webContents.executeJavaScript(`document.body.innerHTML = ''`);
+            windows[id].webContents.executeJavaScript(`document.querySelector('.container').innerHTML = ''`);
+        } else if (updateType === 'style') {
+            windows[id].webContents.executeJavaScript(`loadStyleFromURL(\`${html}\`)`);
         }
     } else {
         // spawn a new window if the window does not exist
@@ -35,9 +37,17 @@ ipcMain.on('window', (event, id, updateType, html) => {
                 sandbox: false
             }
         });
-            // load the index.html file
-    windows[id].loadFile('public/blank.html');
-    windows[id].webContents.executeJavaScript(`document.body.innerHTML = \`${html}\``);
+        // load the index.html file
+        windows[id].loadFile('public/blank.html');
+        windows[id].on('ready-to-show', () => {
+            
+            if (updateType === 'style') {
+                windows[id].webContents.executeJavaScript(`loadStyleFromURL(\`${html}\`)`);
+            }
+            else {
+                windows[id].webContents.executeJavaScript(`document.querySelector('.container').innerHTML += \`${html}\``);
+            }
+        });
     }
 
 
@@ -122,7 +132,7 @@ ipcMain.on('settings-updated', () => {
 
 ipcMain.on('site-selected', (event, host, port) => {
     BrowserWindow.getAllWindows().forEach(win => {
-        win.webContents.send('site-selected', host, port );
+        win.webContents.send('site-selected', host, port);
     });
 });
 
@@ -167,7 +177,7 @@ const createWindow = () => {
                     enabled: false,
                     click: () => {
                         win.webContents.send('reconnect');
-                        
+
                     }
                 },
                 {
@@ -178,7 +188,7 @@ const createWindow = () => {
                 },
             ]
         },
-        
+
         {
             label: 'Configuration',
             submenu: [
