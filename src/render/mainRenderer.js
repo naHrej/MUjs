@@ -74,33 +74,31 @@ const app = Vue.createApp({
             if (data.startsWith('!@style:url:')) {
                 // Extract the URL from the data
                 let url = data.slice('!@style:url:'.length);
-
+            
                 // strip the url of any thing after and including a = character
                 url = url.split('=')[0];
             
-                // Fetch the CSS code from the URL
-                fetch(url)
-                    .then(response => response.text())
-                    .then(css => {
-
-                        // Remove the existing style tag
-                        let existingStyle = document.getElementById('dynamic-style');
-                        if (existingStyle) {
-                            existingStyle.remove();
-                        }
-                        // Create a new style tag
-                        let style = document.createElement('style');
+                // Remove the existing link tag
+                let existingLink = document.getElementById('dynamic-style');
+                if (existingLink) {
+                    existingLink.remove();
+                }
             
-                        // Set the innerHTML of the style tag to the CSS code
-                        style.innerHTML = css;
+                // Create a new link tag
+                let link = document.createElement('link');
             
-                        // Set the id of the style tag
-                        style.id = 'dynamic-style';
+                // Set the href of the link tag to the URL
+                link.href = url;
             
-                        // Append the style tag to the head of the document
-                        document.head.appendChild(style);
-                    })
-                    .catch(error => window.api.write('update-style'));
+                // Set the rel of the link tag
+                link.rel = 'stylesheet/less'; 
+            
+                // Set the id of the link tag
+                link.id = 'dynamic-style';
+            
+                // Append the link tag to the head of the document
+                document.head.appendChild(link);
+                less.refresh();
             } else {
                 let newElement = document.createElement('div');
                 
