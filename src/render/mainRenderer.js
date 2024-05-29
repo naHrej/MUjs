@@ -6,7 +6,7 @@ const app = Vue.createApp({
             port: 1701,
             inputHistory: [],
             currentInputIndex: -1,
-            inputField: '',
+            inputField: null,
             terminal: null,
             showApp: false
         };
@@ -169,17 +169,6 @@ const app = Vue.createApp({
                     } else {
                         this.inputField = this.inputHistory[this.inputHistory.length - 1 - this.currentInputIndex];
                     }
-                } else if (event.key === 'v' && (event.ctrlKey || event.metaKey)) {
-                    navigator.clipboard.readText().then((text) => {
-                        this.inputField += text;
-                    })
-                } else if (event.key === 'c' && (event.ctrlKey || event.metaKey)) {
-                    // Handle 'Command' or 'Control' + 'C' here
-                    navigator.clipboard.writeText(this.inputField);
-                } else if (event.key === 'x' && (event.ctrlKey || event.metaKey)) {
-                    // Handle 'Command' or 'Control' + 'X' here
-                    navigator.clipboard.writeText(this.inputField);
-                    this.inputField = '';
                 }
             }
 

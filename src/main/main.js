@@ -1,5 +1,5 @@
 const { ipcMain, dialog } = require('electron');
-const { app, BrowserWindow, Menu } = require('electron');
+const { globalShortcut, app, BrowserWindow, Menu } = require('electron');
 const Store = require('electron-store');
 const path = require('path');
 const preloadPath = path.resolve('src/preload/preload.js');
@@ -195,6 +195,28 @@ const createWindow = () => {
 
 
 app.whenReady().then(() => {
-    createWindow()
+    createWindow();
+    // implement global cut and paste shortcuts
+    // The global shortcuts should only be active when the app is focused
+    app.on('browser-window-focus', () => {
+        globalShortcut.register('CommandOrControl+C', () => {
+            BrowserWindow.getFocusedWindow().webContents.copy();
+        });
+        globalShortcut.register('CommandOrControl+V', () => {
+            BrowserWindow.getFocusedWindow().webContents.paste();
+        });
+        globalShortcut.register('CommandOrControl+X', () => {
+            BrowserWindow.getFocusedWindow().webContents.cut();
+        });
+        globalShortcut.register('CommandOrControl+A', () => {
+            BrowserWindow.getFocusedWindow().webContents.selectAll();
+        });
+        globalShortcut.register('CommandOrControl+Z', () => {
+            BrowserWindow.getFocusedWindow().webContents.undo();
+        });
+    });
+    app.on('browser-window-blur', () => {
+        globalShortcut.unregisterAll();
+    });
 });
 
