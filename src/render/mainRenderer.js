@@ -106,12 +106,10 @@ const app = Vue.createApp({
 
                 newElement.innerHTML = window.api.ansi_to_html(data);
                 // iterate newElement children and add click event if onCommand attribute is present
-                newElement.childNodes.forEach(node => {
-                    if (node instanceof Element && node.hasAttribute('onCommand')) {
-                        node.addEventListener('click', () => {
-                            this.handleCommandElement(node);
-                        });
-                    }
+                newElement.querySelectorAll('[onCommand]').forEach(node => {
+                    node.addEventListener('click', () => {
+                        this.handleCommandElement(node);
+                    });
                 });
 
 
