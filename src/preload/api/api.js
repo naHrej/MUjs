@@ -103,7 +103,7 @@ client.on('data', (data) => {
             let windowDataArray = windowData.split(':');
             let windowTitle = windowDataArray[0];
             let windowType = windowDataArray[1];
-            let windowHtml = windowDataArray[2];
+            let windowHtml = windowDataArray.slice(2).join(':');
             console.log(windowTitle, windowType, windowHtml);
             ipcRenderer.send('window', windowTitle, windowType, windowHtml);
         }
