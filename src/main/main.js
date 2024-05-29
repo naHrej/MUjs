@@ -7,6 +7,47 @@ const preloadPath = path.resolve('src/preload/preload.js');
 app.setPath("userData", path.join(__dirname, '../../data'));
 const api = require('../preload/api/api.js');
 
+let windows = {}
+// create an ipc listener for the update-window event
+ipcMain.on('window', (event, id, updateType, html) => {
+    // get the window by id
+    const window = windows[id];
+    // check if the window exists
+    if (window) {
+        // send the update event to the window
+        if (updateType === 'append') {
+            window.webContents.executeJavaScript(`document.body.innerHTML += \`${html}\``);
+        } else if (updateType === 'replace') {
+            window.webContents.executeJavaScript(`document.body.innerHTML = \`${html}\``);
+        } else if (updateType === 'prepend') {
+            window.webContents.executeJavaScript(`document.body.innerHTML = \`${html}\` + document.body.innerHTML`);
+        } else if (updateType === 'clear') {
+            window.webContents.executeJavaScript(`document.body.innerHTML = ''`);
+        }
+    } else {
+        // spawn a new window if the window does not exist
+        windows[id] = new BrowserWindow({
+            width: 800,
+            height: 600,
+            webPreferences: {
+                preload: preloadPath,
+                contextIsolation: true,
+                sandbox: false
+            }
+        });
+            // load the index.html file
+    windows[id].loadFile('public/blank.html');
+    windows[id].webContents.executeJavaScript(`document.body.innerHTML = \`${html}\``);
+    }
+
+
+    // add a listener for the closed event
+    windows[id].on('closed', () => {
+        // delete the window from the windows object
+        delete windows[id];
+    });
+});
+
 
 ipcMain.handle('dialog:openDirectory', async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog(BrowserWindow.getFocusedWindow(), {

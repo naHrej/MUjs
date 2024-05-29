@@ -90,13 +90,26 @@ client.on('data', (data) => {
     let uint8array = Buffer.from(newBuffer); // replace this with your Uint8Array
     let decoder = new TextDecoder('utf-8');
     let unicodeString = decoder.decode(uint8array);
+
     // split the string into lines using either /r or /n
     let lines = unicodeString.split(/\n/);
 
 
     // iterate over the lines and emit a received-data event for each line
     lines.forEach((line) => {
+        // If the line starts with !@Window: we get the window title, update type and html data and emit a window event
+        if (line.startsWith('!@Window:')) {
+            let windowData = line.slice('!@Window:'.length);
+            let windowDataArray = windowData.split(':');
+            let windowTitle = windowDataArray[0];
+            let windowType = windowDataArray[1];
+            let windowHtml = windowDataArray[2];
+            console.log(windowTitle, windowType, windowHtml);
+            ipcRenderer.send('window', windowTitle, windowType, windowHtml);
+        }
+        else {
         ipcRenderer.send('received-data', line);
+        }
     });
     //ipcRenderer.send('received-data', unicodeString);
 
