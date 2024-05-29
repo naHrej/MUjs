@@ -87,6 +87,9 @@ const app = Vue.createApp({
                 // Extract the URL from the data
                 let url = data.slice('!@style:url:'.length);
                 url = url.split('.less')[0];
+                
+                // Append a unique query string to the URL
+                url += '.less?' + new Date().getTime();
 
                 // Load and compile the LESS file
                 less.render('@import "' + url + '";', function (error, output) {
