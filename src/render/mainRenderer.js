@@ -32,6 +32,18 @@ const app = Vue.createApp({
         window.api.on('connect', () => {
             this.showApp = true;
             console.log('Connected to the server');
+            // Check if we have a setting called 'connect-on-startup'
+            window.store.get('settings.connectOnStartup').then((value) => {
+                // Check if the value is true
+                if (value) {
+                    // get the authentication string from the store
+                    window.store.get('settings.authString').then((auth) => {
+                        // Send the authentication string to the server
+                        window.api.write(auth);
+                    });
+
+                }
+            });
             setInterval(() => {
                 window.api.write('idle');
             }, 60000);
@@ -72,35 +84,34 @@ const app = Vue.createApp({
 
 
             if (data.startsWith('!@style:url:')) {
-    // Extract the URL from the data
-    let url = data.slice('!@style:url:'.length);
-    url = url.split('.less')[0];
-    console.log('URL: ' + url);
+                // Extract the URL from the data
+                let url = data.slice('!@style:url:'.length);
+                url = url.split('.less')[0];
 
-    // Load and compile the LESS file
-    less.render('@import "' + url + '";', function (error, output) {
-        if (error) {
-            console.error(error);
-        } else {
-            // Create a new style tag
-            let style = document.createElement('style');
+                // Load and compile the LESS file
+                less.render('@import "' + url + '";', function (error, output) {
+                    if (error) {
+                        console.error(error);
+                    } else {
+                        // Create a new style tag
+                        let style = document.createElement('style');
 
-            // Set the id of the style tag
-            style.id = 'dynamic-style';
+                        // Set the id of the style tag
+                        style.id = 'dynamic-style';
 
-            // Set the content of the style tag to the compiled CSS
-            style.textContent = output.css;
+                        // Set the content of the style tag to the compiled CSS
+                        style.textContent = output.css;
 
-            // Remove the old style tag if it exists
-            let oldStyle = document.getElementById('dynamic-style');
-            if (oldStyle) {
-                oldStyle.remove();
-            }
+                        // Remove the old style tag if it exists
+                        let oldStyle = document.getElementById('dynamic-style');
+                        if (oldStyle) {
+                            oldStyle.remove();
+                        }
 
-            // Append the style tag to the head of the document
-            document.head.appendChild(style);
-        }
-    });
+                        // Append the style tag to the head of the document
+                        document.body.appendChild(style);
+                    }
+                });
             } else {
                 let newElement = document.createElement('div');
 

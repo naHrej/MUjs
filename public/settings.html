@@ -42,6 +42,22 @@
                 <input id="font-size" type="number" v-model="fontSize" class="form-control" />
               </div>
 
+              <!-- New row for Connect on Startup and AuthString -->
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="connect-on-startup" v-model="connectOnStartup">
+                    <label class="form-check-label" for="connect-on-startup">
+                      Connect on Startup
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label for="auth-string" class="form-label">AuthString:</label>
+                  <input id="auth-string" type="text" v-model="authString" class="form-control" />
+                </div>
+              </div>
+
               <div class="col-12">
                 <button type="submit" class="btn btn-primary">Save</button>
               </div>
@@ -66,51 +82,53 @@
                 <div class="mt-3">
                   <h5>Existing Timers:</h5>
                   <div v-for="(timer, key) in timers" :key="key" class="mb-2 row d-flex align-items-center">
-                      <div class="col-3">
-                          <label for="timer-name" class="form-label">Timer Name:</label>
-                          <input id="timer-name" v-model="timer.name" class="form-control" />
-                      </div>
-              
-                      <div class="col-3">
-                          <label for="timer-duration" class="form-label">Interval:</label>
-                          <input id="timer-duration" type="number" v-model="timer.interval" class="form-control" />
-                      </div>
-              
-                      <div class="col-3">
-                          <label for="timer-send" class="form-label">Send:</label>
-                          <input id="timer-send" v-model="timer.send" class="form-control" />
-                      </div>
-              
-                      <div class="col-3 d-flex align-items-center">
-                          <button @click="saveTimer(key)" class="btn btn-primary btn-sm mr-2">Save</button>
-                          <button @click="deleteTimer(key)" class="btn btn-danger btn-sm">Delete</button>
-                      </div>
+                    <div class="col-3">
+                      <label for="timer-name" class="form-label">Timer Name:</label>
+                      <input id="timer-name" v-model="timer.name" class="form-control" />
+                    </div>
+
+                    <div class="col-3">
+                      <label for="timer-duration" class="form-label">Interval:</label>
+                      <input id="timer-duration" type="number" v-model="timer.interval" class="form-control" />
+                    </div>
+
+                    <div class="col-3">
+                      <label for="timer-send" class="form-label">Send:</label>
+                      <input id="timer-send" v-model="timer.send" class="form-control" />
+                    </div>
+
+                    <div class="col-3 d-flex align-items-center">
+                      <button @click="saveTimer(key)" class="btn btn-primary btn-sm mr-2">Save</button>
+                      <button @click="deleteTimer(key)" class="btn btn-danger btn-sm">Delete</button>
+                    </div>
                   </div>
-              </div>
-              
-              <div class="mt-3">
+                </div>
+
+                <div class="mt-3">
                   <button @click="addTimer" class="btn btn-success">Add New Timer</button>
-              </div>
+                </div>
                 <!-- end of timers -->
               </div>
             </div>
-            
+
           </div>
         </div>
       </div>
       <div class="accordion-item">
         <h2 class="accordion-header" id="headingMisc">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMisc" aria-expanded="false" aria-controls="collapseMisc">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#collapseMisc" aria-expanded="false" aria-controls="collapseMisc">
             Misc
           </button>
         </h2>
-        <div id="collapseMisc" class="accordion-collapse collapse" aria-labelledby="headingMisc" data-bs-parent="#accordionExample">
+        <div id="collapseMisc" class="accordion-collapse collapse" aria-labelledby="headingMisc"
+          data-bs-parent="#accordionExample">
           <div class="accordion-body">
             <form @submit.prevent="updateWatchPath">
               <div class="mb-3">
                 <label for="watchPath" class="form-label">Watch Path: {{ watchPath }}</label>
                 <button type="button" class="btn btn-primary" v-on:click="updateWatchPath">Folder Select</button>
-                
+
               </div>
             </form>
           </div>

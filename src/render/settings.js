@@ -6,12 +6,16 @@ const settings = Vue.createApp({
             fonts: [],
             timers: [],
             watchPath: '',
+            authString: '',
+            connectOnStartup: false
         }
     },
     methods: {
         async saveSettings() {
             await window.store.set('settings.fontFamily', this.fontFamily);
             await window.store.set('settings.fontSize', this.fontSize);
+            await window.store.set('settings.authString', this.authString);
+            await window.store.set('settings.connectOnStartup', this.connectOnStartup);
             window.api.send('settings-updated');
         },
         async saveTimer(key) {
@@ -44,6 +48,8 @@ const settings = Vue.createApp({
         this.fonts = await window.api.getFonts();
         this.fontFamily = await window.store.get('settings.fontFamily');
         this.fontSize = await window.store.get('settings.fontSize');
+        this.authString = await window.store.get('settings.authString');
+        this.connectOnStartup = await window.store.get('settings.connectOnStartup');
         this.timers = Object.values(await window.store.get('timers') || {});
     }
 }).mount('#settings');
