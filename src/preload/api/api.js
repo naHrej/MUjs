@@ -33,7 +33,7 @@ const api = {
         ansi.use_classes = false;
         let html = ansi.ansi_to_html(data);
         // Replace newline characters with <br> tags
-        html = html.replace(/\n/g, '<br/>').replace(/\r/g, '');
+        //html = html.replace(/\n/g, '<br/>').replace(/\r/g, '');
         return html;
     },
     naws: () => {
@@ -90,7 +90,15 @@ client.on('data', (data) => {
     let uint8array = Buffer.from(newBuffer); // replace this with your Uint8Array
     let decoder = new TextDecoder('utf-8');
     let unicodeString = decoder.decode(uint8array);
-    ipcRenderer.send('received-data', unicodeString);
+    // split the string into lines using either /r or /n
+    let lines = unicodeString.split(/\n/);
+
+
+    // iterate over the lines and emit a received-data event for each line
+    lines.forEach((line) => {
+        ipcRenderer.send('received-data', line);
+    });
+    //ipcRenderer.send('received-data', unicodeString);
 
 });
 
@@ -129,6 +137,7 @@ function handleIACCommand(command, option) {
     const SB = 250;
     const NAWS = 31;
     const SE = 240;
+    const SPAWN = 220;
 
     // Handle the IAC command based on its value
     switch (command) {
@@ -154,6 +163,10 @@ function handleIACCommand(command, option) {
                 client.write(nawsResponse);
             }
             break;
+            case SPAWN:
+                console.log('Spawn command received');
+                
+                break;
         // ... existing cases ...
         default:
             console.log('Unknown IAC command:', command);

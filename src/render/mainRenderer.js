@@ -69,17 +69,14 @@ const app = Vue.createApp({
         });
         
         window.api.on('received-data', (event, data) => {
-            if (data.startsWith("canvas:")) {
-                let canvasData = data.substring(7);
-                initCanvas(canvasData);
 
-                this.terminal.scrollTop = this.terminal.scrollHeight;
-                return;
-            }
 
             if (data.startsWith('!@style:url:')) {
                 // Extract the URL from the data
                 let url = data.slice('!@style:url:'.length);
+
+                // strip the url of any thing after and including a = character
+                url = url.split('=')[0];
             
                 // Fetch the CSS code from the URL
                 fetch(url)
