@@ -104,6 +104,8 @@ const app = Vue.createApp({
             } else {
                 let newElement = document.createElement('div');
 
+                newElement.title = new Date().toLocaleString();
+
                 newElement.innerHTML = window.api.ansi_to_html(data);
                 // iterate newElement children and add click event if onCommand attribute is present
                 newElement.querySelectorAll('[onCommand]').forEach(node => {
