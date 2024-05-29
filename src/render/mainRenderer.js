@@ -8,7 +8,8 @@ const app = Vue.createApp({
             currentInputIndex: -1,
             inputField: null,
             terminal: null,
-            showApp: false
+            showApp: false,
+            styleURL: null
         };
     },
     mounted() {
@@ -27,6 +28,10 @@ const app = Vue.createApp({
             this.port = port;
             window.api.connect(this.port, this.host);
 
+        });
+
+        window.api.on('reload-styles', () => {
+            this.loadStyleFromURL(this.styleURL);
         });
 
         window.api.on('connect', () => {
@@ -87,34 +92,14 @@ const app = Vue.createApp({
                 // Extract the URL from the data
                 let url = data.slice('!@style:url:'.length);
                 url = url.split('.less')[0];
-                
+
                 // Append a unique query string to the URL
                 url += '.less?' + new Date().getTime();
 
-                // Load and compile the LESS file
-                less.render('@import "' + url + '";', function (error, output) {
-                    if (error) {
-                        console.error(error);
-                    } else {
-                        // Create a new style tag
-                        let style = document.createElement('style');
+                this.styleURL = url;
 
-                        // Set the id of the style tag
-                        style.id = 'dynamic-style';
+                this.loadStyleFromURL(url);
 
-                        // Set the content of the style tag to the compiled CSS
-                        style.textContent = output.css;
-
-                        // Remove the old style tag if it exists
-                        let oldStyle = document.getElementById('dynamic-style');
-                        if (oldStyle) {
-                            oldStyle.remove();
-                        }
-
-                        // Append the style tag to the head of the document
-                        document.body.appendChild(style);
-                    }
-                });
             } else {
                 let newElement = document.createElement('div');
 
@@ -143,6 +128,33 @@ const app = Vue.createApp({
             this.currentInputIndex = -1;
             window.api.write(command);
             this.inputField = '';
+        },
+        loadStyleFromURL(url) {
+
+            // Load and compile the LESS file
+            less.render('@import "' + url + '";', function (error, output) {
+                if (error) {
+                    console.error(error);
+                } else {
+                    // Create a new style tag
+                    let style = document.createElement('style');
+
+                    // Set the id of the style tag
+                    style.id = 'dynamic-style';
+
+                    // Set the content of the style tag to the compiled CSS
+                    style.textContent = output.css;
+
+                    // Remove the old style tag if it exists
+                    let oldStyle = document.getElementById('dynamic-style');
+                    if (oldStyle) {
+                        oldStyle.remove();
+                    }
+
+                    // Append the style tag to the head of the document
+                    document.body.appendChild(style);
+                }
+            });
         },
 
         handleKeydown(event) {

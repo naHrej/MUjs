@@ -154,6 +154,13 @@ const createWindow = () => {
                     label: 'Open Developer Tools',
                     click: () => {
                         BrowserWindow.getFocusedWindow().webContents.openDevTools();
+                    },
+                },
+                {
+                    label: 'Reload Styles',
+                    click: () => {
+                        // emit event to reload styles
+                        BrowserWindow.getFocusedWindow().webContents.send('reload-styles');
                     }
                 }
             ]
