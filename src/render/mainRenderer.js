@@ -80,8 +80,6 @@ const app = Vue.createApp({
         window.api.on('close', () => {
             console.log('Connection closed');
         });
-
-
         window.addEventListener('beforeunload', (event) => {
             window.api.end();
         });
@@ -113,8 +111,6 @@ const app = Vue.createApp({
                         this.handleCommandElement(node);
                     });
                 });
-
-
                 this.terminal.appendChild(newElement);
                 this.terminal.scrollTop = this.terminal.scrollHeight;
             }
