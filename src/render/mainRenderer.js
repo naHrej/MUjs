@@ -32,6 +32,7 @@ const app = Vue.createApp({
 
         window.api.on('reload-styles', () => {
             this.loadStyleFromURL(this.styleURL);
+            console.log('Reloading styles');
         });
 
         window.api.on('connect', () => {
@@ -130,6 +131,11 @@ const app = Vue.createApp({
             this.inputField = '';
         },
         loadStyleFromURL(url) {
+
+            url = url.split('.less')[0];
+
+            // Append a unique query string to the URL
+            url += '.less?' + new Date().getTime();
 
             // Load and compile the LESS file
             less.render('@import "' + url + '";', function (error, output) {

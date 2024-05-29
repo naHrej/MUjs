@@ -221,6 +221,11 @@ app.whenReady().then(() => {
         globalShortcut.register('CommandOrControl+Z', () => {
             BrowserWindow.getFocusedWindow().webContents.undo();
         });
+        // reload styles with Control+shift+r
+        globalShortcut.register('CommandOrControl+Shift+R', () => {
+            BrowserWindow.getFocusedWindow().webContents.send('reload-styles');
+        });
+
     });
     app.on('browser-window-blur', () => {
         globalShortcut.unregisterAll();
