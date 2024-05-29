@@ -22,13 +22,13 @@ const app = Vue.createApp({
         });
 
         window.api.on('site-selected', (event, host, port) => {
-            
+
             this.host = host;
             this.port = port;
             window.api.connect(this.port, this.host);
 
         });
-           
+
         window.api.on('connect', () => {
             this.showApp = true;
             console.log('Connected to the server');
@@ -67,41 +67,43 @@ const app = Vue.createApp({
         window.addEventListener('beforeunload', (event) => {
             window.api.end();
         });
-        
+
         window.api.on('received-data', (event, data) => {
 
 
             if (data.startsWith('!@style:url:')) {
-                // Extract the URL from the data
-                let url = data.slice('!@style:url:'.length);
-            
-                // strip the url of any thing after and including a = character
-                url = url.split('=')[0];
-            
-                // Remove the existing link tag
-                let existingLink = document.getElementById('dynamic-style');
-                if (existingLink) {
-                    existingLink.remove();
-                }
-            
-                // Create a new link tag
-                let link = document.createElement('link');
-            
-                // Set the href of the link tag to the URL
-                link.href = url;
-            
-                // Set the rel of the link tag
-                link.rel = 'stylesheet/less'; 
-            
-                // Set the id of the link tag
-                link.id = 'dynamic-style';
-            
-                // Append the link tag to the head of the document
-                document.head.appendChild(link);
-                less.refresh();
+    // Extract the URL from the data
+    let url = data.slice('!@style:url:'.length);
+    url = url.split('.less')[0];
+    console.log('URL: ' + url);
+
+    // Load and compile the LESS file
+    less.render('@import "' + url + '";', function (error, output) {
+        if (error) {
+            console.error(error);
+        } else {
+            // Create a new style tag
+            let style = document.createElement('style');
+
+            // Set the id of the style tag
+            style.id = 'dynamic-style';
+
+            // Set the content of the style tag to the compiled CSS
+            style.textContent = output.css;
+
+            // Remove the old style tag if it exists
+            let oldStyle = document.getElementById('dynamic-style');
+            if (oldStyle) {
+                oldStyle.remove();
+            }
+
+            // Append the style tag to the head of the document
+            document.head.appendChild(style);
+        }
+    });
             } else {
                 let newElement = document.createElement('div');
-                
+
                 newElement.innerHTML = window.api.ansi_to_html(data);
                 // iterate newElement children and add click event if onCommand attribute is present
                 newElement.childNodes.forEach(node => {
@@ -169,11 +171,11 @@ const app = Vue.createApp({
 
         },
         async ApplySettings() {
-                let font = await window.store.get('settings.fontFamily');
-                let size = await window.store.get('settings.fontSize');
+            let font = await window.store.get('settings.fontFamily');
+            let size = await window.store.get('settings.fontSize');
 
-                this.terminal.style.setProperty('font-family', font, 'important');
-                this.terminal.style.setProperty('font-size', size + 'px', 'important');
+            this.terminal.style.setProperty('font-family', font, 'important');
+            this.terminal.style.setProperty('font-size', size + 'px', 'important');
         }
     }
 });
