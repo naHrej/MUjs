@@ -30,7 +30,7 @@ const api = {
     },
     ansi_to_html: (data) => {
         ansi.escape_html = false;
-        ansi.use_classes = false;
+        ansi.use_classes = true;
         let html = ansi.ansi_to_html(data);
         // Replace newline characters with <br> tags
         //html = html.replace(/\n/g, '<br/>').replace(/\r/g, '');
