@@ -91,3 +91,5 @@ typings/
 data/
 
 src/.DS_Store
+
+dist/

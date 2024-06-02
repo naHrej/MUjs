@@ -5,12 +5,18 @@
   "main": "src/main/main.js",
   "scripts": {
     "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "app:dir": "electron-builder --dir",
+    "app:win": "electron-builder --win",
+    "app:mac": "electron-builder --mac",
+    "app:linux": "electron-builder --linux",
+    "app:all": "electron-builder -wml"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^29.2.0"
+    "electron": "^29.2.0",
+    "electron-builder": "^24.13.3"
   },
   "dependencies": {
     "ansi_up": "^6.0.2",
