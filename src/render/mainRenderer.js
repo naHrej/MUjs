@@ -115,10 +115,12 @@ const app = Vue.createApp({
                 }
 
                 // if the data contains a <script> tag and it does not have a key attribute matching the session key,
-                // parse it out and do not add it to the terminal
-                if (data.includes('<script') && !data.includes('key="' + this.sessionKey + '"')) {
-                    return;
+                // escape the data
+                if (data.includes('<script') && !data.includes(`key="${this.sessionKey}"`)) {
+                    data = data.replace(/</g, '&lt;');
+                    data = data.replace(/>/g, '&gt;');
                 }
+
 
                 newElement.innerHTML = window.api.ansi_to_html(data);
                 // iterate newElement children and add click event if onCommand attribute is present
