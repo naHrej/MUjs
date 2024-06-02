@@ -113,16 +113,46 @@ const app = Vue.createApp({
                     window.api.write(`@clientkey ${this.sessionKey}`);
                     return;
                 }
+                data = window.api.ansi_to_html(data);
+                let parser = new DOMParser();
+                let doc = parser.parseFromString(data, 'text/html');
 
-                // if the data contains a <script> tag and it does not have a key attribute matching the session key,
-                // escape the data
-                if (data.includes('<script') && !data.includes(`key="${this.sessionKey}"`)) {
-                    data = data.replace(/</g, '&lt;');
-                    data = data.replace(/>/g, '&gt;');
-                }
+                // Find all <script tags>
+                let scripts = doc.querySelectorAll('script');
+                scripts.forEach(script => {
+                    // We want to make sure that the script meets the following conditions:
+                    // 1. The script tag has a src attribute and the domain matches host
+                    // 2. The script tag has a key attribute and the value matches the session key
+                    if (script.src && script.src.includes(this.host) && script.getAttribute('key') === this.sessionKey) {
+                        // Create a new script element
+                        let newScript = document.createElement('script');
+                        // Set the src attribute to the value of the src attribute of the original script tag
+                        newScript.src = script.src;
+                        // Append the new script tag to the head of the document
+                        document.head.appendChild(newScript);
+                    }
+                });
 
+                // link tags are not allowed in the terminal
+                // They must also only point to the same domain as the host
+                let links = doc.querySelectorAll('link');
+                links.forEach(link => {
+                    if (link.href && link.href.includes(this.host)) {
+                        let newLink = document.createElement('link');
+                        newLink.href = link.href;
+                        newLink.rel = link.rel;
+                        newLink.type = link.type;
+                        document.head.appendChild(newLink);
+                    }
+                });
 
-                newElement.innerHTML = window.api.ansi_to_html(data);
+                let children = Array.from(doc.body.childNodes).filter(node => node.nodeName !== 'SCRIPT' && node.nodeName !== 'LINK');
+                // Add them all as children to newElement
+                children.forEach(child => {
+                    newElement.appendChild(child);
+                });
+
+                
                 // iterate newElement children and add click event if onCommand attribute is present
                 newElement.querySelectorAll('[onCommand]').forEach(node => {
                     node.addEventListener('click', () => {
