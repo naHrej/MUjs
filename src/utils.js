@@ -1,7 +1,7 @@
 // utils.js
 module.exports.calculateCharCount = function calculateCharCount() {
     // Get the console element
-    let consoleElement = document.querySelector('.console');
+    let consoleElement = document.querySelector('#AZUHz3kQsgMj');
 
     // Create a temporary element
     let tempElement = document.createElement('span');

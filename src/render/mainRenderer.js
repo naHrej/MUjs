@@ -15,7 +15,7 @@ const app = Vue.createApp({
     },
     mounted() {
         // get the terminal element
-        this.terminal = document.querySelector('.console');
+        this.terminal = document.querySelector('#AZUHz3kQsgMj');
         this.ApplySettings();
 
         // Get the input history from the store
