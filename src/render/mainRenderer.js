@@ -9,7 +9,8 @@ const app = Vue.createApp({
             inputField: null,
             terminal: null,
             showApp: false,
-            styleURL: null
+            styleURL: null,
+            sessionKey: null
         };
     },
     mounted() {
@@ -49,6 +50,8 @@ const app = Vue.createApp({
                     });
 
                 }
+                // Generate a session key
+                this.sessionKey = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
             });
             setInterval(() => {
                 window.api.write('idle');
@@ -103,6 +106,19 @@ const app = Vue.createApp({
                 let newElement = document.createElement('div');
 
                 newElement.title = new Date().toLocaleString();
+
+                // if data starts with: ANSI Version 2.6 is currently active
+                // send the clientkey to the server
+                if (data.startsWith('ANSI Version 2.6 is currently active')) {
+                    window.api.write(`@clientkey ${this.sessionKey}`);
+                    return;
+                }
+
+                // if the data contains a <script> tag and it does not have a key attribute matching the session key,
+                // parse it out and do not add it to the terminal
+                if (data.includes('<script') && !data.includes('key="' + this.sessionKey + '"')) {
+                    return;
+                }
 
                 newElement.innerHTML = window.api.ansi_to_html(data);
                 // iterate newElement children and add click event if onCommand attribute is present

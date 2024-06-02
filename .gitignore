@@ -89,3 +89,5 @@ typings/
 
 # UserData
 data/
+
+src/.DS_Store
