@@ -2,9 +2,11 @@ const { ipcMain, dialog } = require('electron');
 const { globalShortcut, app, BrowserWindow, Menu } = require('electron');
 const Store = require('electron-store');
 const path = require('path');
-const preloadPath = path.resolve('src/preload/preload.js');
+const preloadPath = app.isPackaged 
+  ? path.join(process.resourcesPath, 'app', 'src', 'preload', 'preload.js') 
+  : path.join(__dirname, 'src', 'preload', 'preload.js');
 
-app.setPath("userData", path.join(__dirname, '../../data'));
+//app.setPath("userData", path.join(__dirname, '../../data'));
 const api = require('../preload/api/api.js');
 
 let windows = {}

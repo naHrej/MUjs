@@ -1,27 +1,48 @@
 {
-  "name": "client",
+  "name": "MUjs",
   "version": "1.0.0",
-  "description": "",
+  "description": "A HTML5 compliant MU* client",
   "main": "src/main/main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "electron-forge start",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "app:dir": "electron-builder --dir",
-    "app:win": "electron-builder --win",
-    "app:mac": "electron-builder --mac",
-    "app:linux": "electron-builder --linux",
-    "app:all": "electron-builder -wml"
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "make:win": "electron-forge make --platform=win32 --arch=x64"
   },
-  "author": "",
-  "license": "ISC",
+  "config": {
+    "forge": {
+      "directories": {
+        "app": "src",
+        "buildResources": "public",
+        "output": "out"
+      },
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-zip"
+        }
+      ]
+    }
+  },
+  "author": "naHrej and Krenath",
+  "license": "GPL-3.0-only",
   "devDependencies": {
-    "electron": "^29.2.0",
-    "electron-builder": "^24.13.3"
+    "@electron-forge/cli": "^7.4.0",
+    "@electron-forge/maker-deb": "^7.4.0",
+    "@electron-forge/maker-rpm": "^7.4.0",
+    "@electron-forge/maker-squirrel": "^7.4.0",
+    "@electron-forge/maker-zip": "^7.4.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
+    "@electron-forge/plugin-fuses": "^7.4.0",
+    "@electron/fuses": "^1.8.0",
+    "electron": "^29.2.0"
   },
   "dependencies": {
     "ansi_up": "^6.0.2",
     "bootstrap": "^5.3.3",
     "chokidar": "^3.6.0",
+    "electron-squirrel-startup": "^1.0.1",
     "electron-store": "^8.2.0",
     "node-ansiparser": "^2.2.1",
     "system-font-families": "^0.6.0",
