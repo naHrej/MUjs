@@ -1,6 +1,6 @@
 {
   "name": "MUjs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A HTML5 compliant MU* client",
   "main": "src/main/main.js",
   "scripts": {
