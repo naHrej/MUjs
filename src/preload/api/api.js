@@ -1,6 +1,7 @@
 // api.js
 const { ipcRenderer, ipcMain} = require('electron');
 const { calculateCharCount } = require('./../../utils');
+const { executeLuaScript } = require('./script/lua');
 
 const net = require('net');
 const { connected } = require('process');
@@ -43,6 +44,7 @@ const api = {
     },
     connect: (port, host) => {
         client.connect(port, host);
+        client.setKeepAlive(true, 10000);
     },
     connected: () => {
         return client.connected;
@@ -67,6 +69,9 @@ const api = {
 
         return getFonts;
     },
+    executeLuaScript: (scriptPath, variables) => {
+        executeLuaScript(scriptPath, variables);
+    }
 };
 module.exports = api;
 

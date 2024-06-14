@@ -30,6 +30,15 @@ const app = Vue.createApp({
             window.api.connect(this.port, this.host);
 
         });
+        window.api.on('disconnected', () => {
+            // add bold white text to the terminal as an element
+            let newElement = document.createElement('div');
+            newElement.style.color = 'white';
+            newElement.style.fontWeight = 'bold';
+            newElement.textContent = '*** Disconnected from the server ***';
+            this.terminal.appendChild(newElement);
+            this.terminal.scrollTop = this.terminal.scrollHeight;
+        });
 
         window.api.on('reload-styles', () => {
             this.loadStyleFromURL(this.styleURL);
@@ -53,9 +62,9 @@ const app = Vue.createApp({
                 // Generate a session key
                 this.sessionKey = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
             });
-            setInterval(() => {
-                window.api.write('idle');
-            }, 60000);
+            // setInterval(() => {
+            //     //window.api.write('');
+            // }, 60000);
         });
 
 

@@ -150,6 +150,12 @@ ipcMain.on('received-data', (event, data) => {
     });
 });
 
+ipcMain.on('disconnected', () => {
+    BrowserWindow.getAllWindows().forEach(win => {
+        win.webContents.send('disconnected');
+    });
+});
+
 
 
 const createSettingsWindow = () => {
@@ -224,6 +230,7 @@ const createWindow = () => {
 
     // Add a listener for the disconnected event
     ipcMain.on('disconnected', () => {
+        // emit a disconnected event
         // Re-enable the connect menu item
         menu.getMenuItemById('connect').enabled = true;
     });
