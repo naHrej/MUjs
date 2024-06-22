@@ -27,7 +27,7 @@ const app = Vue.createApp({
 
 
         resizeHandle.addEventListener('mousedown', function (e) {
-            console.log('mousedown');
+
             this.startY = e.clientY;
             this.startHeight = parseInt(document.defaultView.getComputedStyle(textarea).height, 10);
             document.addEventListener('mousemove', doDrag, false);
@@ -131,8 +131,10 @@ const app = Vue.createApp({
                 // Add a line break
                 data = data + '\n';
 
+
+
                 // Append the data to the inputField
-                this.inputField += data;
+                editor.setValue(editor.getValue() + data);
                 omit = true;
 
                 // get the input textarea element
@@ -238,7 +240,7 @@ const app = Vue.createApp({
 
         handleOnClickDoBuffer(element) {
             let command = element.getAttribute('onclickdobuffer');
-            this.inputField += command;
+            editor.value += command;
             // set focus to the input field
             this.inputField.setFocus();
 
@@ -246,7 +248,7 @@ const app = Vue.createApp({
 
         handleCommandElement(element) {
             let command = element.getAttribute('onCommand');
-            this.inputField = command;
+            editor.value = command;
             this.inputHistory.push(command);
             this.currentInputIndex = -1;
             window.api.write(command);
@@ -288,10 +290,10 @@ const app = Vue.createApp({
         handleKeydown(event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
-                let text = this.inputField;
-                this.inputHistory.push(text);
+                let text = editor.getValue();
+                this.inputHistory.push(editor.getValue());
                 this.currentInputIndex = -1;
-                this.inputField = '';
+                editor.setValue('');
 
                 // save input history
                 window.store.set('inputHistory', Object.values(this.inputHistory || {}));
@@ -299,7 +301,7 @@ const app = Vue.createApp({
             } else if (event.key === 'ArrowUp') {
                 if (this.currentInputIndex < this.inputHistory.length - 1) {
                     this.currentInputIndex++;
-                    this.inputField = this.inputHistory[this.inputHistory.length - 1 - this.currentInputIndex];
+                    editor.setValue(this.inputHistory[this.inputHistory.length - 1 - this.currentInputIndex]);
                     // cancel the input
                     event.preventDefault();
                     // place cursor at the end of the input field
@@ -314,9 +316,10 @@ const app = Vue.createApp({
                 if (this.currentInputIndex > -1) {
                     this.currentInputIndex--;
                     if (this.currentInputIndex === -1) {
-                        this.inputField = '';
+                        editor.setValue('');
                     } else {
-                        this.inputField = this.inputHistory[this.inputHistory.length - 1 - this.currentInputIndex];
+                        editor.setValue(this.inputHistory[this.inputHistory.length - 1 - this.currentInputIndex]);
+                        //editor.value = this.inputHistory[this.inputHistory.length - 1 - this.currentInputIndex];
                         // place cursor at the end of the input field
                         let inputElement = document.getElementById('SdWiqHtqa');
                         inputElement.focus();
@@ -345,11 +348,17 @@ function doDrag(e) {
     const newHeight = (e.clientY / containerHeight) * 100;
     const textarea = document.getElementById('SdWiqHtqa');
     const terminal = document.getElementById('AZUHz3kQsgMj');
-
+    // if the height is less than 10% or greater than 90% return
+    if (newHeight < 10 || newHeight > 90) {
+        return;
+    }
 
     terminal.style.height = `${newHeight}%`;
     textarea.style.height = `${100 - newHeight}%`;
     terminal.scrollTop = terminal.scrollHeight;
+
+    
+    editor.layout();
 
     // stop click through
     e.stopPropagation();
@@ -373,4 +382,5 @@ function stopDrag() {
     document.removeEventListener('mousemove', doDrag, false);
     document.removeEventListener('mouseup', stopDrag, false);
 };
+let editor;
 app.mount('#app');

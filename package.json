@@ -45,6 +45,7 @@
     "electron-squirrel-startup": "^1.0.1",
     "electron-store": "^8.2.0",
     "fengari": "^0.1.4",
+    "monaco-editor": "^0.50.0",
     "node-ansiparser": "^2.2.1",
     "system-font-families": "^0.6.0",
     "vue": "^3.4.21"

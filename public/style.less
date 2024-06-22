@@ -8,12 +8,20 @@
  .flex-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100vh; // Full height of the viewport
+    width: 100vw; // Full width of the viewport
+    overflow: hidden; // Prevents content from overflowing the container
   }
   
+
+//   .monaco-editor {
+//     height: 100%;
+//     width: 100%;
+//   }
+
   #SdWiqHtqa {
-    min-height: 10vh;
-    width: 100vw;
+    min-height: 10%;
+    width: 100%;
     background-color: black;
     color: white;
     flex-grow: 1;
@@ -22,8 +30,8 @@
   }
   
   #AZUHz3kQsgMj {
-    max-height: 90vh;
-    width: 100vw;
+    max-height: 90%;
+    width: 100%;
     background-color: black;
     color: white;
     overflow-y: scroll;

@@ -114,7 +114,7 @@ client.on('data', (data) => {
         }
         else {
         ipcRenderer.send('received-data', line);
-        console.log(line);
+        //console.log(line);
         }
     });
     //ipcRenderer.send('received-data', unicodeString);

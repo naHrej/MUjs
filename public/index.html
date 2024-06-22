@@ -11,6 +11,9 @@
         <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
         <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/less"></script>
+        <link href="https://cdn.bootcdn.net/ajax/libs/monaco-editor/0.20.0/min/vs/editor/editor.main.min.css"
+                rel="stylesheet" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
 </head>
 
 <body>
@@ -45,17 +48,64 @@
                         <div class="flex-container">
                                 <div id="AZUHz3kQsgMj">
                                 </div>
-                                <div id="resizeHandle" style="height: 5px; cursor: ns-resize; background-color: #ccc;"></div>
-                                <textarea ref="inputField" id="SdWiqHtqa" v-model="inputField"
-                                        @keydown="handleKeydown"></textarea>
+                                <div id="resizeHandle" style="height: 5px; cursor: ns-resize; background-color: #ccc;">
+                                </div>
+                                <div ref="inputField" class="monaco-editor" id="SdWiqHtqa" v-model="inputField"
+                                        @keydown="handleKeydown">
+                                        </textarea>
+                                </div>
                         </div>
                 </div>
-        </div>
 
+                <script>
+                        require.config({ paths: { 'vs': 'https://cdn.bootcdn.net/ajax/libs/monaco-editor/0.20.0/min/vs' } });
 
-        <script src="../node_modules/vue/dist/vue.global.js"></script>
-        <script src="../src/render/mainRenderer.js"></script>
-        <script src="../src/render/conmgr.js"></script>
+                        require(['vs/editor/editor.main'], function () {
+
+                                monaco.languages.register({ id: 'moocode' });
+
+                                monaco.languages.setMonarchTokensProvider('moocode', {
+                                        tokenizer: {
+                                                root: [
+                                                        // Keywords
+                                                        [/\b(if|while|for|return|endif|endwhile|endfor|else|elseif|in|this|try|except|finally|endtry)\b/, "keyword.control"],
+                                                        [/\b(typeof|toint|tofloat|toobj|tostr|raise)\b/, "keyword.other"],
+                                                        [/\b(INT|NUM|FLOAT|LIST|MAP|STR|ANON|OBJ|ERR)\b/, "constant.numeric"],
+                                                        [/@(program|args|verb)\b/, "markup.heading"],
+                                                        [/\.\w*\b/, "markup.heading.moo"],
+                                                        [/\$\w*\b/, "constant.regexp"],
+                                                        [/:w*\b/, "string.regexp"],
+                                                        [/(\[|\]|\{|\})/, "variable.css.moo"],
+                                                        [/\b(?:\d+(?:\.\d*)?|\.\d+)\b/, "constant.numeric.moo"],
+                                                        // Strings
+                                                        [/"/, { token: "string.quoted.double.moo", next: "@string" }],
+                                                ],
+                                                string: [
+                                                        [/[^\\"]+/, "string"],
+                                                        [/\\./, "constant.character.escape.moo"],
+                                                        [/"/, { token: "string.quoted.double.moo", next: "@pop" }],
+                                                ]
+                                        }
+                                });
+
+                                monaco.editor.defineTheme("moocode", {
+                                        base: 'vs-dark',
+                                        inherit: true,
+                                        rules: [
+                                                { token: 'variable.css.moo', foreground: 'FFA500' }, // Example: Orange color for 'variable.css.moo'
+                                                // Add other token styles as needed
+                                        ],
+                                })
+                                editor = monaco.editor.create(document.getElementById('SdWiqHtqa'), {
+                                        value: "",
+                                        language: 'moocode',
+                                        theme: "moocode",
+                                });
+                        });
+                </script>
+                <script src="../node_modules/vue/dist/vue.global.js"></script>
+                <script src="../src/render/mainRenderer.js"></script>
+                <script src="../src/render/conmgr.js"></script>
 </body>
 
 </html>
