@@ -1,9 +1,9 @@
-const fengari = require('fengari-web');
+const fengari = require('fengari');
 const lua = fengari.lua;
 const lauxlib = fengari.lauxlib;
 const lualib = fengari.lualib;
 
-export function executeLuaScript(scriptPath, variables) {
+function executeLuaScript(scriptPath, variables) {
     let L = lauxlib.luaL_newstate();
 
     /* Load Lua libraries */
@@ -26,3 +26,5 @@ export function executeLuaScript(scriptPath, variables) {
         throw new Error(lua.to_jsstring(lua.lua_tostring(L, -1)));
     }
 }
+
+module.exports = { executeLuaScript };

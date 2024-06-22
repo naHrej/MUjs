@@ -161,11 +161,18 @@ const app = Vue.createApp({
                     newElement.appendChild(child);
                 });
 
-                
-                // iterate newElement children and add click event if onCommand attribute is present
-                newElement.querySelectorAll('[onCommand]').forEach(node => {
+
+                // Iterate newElement children and add click event if onCommand or onclickdobuffer attribute is present
+                newElement.querySelectorAll('[onCommand], [onclickdobuffer]').forEach(node => {
                     node.addEventListener('click', () => {
-                        this.handleCommandElement(node);
+                        // Check which attribute is present and handle accordingly
+                        if (node.hasAttribute('onCommand')) {
+                            this.handleCommandElement(node);
+                        } else if (node.hasAttribute('onclickdobuffer')) {
+                            // Handle onclickdobuffer attribute
+                            // Assuming a similar handling function exists or needs to be implemented
+                            this.handleOnClickDoBuffer(node);
+                        }
                     });
                 });
                 this.terminal.appendChild(newElement);
@@ -175,6 +182,11 @@ const app = Vue.createApp({
 
     },
     methods: {
+        handleOnClickDoBuffer(element) {
+            let command = element.getAttribute('onclickdobuffer');
+            this.inputField += command;
+        },
+
         handleCommandElement(element) {
             let command = element.getAttribute('onCommand');
             this.inputField = command;
