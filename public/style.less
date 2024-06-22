@@ -1,0 +1,52 @@
+/* We have two elements, a console
+ That takes up 90% of the screen height 
+ and 100% of the screen width
+ 
+ And a textbox that takes up the remainder */
+
+ 
+ html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Consolas-pIqaD, monospace;
+    background-color: black;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  #AZUHz3kQsgMj {
+    height: 90vh;
+    width: 100vw;
+    background-color: black;
+    color: white;
+    /* it scrolls and the text starts at the bottom */
+      overflow-y: scroll;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      /* anchored to the top of the screen */
+      position: fixed;
+      top: 0;
+      white-space: break-spaces;
+    
+  }
+  
+  #SdWiqHtqa {
+    height: 10vh;
+    width: 100vw;
+    background-color: black;
+    resize: none;
+    color: white;
+      /* anchored to the bottom of the screen */
+      position: fixed;
+      bottom: 0;
+      /* so it doesn't overlap the console */
+      z-index: 1;
+      
+  }
+  
+  
