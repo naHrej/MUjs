@@ -135,6 +135,16 @@ const app = Vue.createApp({
                 this.inputField += data;
                 omit = true;
 
+                // get the input textarea element
+                let inputElement = document.getElementById('SdWiqHtqa');
+                // set focus to the input field
+                inputElement.focus();
+                // scroll to bottom of inputElement
+                inputElement.scrollTop = inputElement.scrollHeight;
+
+                // set the cursor to the end of the input field
+                inputElement.setSelectionRange(inputElement.value.length, inputElement.value.length);
+
             }
 
             if (data.startsWith('!@style:url:')) {
@@ -290,6 +300,15 @@ const app = Vue.createApp({
                 if (this.currentInputIndex < this.inputHistory.length - 1) {
                     this.currentInputIndex++;
                     this.inputField = this.inputHistory[this.inputHistory.length - 1 - this.currentInputIndex];
+                    // cancel the input
+                    event.preventDefault();
+                    // place cursor at the end of the input field
+                    let inputElement = document.getElementById('SdWiqHtqa');
+                    // scroll to bottom of inputElement
+                    
+                    inputElement.focus();
+                    inputElement.setSelectionRange(inputElement.value.length, inputElement.value.length);
+                    inputElement.scrollTop = inputElement.scrollHeight;
                 }
             } else if (event.key === 'ArrowDown') {
                 if (this.currentInputIndex > -1) {
@@ -298,6 +317,11 @@ const app = Vue.createApp({
                         this.inputField = '';
                     } else {
                         this.inputField = this.inputHistory[this.inputHistory.length - 1 - this.currentInputIndex];
+                        // place cursor at the end of the input field
+                        let inputElement = document.getElementById('SdWiqHtqa');
+                        inputElement.focus();
+                        inputElement.setSelectionRange(inputElement.value.length, inputElement.value.length);
+                        inputElement.scrollTop = inputElement.scrollHeight;
                     }
                 }
             }
@@ -344,7 +368,6 @@ function doDrag(e) {
 
 };
 function stopDrag() {
-    const terminal = document.getElementById('AZUHz3kQsgMj');
     // Scroll terminal to bottom
 
     document.removeEventListener('mousemove', doDrag, false);
