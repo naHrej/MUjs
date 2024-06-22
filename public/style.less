@@ -5,48 +5,32 @@
  And a textbox that takes up the remainder */
 
  
- html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Consolas-pIqaD, monospace;
-    background-color: black;
-  }
-  
-  * {
-    box-sizing: border-box;
-  }
-  
-  #AZUHz3kQsgMj {
-    height: 90vh;
-    width: 100vw;
-    background-color: black;
-    color: white;
-    /* it scrolls and the text starts at the bottom */
-      overflow-y: scroll;
-      overflow-x: hidden;
-      display: flex;
-      flex-direction: column;
-      /* anchored to the top of the screen */
-      position: fixed;
-      top: 0;
-      white-space: break-spaces;
-    
+ .flex-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
   }
   
   #SdWiqHtqa {
-    height: 10vh;
+    min-height: 10vh;
     width: 100vw;
     background-color: black;
-    resize: none;
     color: white;
-      /* anchored to the bottom of the screen */
-      position: fixed;
-      bottom: 0;
-      /* so it doesn't overlap the console */
-      z-index: 1;
-      
+    flex-grow: 1;
+    resize: none;
+    // Removed flex-grow to allow content-based sizing
   }
   
+  #AZUHz3kQsgMj {
+    max-height: 90vh;
+    width: 100vw;
+    background-color: black;
+    color: white;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    white-space: break-spaces;
+    flex-shrink: 1; // Keeps this to fill remaining space
+  }
   

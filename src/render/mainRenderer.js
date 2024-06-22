@@ -11,13 +11,28 @@ const app = Vue.createApp({
             terminal: null,
             showApp: false,
             styleURL: null,
-            sessionKey: null
+            sessionKey: null,
+            resizeHanfdle: null,
+            textarea: null,
+            startY: null,
+            startHeight: null
         };
     },
     mounted() {
+        let resizeHandle = document.getElementById('resizeHandle');
+        const textarea = document.getElementById('SdWiqHtqa');
         // get the terminal element
         this.terminal = document.querySelector('#AZUHz3kQsgMj');
         this.ApplySettings();
+
+
+        resizeHandle.addEventListener('mousedown', function (e) {
+            console.log('mousedown');
+            this.startY = e.clientY;
+            this.startHeight = parseInt(document.defaultView.getComputedStyle(textarea).height, 10);
+            document.addEventListener('mousemove', doDrag, false);
+            document.addEventListener('mouseup', stopDrag, false);
+        });
 
         // Get the input history from the store
         window.store.get('inputHistory').then((inputHistory) => {
@@ -33,7 +48,7 @@ const app = Vue.createApp({
             // get the current version of the app
 
             let versionNumber = await window.api.version();
-            document.title =  this.name + " - MUjs v" + versionNumber;
+            document.title = this.name + " - MUjs v" + versionNumber;
             window.api.connect(this.port, this.host);
 
         });
@@ -191,11 +206,12 @@ const app = Vue.createApp({
 
     },
     methods: {
+
         handleOnClickDoBuffer(element) {
             let command = element.getAttribute('onclickdobuffer');
             this.inputField += command;
             // set focus to the input field
-            this.inputField.setf
+            this.inputField.setFocus();
 
         },
 
@@ -278,4 +294,41 @@ const app = Vue.createApp({
     }
 });
 
+
+
+function doDrag(e) {
+    console.log('dragging');
+    const containerHeight = document.querySelector('.flex-container').clientHeight;
+    const newHeight = (e.clientY / containerHeight) * 100;
+    const textarea = document.getElementById('SdWiqHtqa');
+    const terminal = document.getElementById('AZUHz3kQsgMj');
+
+
+    terminal.style.height = `${newHeight}%`;
+    textarea.style.height = `${100 - newHeight}%`;
+    terminal.scrollTop = terminal.scrollHeight;
+
+    // stop click through
+    e.stopPropagation();
+    
+
+    
+    // console.log('dragging');
+    // // Corrected initialization
+    // const textarea = document.getElementById('SdWiqHtqa');
+    // //let startY = e.clientY;
+    // let computedStyle = window.getComputedStyle(textarea);
+    // let startHeight = parseInt(computedStyle.height, 10);
+    // // Assuming startY is correctly set somewhere, e.g., in a mousedown event handler
+    // let newHeight = startHeight + e.clientY - startY;
+    // textarea.style.height = newHeight + 'px';
+
+};
+function stopDrag() {
+    const terminal = document.getElementById('AZUHz3kQsgMj');
+        // Scroll terminal to bottom
+
+    document.removeEventListener('mousemove', doDrag, false);
+    document.removeEventListener('mouseup', stopDrag, false);
+};
 app.mount('#app');

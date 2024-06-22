@@ -10,7 +10,7 @@
         <link rel="stylesheet/less" type="text/css" href="style.less" />
         <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
         <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/less" ></script>
+        <script src="https://cdn.jsdelivr.net/npm/less"></script>
 </head>
 
 <body>
@@ -24,15 +24,15 @@
                                                 <input v-model="site.host" type="text">
                                                 <input v-model="site.port" type="text">
                                                 <button @click="saveSite" class="btn btn-primary">Save</button>
-                                            </div>
-                                            <div v-else>
+                                        </div>
+                                        <div v-else>
                                                 <!-- Site details -->
                                                 <h5 class="card-title">{{ site.name }}</h5>
                                                 <p class="card-text">{{ site.host }}:{{ site.port }}</p>
                                                 <button @click="selectSite(key)" class="btn btn-primary">Select</button>
                                                 <button @click="editSite(key)" class="btn btn-secondary">Edit</button>
                                                 <button @click="deleteSite(key)" class="btn btn-danger">Delete</button>
-                                            </div>
+                                        </div>
                                 </div>
                                 <button @click="addSite" class="btn btn-success">Add New Site</button>
                         </div>
@@ -40,14 +40,18 @@
         </div>
 
 
-                <div id="app">
-                        <div v-show="showApp">
-                        <div id="AZUHz3kQsgMj">
+        <div id="app">
+                <div v-show="showApp">
+                        <div class="flex-container">
+                                <div id="AZUHz3kQsgMj">
+                                </div>
+                                <div id="resizeHandle" style="height: 5px; cursor: ns-resize; background-color: #ccc;"></div>
+                                <textarea ref="inputField" id="SdWiqHtqa" v-model="inputField"
+                                        @keydown="handleKeydown"></textarea>
                         </div>
-                        <textarea ref="inputField" id="SdWiqHtqa" v-model="inputField" @keydown="handleKeydown"></textarea>
                 </div>
-                </div>
-        
+        </div>
+
 
         <script src="../node_modules/vue/dist/vue.global.js"></script>
         <script src="../src/render/mainRenderer.js"></script>
