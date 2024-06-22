@@ -31,11 +31,9 @@ const api = {
         }
     },
     ansi_to_html: (data) => {
-        ansi.escape_html = false;
-        ansi.use_classes = true;
-        let html = ansi.ansi_to_html(data);
-        // Replace newline characters with <br> tags
-        //html = html.replace(/\n/g, '<br/>').replace(/\r/g, '');
+        const ansiRegex = /\x1b\[[0-9;]*m/g;
+        // Strip any ANSI escape codes from the data
+        let html = data.replace(ansiRegex, '');
         return html;
     },
     version: () => ipcRenderer.invoke('get-app-version'),
@@ -99,7 +97,7 @@ client.on('data', (data) => {
     let unicodeString = decoder.decode(uint8array);
 
     // split the string into lines using either /r or /n
-    let lines = unicodeString.split(/\n/);
+    let lines = unicodeString.split(/\r\n|\r|\n/);
 
 
     // iterate over the lines and emit a received-data event for each line
@@ -116,6 +114,7 @@ client.on('data', (data) => {
         }
         else {
         ipcRenderer.send('received-data', line);
+        console.log(line);
         }
     });
     //ipcRenderer.send('received-data', unicodeString);

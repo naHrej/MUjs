@@ -121,7 +121,21 @@ const app = Vue.createApp({
         });
 
         window.api.on('received-data', (event, data) => {
+            let omit = false;
+            
+            if (data.startsWith('FugueEdit')) {
+                data = data.replace("FugueEdit >", 'FugueEdit &gt;');
+                // Strip the TinyFugue prompt
+                data = data.slice('FugueEdit &gt; '.length);
+                //data = data.slice('FugueEdit &gt; '.length);
+                // Add a line break
+                data = data + '\n';
 
+                // Append the data to the inputField
+                this.inputField += data;
+                omit = true;
+
+            }
 
             if (data.startsWith('!@style:url:')) {
                 // Extract the URL from the data
@@ -134,6 +148,7 @@ const app = Vue.createApp({
                 this.styleURL = url;
 
                 this.loadStyleFromURL(url);
+                omit = true;
 
             } else {
                 let newElement = document.createElement('div');
@@ -144,6 +159,7 @@ const app = Vue.createApp({
                 // send the clientkey to the server
                 if (data.startsWith('ANSI Version 2.6 is currently active')) {
                     window.api.write(`@clientkey ${this.sessionKey}`);
+
                     return;
                 }
                 data = window.api.ansi_to_html(data);
@@ -163,6 +179,7 @@ const app = Vue.createApp({
                         newScript.src = script.src;
                         // Append the new script tag to the head of the document
                         document.head.appendChild(newScript);
+                        omit = true;
                     }
                 });
 
@@ -199,7 +216,9 @@ const app = Vue.createApp({
                         }
                     });
                 });
-                this.terminal.appendChild(newElement);
+                if (!omit) {
+                    this.terminal.appendChild(newElement);
+                }
                 this.terminal.scrollTop = this.terminal.scrollHeight;
             }
         });
@@ -310,9 +329,9 @@ function doDrag(e) {
 
     // stop click through
     e.stopPropagation();
-    
 
-    
+
+
     // console.log('dragging');
     // // Corrected initialization
     // const textarea = document.getElementById('SdWiqHtqa');
@@ -326,7 +345,7 @@ function doDrag(e) {
 };
 function stopDrag() {
     const terminal = document.getElementById('AZUHz3kQsgMj');
-        // Scroll terminal to bottom
+    // Scroll terminal to bottom
 
     document.removeEventListener('mousemove', doDrag, false);
     document.removeEventListener('mouseup', stopDrag, false);
