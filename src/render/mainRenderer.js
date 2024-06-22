@@ -50,7 +50,7 @@ const app = Vue.createApp({
         window.api.on('reload-styles', () => {
             this.loadStyleFromURL(this.styleURL);
             //  Call the LESS reload function as well
-            this.less.refresh(true);
+            less.refresh(true);
             console.log('Reloading styles');
         });
 
