@@ -3,6 +3,7 @@ const app = Vue.createApp({
     data() {
         return {
             host: "code.deanpool.net",
+            name: "klinMoo",
             port: 1701,
             inputHistory: [],
             currentInputIndex: -1,
@@ -23,10 +24,16 @@ const app = Vue.createApp({
             this.inputHistory = Object.values(inputHistory || {});
         });
 
-        window.api.on('site-selected', (event, host, port) => {
-
+        window.api.on('site-selected', async (event, name, host, port) => {
+            this.name = name;
             this.host = host;
             this.port = port;
+
+            // set the window title to the host
+            // get the current version of the app
+
+            let versionNumber = await window.api.version();
+            document.title =  this.name + " - MUjs v" + versionNumber;
             window.api.connect(this.port, this.host);
 
         });
@@ -185,6 +192,9 @@ const app = Vue.createApp({
         handleOnClickDoBuffer(element) {
             let command = element.getAttribute('onclickdobuffer');
             this.inputField += command;
+            // set focus to the input field
+            this.inputField.setf
+
         },
 
         handleCommandElement(element) {

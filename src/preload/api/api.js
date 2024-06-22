@@ -5,6 +5,7 @@ const { executeLuaScript } = require('./script/lua');
 
 const net = require('net');
 const { connected } = require('process');
+const { Console } = require('console');
 const SystemFonts = require('system-font-families').default;
 let client = new net.Socket();
 let naws = false;
@@ -37,6 +38,7 @@ const api = {
         //html = html.replace(/\n/g, '<br/>').replace(/\r/g, '');
         return html;
     },
+    version: () => ipcRenderer.invoke('get-app-version'),
     naws: () => {
     },
     send: (channel, ...args) => {   

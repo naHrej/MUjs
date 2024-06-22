@@ -40,7 +40,7 @@ const conmgr = Vue.createApp({
         selectSite(key) {
             let host = this.sites[key].host;
             let port = this.sites[key].port;
-            window.api.send('site-selected', this.sites[key].host, this.sites[key].port);
+            window.api.send('site-selected', this.sites[key].name, this.sites[key].host, this.sites[key].port);
             this.showMgr = false;
         }
         

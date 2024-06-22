@@ -10,6 +10,10 @@ const preloadPath = app.isPackaged
 const api = require('../preload/api/api.js');
 
 let windows = {}
+
+ipcMain.handle('get-app-version', async (event) => {
+    return app.getVersion();
+  });
 // create an ipc listener for the update-window event
 ipcMain.on('window', (event, id, updateType, html) => {
     // get the window by id
@@ -132,9 +136,9 @@ ipcMain.on('settings-updated', () => {
     });
 });
 
-ipcMain.on('site-selected', (event, host, port) => {
+ipcMain.on('site-selected', (event, name,  host, port) => {
     BrowserWindow.getAllWindows().forEach(win => {
-        win.webContents.send('site-selected', host, port);
+        win.webContents.send('site-selected', name, host, port);
     });
 });
 
