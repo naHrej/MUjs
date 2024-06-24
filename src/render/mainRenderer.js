@@ -27,7 +27,10 @@ const app = Vue.createApp({
         // get the terminal element
         this.terminal = document.querySelector('#AZUHz3kQsgMj');
         this.ApplySettings();
-
+        
+        window.addEventListener('resize', () => {
+            editor.layout();
+        });
 
         resizeHandle.addEventListener('mousedown', function (e) {
 

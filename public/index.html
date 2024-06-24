@@ -52,17 +52,12 @@
         </div>
 
 
-        <div id="app">
-                <div v-show="showApp">
-                        <div class="flex-container">
-                                <div id="AZUHz3kQsgMj">
-                                </div>
-                                <div id="resizeHandle" style="height: 5px; cursor: ns-resize; background-color: #ccc;">
-                                </div>
-                                <div class="monaco-editor" id="SdWiqHtqa"
-                                        @keydown="handleKeydown">
-                                </div>
-                        </div>
+        <div id="app" class="flex-container" v-show="showApp">
+                <div id="AZUHz3kQsgMj" v-show="showApp">
+                </div>
+                <div id="resizeHandle" v-show="showApp">
+                </div>
+                <div class="monaco-editor" id="SdWiqHtqa" @keydown="handleKeydown" v-show="showApp">
                 </div>
         </div>
 
