@@ -63,9 +63,10 @@ require(['vs/editor/editor.main'], function () {
 
 
 
-    const editor = monaco.editor.create(document.getElementById('container'), {
+    window.editor = monaco.editor.create(document.getElementById('container'), {
         value: ['function x() {', '\tconsole.log("Hello world!");', '}'].join('\n'),
-        language: 'javascript'
+        language: 'mooscode',
+        theme: 'moocode'
     });
 
 });

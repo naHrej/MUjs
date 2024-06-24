@@ -17,11 +17,12 @@ const app = Vue.createApp({
             resizeHanfdle: null,
             textarea: null,
             startY: null,
-            startHeight: null
+            startHeight: null,
+            editor: null
         };
     },
     async mounted() {
-
+        this.editor = window.editor;
         let resizeHandle = document.getElementById('resizeHandle');
         const textarea = document.getElementById('SdWiqHtqa');
         // get the terminal element
