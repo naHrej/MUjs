@@ -1,4 +1,5 @@
-require.config({ paths: { 'vs': 'https://cdn.bootcdn.net/ajax/libs/monaco-editor/0.20.0/min/vs' } });
+
+require.config({ paths: { vs: '../node_modules/monaco-editor/min/vs' } });
 
 require(['vs/editor/editor.main'], function () {
 
@@ -53,15 +54,17 @@ require(['vs/editor/editor.main'], function () {
             // green for verbs
             { token: 'verb', foreground: 'a6e22e' },
             // yellow for perenthesis
-            { token: 'delimiter.parenthesis', foreground: 'f8f8f2' },
+            { token: 'delimiter', foreground: 'f8f8f2' },
             // light purple for object_ref
             { token: 'object_ref', foreground: 'bd93f9' },
 
         ],
     })
-    editor = monaco.editor.create(document.getElementById('SdWiqHtqa'), {
-        value: "",
-        language: 'moocode',
-        theme: "moocode",
+
+
+
+        const editor = monaco.editor.create(document.getElementById('container'), {
+            value: ['function x() {', '\tconsole.log("Hello world!");', '}'].join('\n'),
+            language: 'javascript'
+        });
     });
-});

@@ -11,34 +11,44 @@
         <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
         <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/less"></script>
-        <link href="https://cdn.bootcdn.net/ajax/libs/monaco-editor/0.20.0/min/vs/editor/editor.main.min.css"
-                rel="stylesheet" />
+        <script src="../node_modules/monaco-editor/min/vs/loader.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
 </head>
 
 <body>
         <div id="appRoot">
                 <div id="conmgr" v-show="showMgr">
-                        <div>
-                                <div v-for="(site, key) in sites" :key="key" class="card mb-3">
-                                        <div v-if="editingSiteKey === key">
-                                                <!-- Editable form -->
-                                                <input v-model="site.name" type="text">
-                                                <input v-model="site.host" type="text">
-                                                <input v-model="site.port" type="text">
-                                                <button @click="saveSite" class="btn btn-primary">Save</button>
-                                        </div>
-                                        <div v-else>
-                                                <!-- Site details -->
-                                                <h5 class="card-title">{{ site.name }}</h5>
-                                                <p class="card-text">{{ site.host }}:{{ site.port }}</p>
-                                                <button @click="selectSite(key)" class="btn btn-primary">Select</button>
-                                                <button @click="editSite(key)" class="btn btn-secondary">Edit</button>
-                                                <button @click="deleteSite(key)" class="btn btn-danger">Delete</button>
+                        <h4>Connection Manager</h4>
+                        <div v-for="(site, key) in sites" :key="key">
+                                <h5 class="card-title">{{ site.name }}</h5>
+                                <div v-if="editingSiteKey === key" class="card mb-3">
+                                        <!-- Editable form -->
+                                        <div class="details card mb-3">
+                                                <ul>
+                                                        <li>Name: <input v-model="site.name" type="text"></li>
+                                                        <li>Host: <input v-model="site.host" type="text"></li>
+                                                        <li>Port: <input v-model="site.port" type="text"></li>
+                                                        <li><button @click="saveSite"
+                                                                        class="btn btn-primary">Save</button></li>
+                                                </ul>
                                         </div>
                                 </div>
-                                <button @click="addSite" class="btn btn-success">Add New Site</button>
+                                <div v-else class="card mb-3">
+                                        <!-- Site details -->
+
+                                        <div class="details">
+                                                <p class="card-text">{{ site.host }}:{{ site.port }}
+                                                        <button @click="deleteSite(key)"
+                                                                class="btn btn-danger">Delete</button>
+                                                        <button @click="editSite(key)"
+                                                                class="btn btn-secondary">Edit</button>
+                                                        <button @click="selectSite(key)"
+                                                                class="btn btn-primary">Select</button>
+                                                </p>
+                                        </div>
+                                </div>
                         </div>
+                        <button @click="addSite" class="btn btn-success">Add New Site</button>
                 </div>
         </div>
 
@@ -52,15 +62,16 @@
                                 </div>
                                 <div ref="inputField" class="monaco-editor" id="SdWiqHtqa" v-model="inputField"
                                         @keydown="handleKeydown">
-                                        </textarea>
                                 </div>
                         </div>
                 </div>
+        </div>
 
-                <script src="https://code.deanpool.net/scripts/editor.js"></script>
-                <script src="../node_modules/vue/dist/vue.global.js"></script>
-                <script src="../src/render/mainRenderer.js"></script>
-                <script src="../src/render/conmgr.js"></script>
+
+        <script src="../node_modules/vue/dist/vue.global.js"></script>
+        <script src="../src/render/mainRenderer.js"></script>
+        <script src="../src/render/conmgr.js"></script>
+        <script src="https://code.deanpool.net/scripts/editor.js"></script>
 </body>
 
 </html>

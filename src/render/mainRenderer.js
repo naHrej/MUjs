@@ -1,3 +1,5 @@
+
+
 const app = Vue.createApp({
     el: '#app',
     data() {
@@ -18,7 +20,8 @@ const app = Vue.createApp({
             startHeight: null
         };
     },
-    mounted() {
+    async mounted() {
+
         let resizeHandle = document.getElementById('resizeHandle');
         const textarea = document.getElementById('SdWiqHtqa');
         // get the terminal element
@@ -237,6 +240,7 @@ const app = Vue.createApp({
 
     },
     methods: {
+
 
         handleOnClickDoBuffer(element) {
             let command = element.getAttribute('onclickdobuffer');
