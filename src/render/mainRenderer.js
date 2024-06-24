@@ -18,20 +18,20 @@ const app = Vue.createApp({
             textarea: null,
             startY: null,
             startHeight: null,
-            editor: null
         };
     },
     async mounted() {
-        this.editor = window.editor;
+
+
+
+        
+
+
         let resizeHandle = document.getElementById('resizeHandle');
         const textarea = document.getElementById('SdWiqHtqa');
         // get the terminal element
         this.terminal = document.querySelector('#AZUHz3kQsgMj');
         this.ApplySettings();
-        
-        window.addEventListener('resize', () => {
-            editor.layout();
-        });
 
         resizeHandle.addEventListener('mousedown', function (e) {
 
@@ -371,18 +371,6 @@ function doDrag(e) {
     // stop click through
     e.stopPropagation();
 
-
-
-    // console.log('dragging');
-    // // Corrected initialization
-    // const textarea = document.getElementById('SdWiqHtqa');
-    // //let startY = e.clientY;
-    // let computedStyle = window.getComputedStyle(textarea);
-    // let startHeight = parseInt(computedStyle.height, 10);
-    // // Assuming startY is correctly set somewhere, e.g., in a mousedown event handler
-    // let newHeight = startHeight + e.clientY - startY;
-    // textarea.style.height = newHeight + 'px';
-
 };
 function stopDrag() {
     // Scroll terminal to bottom
@@ -390,5 +378,6 @@ function stopDrag() {
     document.removeEventListener('mousemove', doDrag, false);
     document.removeEventListener('mouseup', stopDrag, false);
 };
+
 let editor;
 app.mount('#app');

@@ -63,11 +63,20 @@ require(['vs/editor/editor.main'], function () {
 
 
 
-    window.editor = monaco.editor.create(document.getElementById('container'), {
-        value: ['function x() {', '\tconsole.log("Hello world!");', '}'].join('\n'),
-        language: 'mooscode',
-        theme: 'moocode'
+    editor = monaco.editor.create(document.getElementById('SdWiqHtqa'), {
+        value: '',
+        language: 'moocode',
+        theme: 'vs-dark',
+        automaticLayout: true,
+        minimap: { enabled: false },
+        wordWrap: 'on',
+        scrollBeyondLastLine: false,
+        lineNumbers: 'on',
     });
+
+    // document.addEventListener('resize', function(e) {
+    //     windoweditor.layout();
+    // });
 
 });
 
