@@ -72,6 +72,7 @@ require(['vs/editor/editor.main'], function () {
         wordWrap: 'on',
         scrollBeyondLastLine: false,
         lineNumbers: 'on',
+        
     });
 
     // document.addEventListener('resize', function(e) {

@@ -1,11 +1,9 @@
 // api.js
-const { ipcRenderer, ipcMain} = require('electron');
+const { ipcRenderer} = require('electron');
 const { calculateCharCount } = require('./../../utils');
 const { executeLuaScript } = require('./script/lua');
 
 const net = require('net');
-const { connected } = require('process');
-const { Console } = require('console');
 const SystemFonts = require('system-font-families').default;
 let client = new net.Socket();
 let naws = false;
@@ -62,6 +60,7 @@ const api = {
     },
     end: () => {
         client.end();
+        ipcRenderer.send('disconnected');
     },
     getFonts: async () => {
         let ssf = new SystemFonts();

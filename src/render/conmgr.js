@@ -9,6 +9,9 @@ const conmgr = Vue.createApp({
     },
     async mounted() {
         this.sites = Object.values(await window.store.get('sites') || {});
+        window.api.on('disconnected', () => {
+            this.showMgr = true;
+        });
        
     },
     methods: {
@@ -43,6 +46,11 @@ const conmgr = Vue.createApp({
             window.api.send('site-selected', this.sites[key].name, this.sites[key].host, this.sites[key].port);
             this.showMgr = false;
         }
+
+        // event for disconnected
+
+
+
         
     }
 }).mount('#appRoot');

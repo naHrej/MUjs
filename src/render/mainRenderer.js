@@ -18,12 +18,13 @@ const app = Vue.createApp({
             textarea: null,
             startY: null,
             startHeight: null,
+            loading: true, // Add this line
         };
     },
     async mounted() {
 
-
-
+        
+        loading = false;
         
 
 
@@ -59,14 +60,11 @@ const app = Vue.createApp({
             window.api.connect(this.port, this.host);
 
         });
+
         window.api.on('disconnected', () => {
-            // add bold white text to the terminal as an element
-            let newElement = document.createElement('div');
-            newElement.style.color = 'white';
-            newElement.style.fontWeight = 'bold';
-            newElement.textContent = '*** Disconnected from the server ***';
-            this.terminal.appendChild(newElement);
-            this.terminal.scrollTop = this.terminal.scrollHeight;
+            this.showApp = false;
+            this.terminal.innerHTML = '';
+            console.log('Disconnected from the server');
         });
 
         window.api.on('reload-styles', () => {
@@ -113,6 +111,10 @@ const app = Vue.createApp({
         window.api.on('reconnect', () => {
             console.log('Reconnecting');
             window.api.connect(this.port, this.host);
+        });
+
+        window.api.on('disconnect', () => {
+            window.api.end();
         });
 
         window.api.on('settings-updated', (event) => {
