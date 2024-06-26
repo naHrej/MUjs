@@ -1,5 +1,5 @@
 // utils.js
-module.exports.calculateCharCount = function calculateCharCount() {
+export function calculateCharCount() {
     // Get the console element
     let consoleElement = document.querySelector('#AZUHz3kQsgMj');
 

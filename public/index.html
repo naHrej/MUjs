@@ -15,7 +15,6 @@
 </head>
 
 <body>
-        <script src="../node_modules/monaco-editor/min/vs/loader.js"></script>
         <div id="appRoot">
                 
                 <div id="conmgr" v-show="showMgr">
@@ -59,38 +58,13 @@
                 </div>
                 <div id="resizeHandle" v-show="showApp">
                 </div>
-                <div class="monaco-editor" id="SdWiqHtqa" @keydown="handleKeydown" v-show="showApp">
+                <div id="SdWiqHtqa" v-show="showApp">
                 </div>
         </div>
 
-        <script>
-                // Example condition: A global variable that indicates if the app is packaged
-                // This variable needs to be set before this script runs
-                var isPackaged = window.isPackaged || false;
-              
-                var script = document.createElement('script');
-
-                // check to see if there is a file at https://code.deanpool.net/scripts/editor.js
-                // if there is, load that file, otherwise load the local file
-                var xhr = new XMLHttpRequest();
-                xhr.open('HEAD', 'https://code.deanpool.net/scripts/editor.js', false);
-                xhr.send();
-
-        
-              
-                if (isPackaged && xhr.status === 200) {
-                  // If the app is packaged, load the script for the packaged version
-                  script.src = "https://code.deanpool.net/scripts/editor.js";
-                } else {
-                  // If the app is not packaged, load the original script
-                  script.src = "editor.js";
-                }
-              
-                document.body.appendChild(script);
-              </script>
         <script src="../node_modules/vue/dist/vue.global.js"></script>
-        <script src="../src/render/mainRenderer.js"></script>
-        <script src="../src/render/conmgr.js"></script>
+        <script type="module" src="../src/render/terminal/terminal.js"></script>
+        <script type="module" src="../src/render/siteManager/siteManager.js"></script>
 
 </body>
 

@@ -1,7 +1,6 @@
-const { ipcMain } = require('electron');
-const {app, BrowserWindow} = require('electron');
+import { ipcMain, BrowserWindow, dialog } from 'electron';
 
-function setupIpcHandlers(app) {
+export function setupIpcHandlers(app) {
     ipcMain.handle('get-app-version', async (event) => {
         return app.getVersion();
     });
@@ -19,7 +18,3 @@ function setupIpcHandlers(app) {
     })
 
 }
-
-
-
-module.exports = { setupIpcHandlers};

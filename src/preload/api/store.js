@@ -1,5 +1,4 @@
-// apiStore.js
-const { ipcRenderer } = require('electron');
+import { ipcRenderer } from 'electron';
 
 const StoreAPI = {
     get: async (val) => {
@@ -20,4 +19,4 @@ const StoreAPI = {
     }
 };
 
-module.exports = StoreAPI;
+export default StoreAPI;

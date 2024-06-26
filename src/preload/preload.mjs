@@ -1,16 +1,11 @@
-// preload.js
-const { contextBridge, ipcRenderer} = require('electron');
-const fs = require('fs');
-const chokidar = require('chokidar');
+import { ipcRenderer } from 'electron';
+import fs from 'fs';
+import chokidar from 'chokidar';
+import { api } from './api/api.js';
+import store from './api/store.js';
 
-var SystemFonts = require('system-font-families').default;
-const api = require('./api/api.js');
-const store = require('./api/store.js');
-
-
-contextBridge.exposeInMainWorld('api', api);
-contextBridge.exposeInMainWorld('store', store);
-
+window.api = api;
+window.store = store;
 
 let watchPath;
 let watcher;

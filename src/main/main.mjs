@@ -1,23 +1,15 @@
-const { ipcMain, dialog } = require('electron');
-const { setupIpcHandlers } = require('./ipcHandler');
-const { spawnNewWindow, setupMenus, setupWindowIpcHandlers} = require('./WindowManager.js');
-const { app} = require('electron');
-const Store = require('electron-store');
-const path = require('path');
-
-//app.setPath("userData", path.join(__dirname, '../../data'));
-const api = require('../preload/api/api.js');
+import { ipcMain, app } from 'electron';
+import { setupIpcHandlers } from './ipcHandler.js';
+import { spawnNewWindow, setupWindowIpcHandlers } from './WindowManager.js';
+import Store from 'electron-store';
+import path from 'path';
 
 
 
 app.whenReady().then(() => {
   createWindow();
   setupIpcHandlers(app);
-
   setupWindowIpcHandlers();
-
-
-
 });
 
 
@@ -72,9 +64,7 @@ ipcMain.on('electron-store-set', async (event, key, val) => {
 const createWindow = async () => {
 
 
-  BrowserWindow = await spawnNewWindow('index', 'public/index.html');
+  await spawnNewWindow('index', 'public/index.html');
 
 }
-
-module.exports = { createWindow}
 

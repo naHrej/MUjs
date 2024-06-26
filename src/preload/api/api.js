@@ -1,21 +1,17 @@
-// api.js
-const { ipcRenderer} = require('electron');
-const { calculateCharCount } = require('./../../utils');
-const { executeLuaScript } = require('./script/lua');
+import { ipcRenderer } from 'electron';
+import { calculateCharCount } from './../../utils.js';
+import { executeLuaScript } from './script/lua.js';
+import net from 'net';
+import SystemFonts from 'system-font-families';
+import { Buffer } from 'buffer';
 
-const net = require('net');
-const SystemFonts = require('system-font-families').default;
 let client = new net.Socket();
 let naws = false;
 
-let ansi;
-
-import('ansi_up').then((module) => {
-    ansi = new module.AnsiUp();
-});
 
 
-const api = {
+
+export const api = {
     invokeMenu: (template) => ipcRenderer.invoke('show-context-menu', template),
     calculateCharCount: () => {
         return calculateCharCount();
@@ -51,12 +47,14 @@ const api = {
         ipcRenderer.on(channel, func);
     },
     write: (data) => {
-        // Append a newline character to the data
-        data += '\n';
-        // Convert the string to a Buffer
-        let buffer = Buffer.from(data, 'utf8');
-        // Send the buffer to the server
-        client.write(buffer);
+        return new Promise((resolve, reject) => {
+            data += '\n'; // Append a newline character to the data
+            let buffer = Buffer.from(data, 'utf8'); // Convert the string to a Buffer
+            client.write(buffer, (err) => { // Send the buffer to the server
+                if (err) reject(err);
+                else resolve();
+            });
+        });
     },
     end: () => {
         client.end();
@@ -72,7 +70,6 @@ const api = {
         executeLuaScript(scriptPath, variables);
     }
 };
-module.exports = api;
 
 client.on('data', (data) => {
     // Convert the data to a Buffer

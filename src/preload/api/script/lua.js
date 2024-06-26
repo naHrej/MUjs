@@ -1,9 +1,7 @@
-const fengari = require('fengari');
-const lua = fengari.lua;
-const lauxlib = fengari.lauxlib;
-const lualib = fengari.lualib;
+import * as fengari from 'fengari';
+const { lua, lauxlib, lualib } = fengari;
 
-function executeLuaScript(scriptPath, variables) {
+export function executeLuaScript(scriptPath, variables) {
     let L = lauxlib.luaL_newstate();
 
     /* Load Lua libraries */
@@ -26,5 +24,3 @@ function executeLuaScript(scriptPath, variables) {
         throw new Error(lua.to_jsstring(lua.lua_tostring(L, -1)));
     }
 }
-
-module.exports = { executeLuaScript };

@@ -45,7 +45,6 @@ const settings = Vue.createApp({
     },
     async mounted() {
         this.watchPath = await window.store.get('watchPath');
-        this.fonts = await window.api.getFonts();
         this.fontFamily = await window.store.get('settings.fontFamily');
         this.fontSize = await window.store.get('settings.fontSize');
         this.authString = await window.store.get('settings.authString');

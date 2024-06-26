@@ -1,12 +1,13 @@
+import { app, Menu, BrowserWindow, ipcMain } from 'electron';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const { app, Menu, BrowserWindow } = require('electron');
-const { ipcMain, dialog } = require('electron');
-const path = require('path');
-const { spawn } = require('child_process');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const preloadPath = app.isPackaged
-    ? path.join(process.resourcesPath, 'app', 'src', 'preload', 'preload.js')
-    : path.join(__dirname, '../', 'preload', 'preload.js');
-
+    ? path.join(process.resourcesPath, 'app', 'src', 'preload', 'preload.mjs')
+    : path.join(__dirname, '../', 'preload', 'preload.mjs');
 const windows = {};
 let connected = false;
 
@@ -74,7 +75,7 @@ function updateMenu() {
 }
 
 
-function setupWindowIpcHandlers() {
+export function setupWindowIpcHandlers() {
     ipcMain.on('window', (event, id, updateType, html) => {
         if (!windows[id]) {
             spawnNewWindow(id, html);
@@ -151,14 +152,15 @@ function setupWindowIpcHandlers() {
 
 
 
-function spawnNewWindow(id, html) {
+export function spawnNewWindow(id, html) {
     return new Promise((resolve, reject) => {
         windows[id] = new BrowserWindow({
             width: 800,
             height: 600,
             webPreferences: {
                 preload: id == 'index' || id == 'settings' ? preloadPath : undefined,
-                contextIsolation: true,
+                contextIsolation: false,
+                nodeIntegration: false,
                 sandbox: false
             }
         });
@@ -180,12 +182,3 @@ function spawnNewWindow(id, html) {
         });
     });
 }
-
-
-
-
-
-
-
-
-module.exports = { setupWindowIpcHandlers, spawnNewWindow };
