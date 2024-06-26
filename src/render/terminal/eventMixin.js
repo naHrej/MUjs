@@ -71,3 +71,32 @@ export const eventMixin = {
     },
     
   };
+
+
+  function doDrag(e) {
+    const containerHeight = document.querySelector('.flex-container').clientHeight;
+    const newHeight = (e.clientY / containerHeight) * 100;
+    const textarea = document.getElementById('SdWiqHtqa');
+    const terminal = document.getElementById('AZUHz3kQsgMj');
+    // if the height is less than 10% or greater than 90% return
+    if (newHeight < 10 || newHeight > 90) {
+        return;
+    }
+
+    terminal.style.height = `${newHeight}%`;
+    textarea.style.height = `${100 - newHeight}%`;
+    terminal.scrollTop = terminal.scrollHeight;
+
+
+    //editor.layout();
+
+    // stop click through
+    e.stopPropagation();
+
+};
+function stopDrag() {
+    // Scroll terminal to bottom
+
+    document.removeEventListener('mousemove', doDrag, false);
+    document.removeEventListener('mouseup', stopDrag, false);
+};
