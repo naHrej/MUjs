@@ -74,7 +74,7 @@ export const editorMixin = {
             ],
         });
         var terminal  = document.getElementById('SdWiqHtqa');
-        const editor = monaco.editor.create(terminal, {
+        editor = monaco.editor.create(terminal, {
             value: '',
             language: 'moocode',
             theme: 'vs-dark',

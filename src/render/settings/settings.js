@@ -11,6 +11,50 @@ const settings = Vue.createApp({
         }
     },
     methods: {
+        async renderSettings() {
+            // Get the whole store object
+            const store = await window.store;
+
+
+            // Generate elements from the store array, separate each setting into it's parent section
+            const settings = Object.entries(store).map(([key, value]) => {
+                return {
+                    key,
+                    value,
+                    section: key.split('.')[0]
+                };
+            });
+
+            // Group the settings by section
+            const groupedSettings = settings.reduce((acc, setting) => {
+                if (!acc[setting.section]) {
+                    acc[setting.section] = [];
+                }
+                acc[setting.section].push(setting);
+                return acc;
+            }
+
+            , {});
+
+            // Render the settings
+            return Object.entries(groupedSettings).map(([section, settings]) => {
+                return h('div', [
+                    h('h2', section),
+                    h('div', settings.map(setting => {
+                        return h('div', [
+                            h('label', setting.key),
+                            h('input', {
+                                value: setting.value,
+                                onInput: event => {
+                                    store.set(setting.key, event.target.value);
+                                }
+                            })
+                        ]);
+                    }))
+                ]);
+            });
+        },
+
         async saveSettings() {
             await window.store.set('settings.fontFamily', this.fontFamily);
             await window.store.set('settings.fontSize', this.fontSize);
