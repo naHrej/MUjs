@@ -78,20 +78,15 @@ export const api = {
     OpenFile: async () => {
         try {
             // Show an open dialog and wait for the file path
-            const filePaths = await ipcRenderer.invoke('dialog:openFile');
-            // If a file path was selected
-            if (filePaths && filePaths.length > 0) {
-                // Read the file
-                let data = '';
-                    fs.readFile(filePaths, 'utf8', (error, data) => {
-                        if (error) {
-                            // Handle error (e.g., log or throw)
-                            console.error("Failed to read file:", error);
-                            return;
-                        }
-                        // Proceed with processing the data
-                    });
+            const filePath = await ipcRenderer.invoke('dialog:openFile');
+            // If a file path was selected and it's a valid path
+            if (filePath && fs.existsSync(filePath)) {
+                // load the file
+                const data = fs.readFileSync(filePath, 'utf8');
+                // process the data
                 return data;
+            } else {
+                console.log('No file selected or file does not exist.');
             }
         } catch (error) {
             console.error('Failed to open file:', error);

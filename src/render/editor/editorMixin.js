@@ -91,7 +91,8 @@ export const editorMixin = {
       const submitButton = document.getElementById('submit');
 
       loadButton.addEventListener('click', () => {
-        this.OpenFile();
+        const text = this.OpenFile();
+        editor.setValue(text);
       });
 
       saveButton.addEventListener('click', () => {
@@ -107,10 +108,11 @@ export const editorMixin = {
       window.api.send('submit', editor.getValue());
     },
     async SaveToFile() {
-       await window.api.SaveFile(editor.getValue());
+       await window.api.saveFile(editor.getValue());
     },
     async OpenFile() {
-      editor.setValue(await window.api.OpenFile());
+      let text = await window.api.OpenFile();
+      editor.setValue(text);
     },
 
     initEditor() {
