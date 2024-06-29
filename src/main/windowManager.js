@@ -1,3 +1,4 @@
+
 import { app, Menu, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -66,7 +67,20 @@ function updateMenu() {
                         // emit event to reload styles
                         BrowserWindow.getFocusedWindow().webContents.send('reload-styles');
                     }
+                },
+                {
+                    label: 'Reload',
+                    click: () => {
+                        BrowserWindow.getFocusedWindow().reload();
+                    }
+                },
+                {
+                    label: 'Toggle Editor',
+                    click: () => {
+                        spawnNewWindow('editor', '');
+                    }
                 }
+
             ]
         }
     ]);
@@ -97,6 +111,12 @@ export function setupWindowIpcHandlers() {
         }
     });
 
+    // retransmit submit event
+    ipcMain.on('submit', (event, data) => {
+        Object.values(windows).forEach(win => {
+            win.webContents.send('submit', data);
+        });
+    });
     // Add a listener for the disconnected event
     ipcMain.on('disconnect', () => {
         connected = false;
@@ -148,6 +168,21 @@ export function setupWindowIpcHandlers() {
             win.webContents.send('disconnected');
         });
     });
+    ipcMain.on('update-editor', (event, data) => {
+        // check if we have an editor window open
+        if (windows['editor']) {
+            windows['editor'].webContents.send('update-editor', data);
+        } else {
+            spawnNewWindow('editor', data);
+            // forward the data to the editor window
+            // Wait for the editor window to be ready
+            windows['editor'].webContents.on('did-finish-load', (name) => {
+                if (name === 'editor') {
+                    windows['editor'].webContents.send('update-editor', data);
+                }
+            });
+        }
+    });
 }
 
 
@@ -158,24 +193,22 @@ export function spawnNewWindow(id, html) {
             width: 800,
             height: 600,
             webPreferences: {
-                preload: id == 'index' || id == 'settings' ? preloadPath : undefined,
+                preload: id == 'index' || id == 'settings' || 'editor' ? preloadPath : undefined,
                 contextIsolation: false,
-                nodeIntegration: false,
+                nodeIntegration: true,
                 sandbox: false
             }
         });
 
 
 
-
-
-        windows[id].loadFile(`public/${id == 'index' || id == 'settings' ? id : 'blank'}.html`);
+        windows[id].loadFile(`public/${id == 'index' || id == 'settings' || id == 'editor' ? id : 'blank'}.html`);
 
         windows[id].once('ready-to-show', () => {
             windows[id].on('closed', () => {
                 delete windows[id];
             });
-            if (id !== 'index' && id !== 'settings') {
+            if (id !== 'index' && id !== 'settings' && id !== 'editor') {
                 windows[id].webContents.executeJavaScript(`document.querySelector('.container').innerHTML += \`${html}\``);
             }
             resolve(windows[id]);

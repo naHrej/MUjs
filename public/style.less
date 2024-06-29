@@ -4,6 +4,12 @@
  
  And a textbox that takes up the remainder */
 
+ html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
  
  .flex-container {
     display: flex;
@@ -12,6 +18,13 @@
     width: 100vw; // Full width of the viewport
     overflow: hidden; // Prevents content from overflowing the container
   }
+
+
+  .editor-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
   
 
 #resizeHandle
@@ -19,8 +32,14 @@
   height: 5px; cursor: ns-resize; background-color: #ccc;
 }
 
-#monaco-editor {
-  font-family: Consolas, 'Courier New', monospace;
+#monaco-editor-toolbar {
+  flex: 0 1 auto; // Adjusted to only take the space it needs without growing
+  max-height: 10%; // Limits the toolbar to 10% of the container's height
+}
+
+#monaco-editor-moocode {
+  flex: 9; // Takes up the remaining space
+  // Ensures it fills 90% of the container's height
 }
 
   #SdWiqHtqa {

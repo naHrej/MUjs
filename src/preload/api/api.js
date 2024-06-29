@@ -1,12 +1,18 @@
 import { ipcRenderer } from 'electron';
 import { calculateCharCount } from './../../utils.js';
 import { executeLuaScript } from './script/lua.js';
+// Assuming you have installed `monaco-editor`, `monaco-textmate`, and `vscode-textmate`
+
+import fs from 'fs';
 import net from 'net';
 import SystemFonts from 'system-font-families';
 import { Buffer } from 'buffer';
 
 let client = new net.Socket();
 let naws = false;
+
+
+
 
 
 
@@ -33,7 +39,7 @@ export const api = {
     version: () => ipcRenderer.invoke('get-app-version'),
     naws: () => {
     },
-    send: (channel, ...args) => {   
+    send: (channel, ...args) => {
         ipcRenderer.send(channel, ...args);
     },
     connect: (port, host) => {
@@ -68,6 +74,41 @@ export const api = {
     },
     executeLuaScript: (scriptPath, variables) => {
         executeLuaScript(scriptPath, variables);
+    },
+    OpenFile: async () => {
+        try {
+            // Show an open dialog and wait for the file path
+            const filePaths = await ipcRenderer.invoke('dialog:openFile');
+            // If a file path was selected
+            if (filePaths && filePaths.length > 0) {
+                // Read the file
+                let data = '';
+                    fs.readFile(filePaths, 'utf8', (error, data) => {
+                        if (error) {
+                            // Handle error (e.g., log or throw)
+                            console.error("Failed to read file:", error);
+                            return;
+                        }
+                        // Proceed with processing the data
+                    });
+                return data;
+            }
+        } catch (error) {
+            console.error('Failed to open file:', error);
+        }
+    },
+    saveFile: async (data) => {
+        try {
+            // Show a save dialog and wait for the file path
+            const filePath = await ipcRenderer.invoke('dialog:saveFile');
+            // If a file path was selected
+            if (filePath) {
+                // Write the data to the file
+                fs.writeFileSync(filePath, data);
+            }
+        } catch (error) {
+            console.error('Failed to save file:', error);
+        }
     }
 };
 
@@ -109,8 +150,8 @@ client.on('data', (data) => {
             ipcRenderer.send('window', windowTitle, windowType, windowHtml);
         }
         else {
-        ipcRenderer.send('received-data', line);
-        //console.log(line);
+            ipcRenderer.send('received-data', line);
+            //console.log(line);
         }
     });
     //ipcRenderer.send('received-data', unicodeString);
@@ -178,10 +219,10 @@ function handleIACCommand(command, option) {
                 client.write(nawsResponse);
             }
             break;
-            case SPAWN:
-                console.log('Spawn command received');
-                
-                break;
+        case SPAWN:
+            console.log('Spawn command received');
+
+            break;
         // ... existing cases ...
         default:
             console.log('Unknown IAC command:', command);

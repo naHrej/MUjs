@@ -1,12 +1,11 @@
 import { eventMixin } from "./eventMixin.js";
 import { connectionEventMixin } from "./connectionEventMixin.js";
-import { editorMixin } from "./editorMixin.js";
 
 
 
 const app = Vue.createApp({
     el: '#app',
-    mixins: [eventMixin, connectionEventMixin, editorMixin],
+    mixins: [eventMixin, connectionEventMixin],
     data() {
         return {
             host: "code.deanpool.net",
@@ -21,10 +20,6 @@ const app = Vue.createApp({
             sessionKey: null,
             resizeHanfdle: null,
             textarea: null,
-            startY: null,
-            startHeight: null,
-            loading: true, // Add this line
-            editor: null
         };
     },
     async mounted() {
@@ -33,12 +28,39 @@ const app = Vue.createApp({
     },
     methods: {
   
-        
+        handleKeydown(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                let text = this.inputField;
+                this.inputHistory.push(text);
+                this.currentInputIndex = -1;
+                this.inputField = '';
+
+                // save input history
+                window.store.set('inputHistory', Object.values(this.inputHistory || {}));
+                window.api.write(text);
+            } else if (event.key === 'ArrowUp') {
+                if (this.currentInputIndex < this.inputHistory.length - 1) {
+                    this.currentInputIndex++;
+                    this.inputField = this.inputHistory[this.inputHistory.length - 1 - this.currentInputIndex];
+                }
+            } else if (event.key === 'ArrowDown') {
+                if (this.currentInputIndex > -1) {
+                    this.currentInputIndex--;
+                    if (this.currentInputIndex === -1) {
+                        this.inputField = '';
+                    } else {
+                        this.inputField = this.inputHistory[this.inputHistory.length - 1 - this.currentInputIndex];
+                    }
+                }
+            }
+
+        },
 
 
         handleOnClickDoBuffer(element) {
             let command = element.getAttribute('onclickdobuffer');
-            editor.value += command;
+            this.inputField += command;
             // set focus to the input field
             this.inputField.setFocus();
 
@@ -46,7 +68,7 @@ const app = Vue.createApp({
 
         handleCommandElement(element) {
             let command = element.getAttribute('onCommand');
-            editor.value = command;
+            textarea.value = command;
             this.inputHistory.push(command);
             this.currentInputIndex = -1;
             window.api.write(command);
@@ -83,6 +105,7 @@ const app = Vue.createApp({
                     document.body.appendChild(style);
                 }
             });
+            
         },
 
 

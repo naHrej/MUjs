@@ -1,9 +1,8 @@
 import { ipcMain, app } from 'electron';
 import { setupIpcHandlers } from './ipcHandler.js';
-import { spawnNewWindow, setupWindowIpcHandlers } from './WindowManager.js';
+import { spawnNewWindow, setupWindowIpcHandlers } from './windowManager.js';
 import Store from 'electron-store';
 import path from 'path';
-
 
 
 app.whenReady().then(() => {

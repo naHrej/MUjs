@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet/less" type="text/css" href="style.less" />
+    <script src="https://cdn.jsdelivr.net/npm/less"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://cdn.bootcdn.net/ajax/libs/monaco-editor/0.20.0/min/vs/editor/editor.main.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <script>
+        let editor = null;
+    </script>
+    <div id="editor" class="editor-container">
+        <!-- implement Monaco editor with a toolbar at the top for loading, saving and submitting data-->
+        <!-- use fontawesome icons-->
+        <div id="monaco-editor-toolbar">
+            <button id="load" title="Load"><i class="fas fa-folder-open" ></i></button>
+            <button id="save" title="Save"><i class="fas fa-save"></i></button>
+            <button id="submit" title="Submit"><i class="fas fa-paper-plane"></i></button>
+        </div>
+        <div id="monaco-editor-moocode"></div>
+    </div>
+    <script src="../node_modules/vue/dist/vue.global.js"></script>
+    <script type="module" src="../src/render/editor/editor.js"></script>
+</body>
+
+</html>

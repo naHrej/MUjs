@@ -33,6 +33,12 @@ export const eventMixin = {
         this.showApp = false;
       });
 
+      // handle submit event from editor
+      window.api.on('submit', (event, data) => {
+        // dont worry about the input buffer, just send the data
+        window.api.write(data);
+      });
+
       window.api.on('reload-styles', () => {
         this.loadStyleFromURL(this.styleURL);
         //  Call the LESS reload function as well

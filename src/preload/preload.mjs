@@ -4,8 +4,11 @@ import chokidar from 'chokidar';
 import { api } from './api/api.js';
 import store from './api/store.js';
 
+
 window.api = api;
 window.store = store;
+
+
 
 let watchPath;
 let watcher;

@@ -1,0 +1,70 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Moocode",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#strings"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [
+				{
+					"name": "keyword.control.moo",
+					"match": "\\b(if|while|for|return|endif|endwhile|endfor|else|elseif|in|this|try|except|finally|endtry)\\b"
+				},
+				{
+					"name": "keyword.other",
+					"match": "\\b(typeof|toint|tofloat|toobj|tostr|raise)\\b"
+				},
+				{
+					"name": "constant.numeric",
+					"match": "\\b(INT|NUM|FLOAT|LIST|MAP|STR|ANON|OBJ|ERR)\\b"
+				},
+				{
+					"name": "markup.heading",
+					"match": "@(program|args|verb)\\b"
+				},
+				{
+					"name": "markup.heading.moo",
+					"match": "\\.\\w*\\b"
+				},
+				{
+					"name": "constant.regexp",
+					"match": "\\$\\w*\\b"
+				},
+				{
+					"name": "string.regexp",
+					"match": ":\\w*\\b"
+				},
+				{
+					"name" : "variable.css.moo",
+					"match": "(\\[|\\]|{|})" 
+
+				},
+
+				{
+					"name" : "constant.numeric.moo",
+					"match": "\\b(?:\\d+(?:\\.\\d*)?|\\.\\d+)" 
+
+				}
+
+			]
+		},
+		"strings": {
+			"name": "string.quoted.double.moo",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.moo",
+					"match": "\\\\."
+				}
+			]
+		}
+	},
+	"scopeName": "source.moo"
+}

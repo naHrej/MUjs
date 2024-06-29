@@ -61,8 +61,8 @@
                 </div>
                 <div id="resizeHandle" v-show="showApp">
                 </div>
-                <div id="SdWiqHtqa" v-show="showApp">
-                </div>
+                <textarea v-model="inputField" id="SdWiqHtqa" v-show="showApp" @keydown="handleKeydown">
+                </textarea>
         </div>
 
         <script src="../node_modules/vue/dist/vue.global.js"></script>

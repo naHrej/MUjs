@@ -44,16 +44,9 @@ export const connectionEventMixin = {
 
 
 
-                // Append the data to the inputField
-                editor.setValue(editor.getValue() + data);
+                // send an update-editor back to electron via IPC
+                window.api.send('update-editor', data);
                 omit = true;
-
-                // get the input textarea element
-                let inputElement = document.getElementById('SdWiqHtqa');
-                // set focus to the input field
-                inputElement.focus();
-                // scroll to bottom of inputElement
-                inputElement.scrollTop = inputElement.scrollHeight;
 
                 // set the cursor to the end of the input field
                 inputElement.setSelectionRange(inputElement.value.length, inputElement.value.length);
