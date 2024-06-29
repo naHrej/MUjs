@@ -70,6 +70,9 @@ export const editorMixin = {
 
 
     this.initEditor();
+    window.api.on('update-editor', (event, data) => {
+      editor.setValue(editor.getValue() + data);
+    });
 
     this.setupEventListeners();
 
