@@ -73,6 +73,13 @@ export const editorMixin = {
     window.api.on('update-editor', (event, data) => {
       editor.setValue(editor.getValue() + data);
     });
+    // add a DOM READY event listener
+
+    window.addEventListener('DOMContentLoaded', () => {
+      window.api.send('editor-ready');
+    });
+    
+
 
     this.setupEventListeners();
 

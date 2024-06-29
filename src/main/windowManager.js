@@ -171,16 +171,16 @@ export function setupWindowIpcHandlers() {
     ipcMain.on('update-editor', (event, data) => {
         // check if we have an editor window open
         if (windows['editor']) {
+            windows['editor'].once('ready-to-show', () => {
             windows['editor'].webContents.send('update-editor', data);
+            });
         } else {
             spawnNewWindow('editor', data);
-            // forward the data to the editor window
-            // Wait for the editor window to be ready
-            windows['editor'].webContents.on('did-finish-load', (name) => {
-                if (name === 'editor') {
-                    windows['editor'].webContents.send('update-editor', data);
-                }
-            });
+            // wait for the editor to be ready
+            windows['editor'].once('ready-to-show', () => {
+                windows['editor'].webContents.send('update-editor', data);
+            }
+            );
         }
     });
 }
