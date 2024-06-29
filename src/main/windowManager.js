@@ -170,18 +170,16 @@ export function setupWindowIpcHandlers() {
     });
     ipcMain.on('update-editor', (event, data) => {
         // check if we have an editor window open
-        if (windows['editor']) {
-            windows['editor'].once('ready-to-show', () => {
+        if (!windows['editor']) {
+            spawnNewWindow('editor', data);
+        }
+        windows['editor'].once('ready-to-show', () => {
             windows['editor'].webContents.send('update-editor', data);
             });
-        } else {
-            spawnNewWindow('editor', data);
-            // wait for the editor to be ready
-            windows['editor'].once('ready-to-show', () => {
-                windows['editor'].webContents.send('update-editor', data);
-            }
-            );
-        }
+
+           
+        windows['editor'].webContents.send('update-editor', data);
+                
     });
 }
 
@@ -199,6 +197,11 @@ export function spawnNewWindow(id, html) {
                 sandbox: false
             }
         });
+
+        if(id == 'editor') {
+            // unregister any listeners for update-editor
+            windows['editor'].removeAllListeners('update-editor');
+        }
 
 
 
