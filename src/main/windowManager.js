@@ -142,10 +142,10 @@ export function setupWindowIpcHandlers() {
         });
     });
 
-    ipcMain.on('site-selected', (event, name, host, port) => {
+    ipcMain.on('site-selected', (event, name, host, port, connectionString, acEnabled) => {
 
         Object.values(windows).forEach(win => {
-            win.webContents.send('site-selected', name, host, port);
+            win.webContents.send('site-selected', name, host, port, connectionString, acEnabled);
         });
     });
 

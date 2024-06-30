@@ -155,3 +155,22 @@
   width: fit-content; /* Ensures the background only covers the text */
   padding: 10px 20px; /* Adequate padding around the text */
 }
+
+.fa-check-square, .fa-square {
+  cursor: pointer;
+}
+.checkbox-hidden {
+  display: none;
+}
+.checkbox-hidden + label .fa-square {
+  display: inline-block;
+}
+.checkbox-hidden:checked + label .fa-square {
+  display: none;
+}
+.checkbox-hidden + label .fa-check-square {
+  display: none;
+}
+.checkbox-hidden:checked + label .fa-check-square {
+  display: inline-block;
+}

@@ -20,6 +20,8 @@ const app = Vue.createApp({
             sessionKey: null,
             resizeHanfdle: null,
             textarea: null,
+            connStr: null,
+            acEnabled: false,
         };
     },
     async mounted() {

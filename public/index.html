@@ -36,6 +36,14 @@
                                                                 <li>Name: <input v-model="site.name" type="text"></li>
                                                                 <li>Host: <input v-model="site.host" type="text"></li>
                                                                 <li>Port: <input v-model="site.port" type="text"></li>
+                                                                <li>OnConnect: <input v-model="site.connectionString" type="text"></li>
+                                                                <li><!-- Checkbox Input -->
+                                                                        <input type="checkbox" id="customCheckbox" class="checkbox-hidden" v-model="site.acEnabled"/>
+                                                                        <label for="customCheckbox">
+                                                                            <i class="far fa-square"></i> <!-- Unchecked icon -->
+                                                                            <i class="fas fa-check-square"></i> <!-- Checked icon -->
+                                                                            Custom Checkbox
+                                                                        </label></li>
                                                                 <li><button @click="saveSite" class="btn btn-primary">
                                                                                 <i class="fas fa-save"></i> Save
                                                                         </button>

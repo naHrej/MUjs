@@ -36,14 +36,16 @@ const conmgr = Vue.createApp({
             this.sites.push({
                 name: `Site ${this.sites.length + 1}`,
                 host: '',
-                port: 80
+                port: 80,
+                connectionString: '',
+                acEnabled: false,
             });
             this.saveSite(this.sites.length - 1);
         },
         selectSite(key) {
-            let host = this.sites[key].host;
-            let port = this.sites[key].port;
-            window.api.send('site-selected', this.sites[key].name, this.sites[key].host, this.sites[key].port);
+            window.api.send('site-selected', this.sites[key].name, 
+                this.sites[key].host, this.sites[key].port,
+                 this.sites[key].connectionString, this.sites[key].acEnabled);
             this.showMgr = false;
         }
 
