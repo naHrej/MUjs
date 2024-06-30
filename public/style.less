@@ -8,6 +8,14 @@
   height: 100%;
   margin: 0;
   padding: 0;
+  overflow: hidden;
+  overflow-y: auto;
+  background: linear-gradient(
+    200.96deg,
+    #01154e -29.09%,
+    #5796dd 51.77%,
+    #7a2c9e 129.35%
+  );
 }
 
  
@@ -65,13 +73,9 @@
     flex-shrink: 1; // Keeps this to fill remaining space
   }
 
-  div#conmgr {
-    padding:1em;
-    div.card {
-      border-top-left-radius:0;
-      border-top-right-radius:0; 
-      padding-top:1em;     
-    }
+#appRoot {
+
+
     h5 {
       background-color:dodgerblue;
       color: white;
@@ -84,9 +88,14 @@
       list-style: none;
     }  
     div.details{  
+      .card-text {
+        margin: 0; /* Removes default margin from the card text */
+        justify-content: center;
+      }
       p {
         margin-left:1em;
         margin-bottom:1em;
+        
       }       
       button.btn {
         margin-right:1em;
@@ -96,5 +105,53 @@
     }
   }
 
+.cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: start; /* Adjusts spacing between cards */
+    gap: 20px; /* Adjusts spacing between cards */
+}
 
-  
+.card {
+    flex: 0 1 calc(33.333% - 20px); /* Adjusts card width to fit 3 per row, accounting for some margin */
+    margin: 10px; /* Adjusts spacing around cards */
+    
+}
+
+.button-row {
+  display: flex;
+  justify-content: center; // Centers the buttons in the button row
+  gap: 1px; // Reduces the space between buttons for a closer appearance
+
+  button {
+    padding: 5px 10px; // Reduces padding inside the buttons
+    font-size: 12px; // Reduces font size for the text inside the buttons
+    // Adjust padding and font-size values as needed
+  }
+}
+
+.card-background {
+  background-color: darkslategray; // Adjusts the background color of the card
+  padding: 0px; // Adjusts padding inside the card
+  border-radius: 10px; // Rounds the corners of the card
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Adds a shadow to the card
+}
+
+.center-button {
+  display: flex;
+  justify-content: center; /* Centers the button horizontally */
+  width: 100%; /* Ensures the div takes the full width */
+}
+
+.connection-manager-title {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Soft, modern font */
+  color: #cecaca; /* Soft, dark gray color */
+  text-align: center; /* Center-aligns the text */
+  padding: 20px 0; /* Adds more padding above and below the text */
+  background-color: #483434; /* Light gray background for contrast */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  border-radius: 10px; /* Slightly rounded corners for a modern look */
+  margin: 20px auto; /* Centers the title block with auto margins */
+  width: fit-content; /* Ensures the background only covers the text */
+  padding: 10px 20px; /* Adequate padding around the text */
+}

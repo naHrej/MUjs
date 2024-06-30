@@ -12,7 +12,7 @@
         <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
         <script src="https://cdn.jsdelivr.net/npm/less"></script>
-        
+
 </head>
 
 <body>
@@ -20,39 +20,52 @@
                 let editor = null;
         </script>
         <div id="appRoot">
-                
-                <div id="conmgr" v-show="showMgr">
-                        <h4>Connection Manager</h4>
-                        <div v-for="(site, key) in sites" :key="key">
-                                <h5 class="card-title">{{ site.name }}</h5>
-                                <div v-if="editingSiteKey === key" class="card mb-3">
-                                        <!-- Editable form -->
-                                        <div class="details card mb-3">
-                                                <ul>
-                                                        <li>Name: <input v-model="site.name" type="text"></li>
-                                                        <li>Host: <input v-model="site.host" type="text"></li>
-                                                        <li>Port: <input v-model="site.port" type="text"></li>
-                                                        <li><button @click="saveSite"
-                                                                        class="btn btn-primary">Save</button></li>
-                                                </ul>
-                                        </div>
-                                </div>
-                                <div v-else class="card mb-3">
-                                        <!-- Site details -->
 
-                                        <div class="details">
-                                                <p class="card-text">{{ site.host }}:{{ site.port }}
-                                                        <button @click="deleteSite(key)"
-                                                                class="btn btn-danger">Delete</button>
-                                                        <button @click="editSite(key)"
-                                                                class="btn btn-secondary">Edit</button>
-                                                        <button @click="selectSite(key)"
-                                                                class="btn btn-primary">Select</button>
-                                                </p>
+                <div id="conmgr" v-show="showMgr">
+                        <h4 class="connection-manager-title">Connection Manager</h4>
+                        <div class="center-button">
+                                <button @click="addSite" class="btn btn-success"><i class="fas fa-plus"></i></button>
+                        </div><br/>
+                        <div class="cards-container">
+                                <div class="card-background" v-for="(site, key) in sites" :key="key">
+                                        <h5 class="card-title">{{ site.name }}</h5>
+                                        <div v-if="editingSiteKey === key" class="card mb-3">
+                                                <!-- Editable form -->
+                                                <div class="details card mb-3">
+                                                        <ul>
+                                                                <li>Name: <input v-model="site.name" type="text"></li>
+                                                                <li>Host: <input v-model="site.host" type="text"></li>
+                                                                <li>Port: <input v-model="site.port" type="text"></li>
+                                                                <li><button @click="saveSite" class="btn btn-primary">
+                                                                                <i class="fas fa-save"></i> Save
+                                                                        </button>
+                                                        </ul>
+                                                </div>
+                                        </div>
+                                        <div v-else class="card mb-3">
+                                                <!-- Site details -->
+
+                                                <div class="details">
+                                                        <p class="card-text">{{ site.host }}:{{ site.port }}
+                                                        <div class="button-row"> <!-- Button row wrapper -->
+                                                                <button @click="deleteSite(key)" class="btn btn-danger">
+                                                                        <i class="fas fa-trash"></i>
+                                                                </button>
+                                                                <button @click="editSite(key)"
+                                                                        class="btn btn-secondary">
+                                                                        <i class="fas fa-edit"></i>
+                                                                </button>
+                                                                <button @click="selectSite(key)"
+                                                                        class="btn btn-primary">
+                                                                        <i class="fas fa-check"></i>
+                                                                </button>
+                                                        </div>
+                                                        </p>
+                                                </div>
                                         </div>
                                 </div>
                         </div>
-                        <button @click="addSite" class="btn btn-success">Add New Site</button>
+
                 </div>
         </div>
 
