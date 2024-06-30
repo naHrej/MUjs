@@ -59,8 +59,8 @@ export const editorMixin = {
           [/\b(INT|NUM|FLOAT|LIST|MAP|STR|ANON|OBJ|ERR|ANY)\b/, "constant.numeric"],
 
 
-          [/($\w+)([:])(\w+)\b/, ["object_ref", "delimiter", "verb"]],       
-          [/(\$\w+)([.])(\w+)\b/, ["object_ref", "delimiter", "property"]],
+          [/(\$\w+)([:])(\w+)\b/, ["objectref", "delimiter", "verb"]],       
+          [/(\$\w+)([.])(\w+)\b/, ["objectref", "delimiter", "property"]],
           [/(\w+)([:])(\w+)\b/, ["object", "delimiter", "verb"]], 
           [/(\w+)([.])(\w+)\b/, ["object", "delimiter", "property"]],
           
@@ -69,6 +69,7 @@ export const editorMixin = {
           [/\b(?:\d+(?:\.\d*)?|\.\d+)\b/, "constant.numeric.moo"],
           // Strings
           [/"/, { token: "string.quoted.double.moo", next: "@string" }],
+          [/(\w+)b/, { token: "variable" }]
         ],
         string: [
           [/[^\\"]+/, "string"],
@@ -89,13 +90,14 @@ export const editorMixin = {
         { token: 'verb', foreground: 'ffff00' },
         { token: 'delimiter', foreground: 'EA3FF7' },
         { token: 'object', foreground: '00FFFF' },
-        { token: 'object_ref', foreground: 'FFFF00' },
+        { token: 'objectref', foreground: 'FFFF00' },
         { token: 'markup.heading', foreground: 'f9f93d' },
         { token: 'comment', fontStyle: 'italic'},
         { token: 'keyword.control', foreground: 'C586C0', fontStyle: 'bold'},
       //  { token: 'keyword.params', fontStyle: 'bold'},  
         { token: 'keyword.function', foreground: '8686C0'},     
         { token: 'operators.semicolon', foreground: '00FF00', fontStyle: 'bold'},
+        { token: 'variable', foreground: '2596be' },
 
 
         
@@ -161,6 +163,12 @@ export const editorMixin = {
         language: 'moocode', // Use 'plaintext' initially or the language id if known
         theme: 'moocode'
       });
+
+      // Add shortcuts for submitting code ControlOrCommand + S
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
+        this.SubmitToServer();
+      });
+
     },
 
   }

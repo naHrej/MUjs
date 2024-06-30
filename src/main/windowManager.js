@@ -57,12 +57,14 @@ function updateMenu() {
             submenu: [
                 {
                     label: 'Open Developer Tools',
+                    accelerator: 'F12',
                     click: () => {
                         BrowserWindow.getFocusedWindow().webContents.openDevTools();
                     },
                 },
                 {
                     label: 'Reload Styles',
+                    accelerator: 'Shift+F5',
                     click: () => {
                         // emit event to reload styles
                         BrowserWindow.getFocusedWindow().webContents.send('reload-styles');
@@ -70,12 +72,14 @@ function updateMenu() {
                 },
                 {
                     label: 'Reload',
+                    accelerator: 'F5',
                     click: () => {
                         BrowserWindow.getFocusedWindow().reload();
                     }
                 },
                 {
                     label: 'Toggle Editor',
+                    accelerator: 'F2',
                     click: () => {
                         spawnNewWindow('editor', '');
                     }
