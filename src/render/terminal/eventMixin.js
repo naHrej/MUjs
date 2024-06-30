@@ -19,10 +19,13 @@ export const eventMixin = {
         this.inputHistory = Object.values(inputHistory || {});
       });
   
-      window.api.on('site-selected', async (event, name, host, port) => {
+      window.api.on('site-selected', async (event, name, host, port, connstr, acEnabled) => {
         this.name = name;
         this.host = host;
         this.port = port;
+        this.connStr = connstr;
+        this.acEnabled = acEnabled;
+        console.log(connstr);
   
         let versionNumber = await window.api.version();
         document.title = `${this.name} - MUjs v${versionNumber}`;
