@@ -201,7 +201,12 @@ export const editorMixin = {
           const model = editor.getModel();
           if (model) {
             const lineContent = model.getLineContent(lineNumber);
-            // Check if the line starts with @program and not @@
+            // if the line starts with @@ stop the line number incrementing and display blank
+            if (lineContent.startsWith('@@')) {
+              atLineCount++;
+              return '';
+            }
+
             if (lineContent.startsWith('@program')) {
               // Reset the line number for the next line
               atLineCount = lineNumber;
