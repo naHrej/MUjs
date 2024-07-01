@@ -1,12 +1,26 @@
 # MUjs
 
 **Features**
+
 - Full HTML5 support
-- Separate code editor window with syntax hilighting for MOO
+- Separate code editor window
+  - Smart syntax hilighting tailored for MOO
+  - Captures code listings when lines begin with the "FugueEdit > " prefix
+  - Numbers lines from line 1 for each verb in the editor
+  - Control-S submits the code back to the server
+  - Control-Shift-S submits only the hilighted code to the server
+  - Supports loading and saving files to disk
+
+- Accepts and dynamically updates stylesheets from the game server
+- Customizable local stylesheet to adjust the appearance and layout of the client
+- Protects against script execution by unapproved scripts, only allowing server-provided scripts to run
+
+
 
 
 
 **Building from source**
+
 To build npm (nodeJS) is required
 
 ```
