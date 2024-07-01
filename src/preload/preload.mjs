@@ -7,9 +7,6 @@ import store from './api/store.js';
 
 window.api = api;
 window.store = store;
-
-
-
 let watchPath;
 let watcher;
 let watchEnabled = false;

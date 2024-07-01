@@ -7,7 +7,8 @@ const settings = Vue.createApp({
             timers: [],
             watchPath: '',
             authString: '',
-            connectOnStartup: false
+            connectOnStartup: false,
+            ansiEnabled: false
         }
     },
     methods: {
@@ -56,8 +57,7 @@ const settings = Vue.createApp({
         },
 
         async saveSettings() {
-            await window.store.set('settings.fontFamily', this.fontFamily);
-            await window.store.set('settings.fontSize', this.fontSize);
+            await window.store.set('settings.ansiEnabled', this.ansiEnabled);
             await window.store.set('settings.authString', this.authString);
             await window.store.set('settings.connectOnStartup', this.connectOnStartup);
             window.api.send('settings-updated');
@@ -89,6 +89,7 @@ const settings = Vue.createApp({
     },
     async mounted() {
         this.watchPath = await window.store.get('watchPath');
+        this.ansiEnabled = await window.store.get('settings.ansiEnabled');
         this.fontFamily = await window.store.get('settings.fontFamily');
         this.fontSize = await window.store.get('settings.fontSize');
         this.authString = await window.store.get('settings.authString');

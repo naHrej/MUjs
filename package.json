@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@guolao/vue-monaco-editor": "^1.5.1",
+    "ansi_up": "^6.0.2",
     "bootstrap": "^5.3.3",
     "buffer": "^6.0.3",
     "chokidar": "^3.6.0",

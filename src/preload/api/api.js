@@ -7,6 +7,7 @@ import fs from 'fs';
 import net from 'net';
 import SystemFonts from 'system-font-families';
 import { Buffer } from 'buffer';
+import { AnsiUp} from 'ansi_up';
 
 let client = new net.Socket();
 let naws = false;
@@ -31,9 +32,9 @@ export const api = {
         }
     },
     ansi_to_html: (data) => {
-        const ansiRegex = /\x1b\[[0-9;]*m/g;
-        // Strip any ANSI escape codes from the data
-        let html = data.replace(ansiRegex, '');
+        let ansi_up = new AnsiUp;
+        ansi_up.escape_html = false;
+        let html = ansi_up.ansi_to_html(data);
         return html;
     },
     version: () => ipcRenderer.invoke('get-app-version'),
@@ -108,48 +109,10 @@ export const api = {
 };
 
 client.on('data', (data) => {
-    // Convert the data to a Buffer
-    let buffer = Buffer.from(data);
-    let newBuffer = [];
-
-    // Loop through the buffer
-    for (let i = 0; i < buffer.length; i++) {
-        // Check for the IAC command
-        if (buffer[i] === 255) {
-            // Handle the IAC command
-            handleIACCommand(buffer[i + 1], buffer[i + 2]);
-            i += 2;
-        } else {
-            // Append the byte to the new buffer
-            newBuffer.push(buffer[i]);
-        }
-    }
-    let uint8array = Buffer.from(newBuffer); // replace this with your Uint8Array
-    let decoder = new TextDecoder('utf-8');
-    let unicodeString = decoder.decode(uint8array);
-
-    // split the string into lines using either /r or /n
-    let lines = unicodeString.split(/\r\n|\r|\n/);
-
-
-    // iterate over the lines and emit a received-data event for each line
-    lines.forEach((line) => {
-        // If the line starts with !@Window: we get the window title, update type and html data and emit a window event
-        if (line.startsWith('!@Window:')) {
-            let windowData = line.slice('!@Window:'.length);
-            let windowDataArray = windowData.split(':');
-            let windowTitle = windowDataArray[0];
-            let windowType = windowDataArray[1];
-            let windowHtml = windowDataArray.slice(2).join(':');
-            console.log(windowTitle, windowType, windowHtml);
-            ipcRenderer.send('window', windowTitle, windowType, windowHtml);
-        }
-        else {
-            ipcRenderer.send('received-data', line);
+  
+    ipcRenderer.send('received-data', data.toString('utf-8'));
             //console.log(line);
-        }
-    });
-    //ipcRenderer.send('received-data', unicodeString);
+ 
 
 });
 

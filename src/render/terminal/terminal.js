@@ -22,10 +22,12 @@ const app = Vue.createApp({
             textarea: null,
             connStr: null,
             acEnabled: false,
+            ansiEnabled: false,
         };
     },
     async mounted() {
         this.loading = false;
+        this.ansiEnabled = await window.store.get('settings.ansiEnabled') || false;
 
     },
     methods: {
@@ -112,11 +114,8 @@ const app = Vue.createApp({
 
 
         async ApplySettings() {
-            let font = await window.store.get('settings.fontFamily');
-            let size = await window.store.get('settings.fontSize');
+            this.ansiEnabled = await window.store.get('settings.ansiEnabled') || false;
 
-            this.terminal.style.setProperty('font-family', font, 'important');
-            this.terminal.style.setProperty('font-size', size + 'px', 'important');
         }
     }
 });

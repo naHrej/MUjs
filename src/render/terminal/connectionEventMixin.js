@@ -28,6 +28,13 @@ export const connectionEventMixin = {
         window.api.on('received-data', (event, data) => {
             let omit = false;
 
+            if(this.ansiEnabled)
+            {
+
+                    console.log('ANSI Enabled: ' + this.ansiEnabled);
+                    data = window.api.ansi_to_html(data);
+            }
+
             // trim any unprintable characters
             data = data.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
             data = data.trim();
@@ -76,7 +83,7 @@ export const connectionEventMixin = {
 
                 return;
             }
-            data = window.api.ansi_to_html(data);
+            //data = window.api.ansi_to_html(data);
             let parser = new DOMParser();
             let doc = parser.parseFromString(data, 'text/html');
 
