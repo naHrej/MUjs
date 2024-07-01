@@ -97,8 +97,7 @@ export const editorMixin = {
         { token: 'comment', fontStyle: 'italic'},
         { token: 'keyword.control', foreground: 'C586C0', fontStyle: 'bold'},
         { token: 'keyword.control.end', foreground: 'A776C5', fontStyle: 'bold'},
-        
-      //  { token: 'keyword.params', fontStyle: 'bold'},  
+        { token: 'keyword.params', foreground: '8686C0', fontStyle: 'bold'},  
         { token: 'keyword.function', foreground: '8686C0'}, 
         { token: 'operators', foreground: 'BADA55'},
         { token: 'operators.semicolon', foreground: 'BADA55', fontStyle: 'bold'},
