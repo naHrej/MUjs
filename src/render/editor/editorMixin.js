@@ -92,7 +92,7 @@ export const editorMixin = {
         { token: 'verb', foreground: 'DCDCAA' },
         { token: 'delimiter', foreground: 'EA3FF7' },
         { token: 'object', foreground: '31CAA3' },
-        { token: 'objectref', foreground: '9BD3C0' },
+        { token: 'objectref', foreground: '9BD3C0', fontStyle: 'italic' },
         { token: 'markup.heading', foreground: 'f9f93d' },
         { token: 'comment', fontStyle: 'italic'},
         { token: 'keyword.control', foreground: 'C586C0', fontStyle: 'bold'},
