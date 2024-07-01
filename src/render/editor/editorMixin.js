@@ -19,31 +19,16 @@ export const editorMixin = {
         root: [
           // comment starts with //
           [/(\/\/|@\@).*$/, "comment"],
-          [/^@(program|args|verb|@)\b/, "markup.heading"],
-
-
-          //fucking literal dollar sign goddamnit
-          //[/\$/,"dollar"],
-          // Special handling for object_ref by itself
-          //[/\$\w+/, "object_ref"],
+          [/^@(program|args|verb)\b/, "markup.heading"],
 
 
           // punctuation of various kinds not already involved in other patterns.
-          [/[\.\`\'@=><!~?:&|+\-*\/\^%]+/, "operators"],
-          [/[\[\]]+/, "delimiter.square"],
-          [/[\{\}]+/, "delimeter.curly"],
-          [/[\(\)]+/, "delimeter.parenthesis"],
-          [/[\<\>]+/, "delimeter.angle"],          
-          [/[;]+/, "operators.semicolon"],          
-
-          //These work like I expect them to in that we define the patterns and we define the colors:
+          [/[\.,`\'@=><!~?:&|+\-*\/\^%]+/, "operators"],        
+          [/[;]+/, "operators.semicolon"],        
           [/(#\d+)/, "object"],
           [/(\d+)/, "number"],
           
           [/\b(E_NONE|E_TYPE|E_DIV|E_PERM|E_PROPNF|E_VERBNF|E_VARNF|E_INVIND|E_RECMOVE|E_MAXREC|E_RANGE|E_ARGS|E_NACC|E_INVARG|E_QUOTA|E_FLOAT|E_FILE|E_EXEC|E_INTRPT)\b/, "constant.error"],         
-
-
-          //These work, but the colors seem to be inherited from somewhere else
 
 
           // Keywords
@@ -52,21 +37,25 @@ export const editorMixin = {
           [/\b(return|endif|endwhile|endfor|else|elseif|finally|endtry)\b/, 
             "keyword.control.end"],
 
+          // built-in functions
           [/\b(abs|acos|add_property|add_verb|asin|atan|binary_hash|boot_player|buffered_output_length|call_function|caller_perms|callers|ceil|children|chparent|clear_property|connected_players|connected_seconds|connection_name|connection_option|connection_options|cos|cosh|create|crypt|ctime|db_disk_size|decode_binary|delete_property|delete_verb|disassemble|dump_database|encode_binary|equal|eval|exp|floatstr|floor|flush_input|force_input|function_info|idle_seconds|index|is_clear_property|is_member|is_player|kill_task|length|listappend|listdelete|listen|listeners|listinsert|listset|load_server_options|log|log10|log_cache_stats|match|max|max_object|memory_usage|min|move|notify|object_bytes|open_network_connection|output_delimiters|parent|pass|players|properties|property_info|queue_info|queued_tasks|raise|random|read|recycle|renumber|reset_max_object|resume|rindex|rmatch|seconds_left|server_log|server_version|set_connection_option|set_player_flag|set_property_info|set_task_perms|set_verb_args|set_verb_code|set_verb_info|setadd|setremove|shutdown|sin|sinh|sqrt|strcmp|string_hash|strsub|substitute|suspend|tan|tanh|task_id|task_stack|ticks_left|time|tofloat|toint|toliteral|tonum|toobj|tostr|trunc|typeof|unlisten|valid|value_bytes|value_hash|verb_args|verb_cache_stats|verb_code|verb_info|verbs)\b/, "keyword.function"],
 
+          //built-in variables
           [/\b(verb|args|argspec|obj|objspec|dobj|dobjspec|iobj|iobjspec)\b/, "keyword.params"],
           
           [/\b(INT|NUM|FLOAT|LIST|MAP|STR|ANON|OBJ|ERR|ANY)\b/, "constant.numeric"],
 
-
-          [/(\$\w+)([:])(\w+)\b/, ["objectref", "delimiter", "verb"]],       
-          [/(\$\w+)([.])(\w+)\b/, ["objectref", "delimiter", "property"]],
-
+          //object refs 
+          [/(\$\w+)([:])(\w+)/, ["objectref", "delimiter", "verb"]],       
+          [/(\$\w+)([.])(\w+)/, ["objectref", "delimiter", "property"]],       
+          [/(\$\w+)([:])(\()(\w+)(\))/, ["objectref", "delimiter","verb","variable","verb"]],
+          [/(\$\w+)([.])(\()(\w+)(\))/, ["objectref", "delimiter","property","variable","property"]],
           
-          [/(\w+)([:])(\w+)\b/, ["object", "delimiter", "verb"]], 
-          [/(\w+)([.])(\w+)\b/, ["object", "delimiter", "property"]],
-          
-          //[/\b(\w+)\b/, "object"],
+          [/\$\w+/, "objectref"],        
+
+          //objects
+          [/(\w+)([:])(\(?\w+\)?)\b/, ["object", "delimiter", "verb"]], 
+          [/(\w+)([.])(\(?\w+\)?)\b/, ["object", "delimiter", "property"]],
 
           [/\b(?:\d+(?:\.\d*)?|\.\d+)\b/, "constant.numeric.moo"],
           // Strings
@@ -89,7 +78,7 @@ export const editorMixin = {
         { token: 'constant.error', foreground: 'EF7587' }, // Bright red
         { token: 'number', foreground: '81e274' },
         { token: 'property', foreground: '3FCA31' }, //2596be
-        { token: 'verb', foreground: 'DCDCAA' },
+        { token: 'verb', foreground: 'ee9966' },
         { token: 'delimiter', foreground: 'EA3FF7' },
         { token: 'object', foreground: '31CAA3' },
         { token: 'objectref', foreground: '9BD3C0', fontStyle: 'italic' },
@@ -168,6 +157,7 @@ export const editorMixin = {
         language: 'moocode', // Use 'plaintext' initially or the language id if known
         theme: 'moocode',
         automaticLayout: true,
+        "bracketPairColorization.enabled": true
       });
 
       // Add shortcuts for submitting code ControlOrCommand + S
