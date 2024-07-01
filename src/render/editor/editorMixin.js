@@ -235,25 +235,23 @@ export const editorMixin = {
       let atLineCount = 0;
       // Initialize your Monaco editor instance
       // For example:
-      editor = monaco.editor.create(
-        document.getElementById("monaco-editor-moocode"),
-        {
-          value: "",
-          language: "moocode", // Use 'plaintext' initially or the language id if known
-          theme: "moocode",
-          automaticLayout: true,
-          inlayHints: {
-            enabled: true,
-          },
-          lineNumbers: function (lineNumber) {
-            const model = editor.getModel();
-            if (model) {
-              const lineContent = model.getLineContent(lineNumber);
-              // if the line starts with @@ stop the line number incrementing and display blank
-              if (lineContent.startsWith("@@")) {
-                atLineCount++;
-                return "";
-              }
+      editor = monaco.editor.create(document.getElementById('monaco-editor-moocode'), {
+        value: '',
+        language: 'moocode', // Use 'plaintext' initially or the language id if known
+        theme: 'moocode',
+        automaticLayout: true,
+        inlayHints: {
+          enabled: true,
+        },
+        lineNumbers: function (lineNumber) {
+          const model = editor.getModel();
+          if (model) {
+            const lineContent = model.getLineContent(lineNumber);
+            // if the line starts with @@ stop the line number incrementing and display blank
+            if (lineContent.startsWith('@@') || lineContent == '.') {
+              atLineCount++;
+              return '';
+            }
 
               if (lineContent.startsWith("@program")) {
                 // Reset the line number for the next line
