@@ -56,6 +56,8 @@ export const editorMixin = {
           //objects
           [/(\w+)([:])(\(?\w+\)?)\b/, ["object", "delimiter", "verb"]], 
           [/(\w+)([.])(\(?\w+\)?)\b/, ["object", "delimiter", "property"]],
+          [/(\w+)([:])(\()(\w+)(\))/, ["object", "delimiter","verb","variable","verb"]],
+          [/(\w+)([.])(\()(\w+)(\))/, ["object", "delimiter","property","variable","property"]],
 
           [/\b(?:\d+(?:\.\d*)?|\.\d+)\b/, "constant.numeric.moo"],
           // Strings
