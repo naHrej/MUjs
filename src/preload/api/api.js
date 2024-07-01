@@ -1,5 +1,4 @@
 import { ipcRenderer } from 'electron';
-import { calculateCharCount } from './../../utils.js';
 import { executeLuaScript } from './script/lua.js';
 // Assuming you have installed `monaco-editor`, `monaco-textmate`, and `vscode-textmate`
 
@@ -10,7 +9,6 @@ import { Buffer } from 'buffer';
 import { AnsiUp} from 'ansi_up';
 
 let client = new net.Socket();
-let naws = false;
 
 
 
@@ -20,17 +18,10 @@ let naws = false;
 
 export const api = {
     invokeMenu: (template) => ipcRenderer.invoke('show-context-menu', template),
-    calculateCharCount: () => {
-        return calculateCharCount();
-    },
     invoke: (channel, ...args) => {
         return ipcRenderer.invoke(channel, ...args);
     },
-    send_naws: (byte1, byte2) => {
-        if (naws) {
-            sendNAWS(byte1, byte2);
-        }
-    },
+    flashFrame: (flash) => ipcRenderer.send('flash-frame', flash),
     ansi_to_html: (data) => {
         let ansi_up = new AnsiUp;
         ansi_up.escape_html = false;
@@ -38,8 +29,6 @@ export const api = {
         return html;
     },
     version: () => ipcRenderer.invoke('get-app-version'),
-    naws: () => {
-    },
     send: (channel, ...args) => {
         ipcRenderer.send(channel, ...args);
     },
@@ -126,64 +115,3 @@ client.on('connect', () => {
     // emit a connected event
     ipcRenderer.send('connect');
 });
-
-
-
-
-function sendNAWS(byte1, byte2) {
-    // Define the IAC commands
-    const IAC = 255;
-    const DO = 253;
-    const WILL = 251;
-    const SB = 250;
-    const NAWS = 31;
-    const SE = 240;
-    let nawsResponse = Buffer.from([IAC, SB, NAWS, byte1, byte2, 0, 24, IAC, SE]);
-    client.write(nawsResponse);
-
-}
-
-function handleIACCommand(command, option) {
-    // Define the IAC commands
-    const IAC = 255;
-    const DO = 253;
-    const WILL = 251;
-    const SB = 250;
-    const NAWS = 31;
-    const SE = 240;
-    const SPAWN = 220;
-
-    // Handle the IAC command based on its value
-    switch (command) {
-        // ... existing cases ...
-        case DO:
-            if (option === NAWS) {
-                // Respond with IAC WILL NAWS
-                if (!naws) {
-                    let response = Buffer.from([IAC, WILL, NAWS]);
-                    client.write(response);
-                }
-
-                naws = true;
-                // Calculate the width of the console
-                let width = calculateCharCount() - 2;
-
-                // Convert the width to two bytes
-                let byte1 = Math.floor(width / 256);
-                let byte2 = width % 256;
-
-                // Respond with IAC SB NAWS byte1 byte2 0 24 IAC SE
-                let nawsResponse = Buffer.from([IAC, SB, NAWS, byte1, byte2, 0, 24, IAC, SE, "\n"]);
-                client.write(nawsResponse);
-            }
-            break;
-        case SPAWN:
-            console.log('Spawn command received');
-
-            break;
-        // ... existing cases ...
-        default:
-            console.log('Unknown IAC command:', command);
-            break;
-    }
-};

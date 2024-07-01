@@ -53,13 +53,6 @@ export const eventMixin = {
 
     
     window.addEventListener('resize', () => {
-        // Calculate how many characters can fit on a line
-        let columns = window.api.calculateCharCount() - 2;
-        let byte1 = Math.floor(columns / 256);
-        let byte2 = columns % 256;
-        // Send the window size to the server
-        window.api.send_naws(byte1, byte2);
-        // set scrollbar to bottom
         this.terminal.scrollTop = this.terminal.scrollHeight;
     });
 

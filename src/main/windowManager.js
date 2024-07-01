@@ -128,6 +128,12 @@ export function setupWindowIpcHandlers() {
 
     });
 
+    ipcMain.on('flash-frame', (event, flash) => {
+        Object.values(windows).forEach(win => {
+            win.flashFrame(flash);
+        });
+    });
+
     // Add a listener for the connected event
     ipcMain.on('connect', () => {
         connected = true;
@@ -206,6 +212,10 @@ export function spawnNewWindow(id, html) {
             // unregister any listeners for update-editor
             windows['editor'].removeAllListeners('update-editor');
         }
+        // add event listener for onfocus
+        windows[id].on('focus', () => {
+            windows[id].flashFrame(false);
+        });
 
 
 

@@ -28,6 +28,11 @@ export const connectionEventMixin = {
         window.api.on('received-data', (event, data) => {
             let omit = false;
 
+            // if the window is not focused flash the icon in the toolbar
+            if (!document.hasFocus()) {
+                window.api.flashFrame(true);
+            }
+
             if(this.ansiEnabled)
             {
 
