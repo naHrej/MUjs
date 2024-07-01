@@ -1,6 +1,6 @@
 # MUjs
 
-**Features**
+## Features
 
 - Full HTML5 support
 - Separate code editor window
@@ -17,9 +17,7 @@
 
 
 
-
-
-**Building from source**
+## Installing 
 
 To build npm (nodeJS) is required
 
@@ -27,6 +25,8 @@ To build npm (nodeJS) is required
 npm install
 npm run start
 ```
+
+## Details
 
 A few unique features to the client:
 
