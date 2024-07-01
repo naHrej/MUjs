@@ -54,8 +54,8 @@ export const editorMixin = {
           [/\$\w+/, "objectref"],        
 
           //objects
-          [/(\w+)([:])(\(?\w+\)?)\b/, ["object", "delimiter", "verb"]], 
-          [/(\w+)([.])(\(?\w+\)?)\b/, ["object", "delimiter", "property"]],
+          [/(\w+)([:])(\w+)\b/, ["object", "delimiter", "verb"]], 
+          [/(\w+)([.])(\w+)\b/, ["object", "delimiter", "property"]],
           [/(\w+)([:])(\()(\w+)(\))/, ["object", "delimiter","verb","variable","verb"]],
           [/(\w+)([.])(\()(\w+)(\))/, ["object", "delimiter","property","variable","property"]],
 
