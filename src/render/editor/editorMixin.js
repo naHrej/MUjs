@@ -104,6 +104,24 @@ export const editorMixin = {
       }
     });
 
+    monaco.languages.registerInlayHintsProvider('moocode', {
+      provideInlayHints: function(model, range, token) {
+        const hints = [];
+        for (let lineNumber = range.startLineNumber; lineNumber <= range.endLineNumber; lineNumber++) {
+          const lineContent = model.getLineContent(lineNumber);
+          // Example: Add an inlay hint for lines starting with a specific keyword
+          if (lineContent.startsWith('@program')) {
+            hints.push({
+              text: 'Hint text',
+              position: { lineNumber: lineNumber, column: lineContent.length + 1 }, // Position at end of line
+              kind: monaco.languages.InlayHintKind.Type,
+            });
+          }
+        }
+        return { hints: hints };
+      }
+    });
+
 
     this.initEditor();
     window.api.on('update-editor', (event, data) => {
@@ -121,6 +139,7 @@ export const editorMixin = {
 
   },
   methods: {
+    
     setupEventListeners() {
       const loadButton = document.getElementById('load');
       const saveButton = document.getElementById('save');
@@ -138,6 +157,21 @@ export const editorMixin = {
       submitButton.addEventListener('click', () => {
         this.SubmitToServer();
       });
+
+      editor.onDidScrollChange((e) => {
+        const position = editor.getPosition();
+        const model = editor.getModel();
+        let programLineContent = "No @program line found";
+        for (let lineNumber = position.lineNumber; lineNumber > 0; lineNumber--) {
+          const lineContent = model.getLineContent(lineNumber);
+          if (lineContent.includes("@program")) {
+            programLineContent = lineContent;
+            break; // Stop searching once the nearest @program line is found
+          }
+        }
+        // Display the nearest @program line content in the designated UI element
+        document.getElementById('program-info').textContent = programLineContent;
+      });
     },
     SubmitToServer() {
       // Send the contents of the editor to the server
@@ -152,6 +186,7 @@ export const editorMixin = {
     },
 
     initEditor() {
+      let atLineCount = 0;
       // Initialize your Monaco editor instance
       // For example:
       editor = monaco.editor.create(document.getElementById('monaco-editor-moocode'), {
@@ -159,10 +194,28 @@ export const editorMixin = {
         language: 'moocode', // Use 'plaintext' initially or the language id if known
         theme: 'moocode',
         automaticLayout: true,
+        inlayHints: {
+          enabled: true,
+        },
         lineNumbers: function (lineNumber) {
-          return lineNumber - 1;
-        }        
-      });
+          const model = editor.getModel();
+          if (model) {
+            const lineContent = model.getLineContent(lineNumber);
+            // Check if the line starts with @program and not @@
+            if (lineContent.startsWith('@program')) {
+              // Reset the line number for the next line
+              atLineCount = lineNumber;
+              // Return no line number for lines starting with @program
+              return '';
+            } else {
+              // Adjust line number based on the last @program line
+              let adjustedLineNumber = lineNumber - atLineCount;
+              return adjustedLineNumber.toString();
+            }
+          }
+          return lineNumber.toString(); // Default line number if model is not accessible
+        }
+  });
 
       // Add shortcuts for submitting code ControlOrCommand + S
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
@@ -173,3 +226,5 @@ export const editorMixin = {
 
   }
 }
+
+
