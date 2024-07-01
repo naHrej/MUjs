@@ -202,7 +202,7 @@ export const editorMixin = {
           if (model) {
             const lineContent = model.getLineContent(lineNumber);
             // if the line starts with @@ stop the line number incrementing and display blank
-            if (lineContent.startsWith('@@')) {
+            if (lineContent.startsWith('@@') || lineContent == '.') {
               atLineCount++;
               return '';
             }
