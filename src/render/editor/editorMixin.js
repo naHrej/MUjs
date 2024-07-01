@@ -229,6 +229,8 @@ export const editorMixin = {
         const lineContent = model.getLineContent(lineNumber);
         if (lineContent.includes("@program")) {
           programLineContent = lineContent;
+          // remove the @program keyword from the title
+          programLineContent = programLineContent.replace("@program", "").trim();
           break; // Stop searching once the nearest @program line is found
         }
       }
