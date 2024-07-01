@@ -102,7 +102,7 @@ export const editorMixin = {
         { token: 'keyword.function', foreground: '8686C0'}, 
         { token: 'operators', foreground: 'BADA55'},
         { token: 'operators.semicolon', foreground: 'BADA55', fontStyle: 'bold'},
-        { token: 'variable', foreground: 'D8BAEC' },
+        { token: 'variable', foreground: '31CAA3' },
         { token: 'string', foreground: 'AB9471'}
 
 
@@ -167,7 +167,8 @@ export const editorMixin = {
       editor = monaco.editor.create(document.getElementById('monaco-editor-moocode'), {
         value: '',
         language: 'moocode', // Use 'plaintext' initially or the language id if known
-        theme: 'moocode'
+        theme: 'moocode',
+        automaticLayout: true,
       });
 
       // Add shortcuts for submitting code ControlOrCommand + S
