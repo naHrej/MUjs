@@ -61,7 +61,7 @@ export const editorMixin = {
 
           [/(\$\w+)([:])(\w+)\b/, ["objectref", "delimiter", "verb"]],       
           [/(\$\w+)([.])(\w+)\b/, ["objectref", "delimiter", "property"]],
-          [/\$\w+/, "objectref"],
+
           
           [/(\w+)([:])(\w+)\b/, ["object", "delimiter", "verb"]], 
           [/(\w+)([.])(\w+)\b/, ["object", "delimiter", "property"]],
@@ -88,12 +88,11 @@ export const editorMixin = {
       rules: [
         { token: 'constant.error', foreground: 'EF7587' }, // Bright red
         { token: 'number', foreground: '81e274' },
-        { token: 'property', foreground: '2596be' }, //2596be
+        { token: 'property', foreground: '3FCA31' }, //2596be
         { token: 'verb', foreground: 'DCDCAA' },
         { token: 'delimiter', foreground: 'EA3FF7' },
         { token: 'object', foreground: '31CAA3' },
-        { token: 'objectref', foreground: '31CAA3' , fontStyle: 'italic'},
-        { token: 'variable', foreground: '8AC4B3' },
+        { token: 'objectref', foreground: '9BD3C0' },
         { token: 'markup.heading', foreground: 'f9f93d' },
         { token: 'comment', fontStyle: 'italic'},
         { token: 'keyword.control', foreground: 'C586C0', fontStyle: 'bold'},
@@ -103,6 +102,7 @@ export const editorMixin = {
         { token: 'keyword.function', foreground: '8686C0'}, 
         { token: 'operators', foreground: 'BADA55'},
         { token: 'operators.semicolon', foreground: 'BADA55', fontStyle: 'bold'},
+        { token: 'variable', foreground: '3185CA' },
         { token: 'string', foreground: 'AB9471'}
 
 
