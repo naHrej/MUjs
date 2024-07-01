@@ -91,7 +91,7 @@ export const editorMixin = {
         { token: 'property', foreground: '2596be' }, //2596be
         { token: 'verb', foreground: 'DCDCAA' },
         { token: 'delimiter', foreground: 'EA3FF7' },
-        { token: 'object', foreground: '8AC4B3' },
+        { token: 'object', foreground: '31CAA3' },
         { token: 'objectref', foreground: '9BD3C0' },
         { token: 'markup.heading', foreground: 'f9f93d' },
         { token: 'comment', fontStyle: 'italic'},
@@ -102,7 +102,7 @@ export const editorMixin = {
         { token: 'keyword.function', foreground: '8686C0'}, 
         { token: 'operators', foreground: 'BADA55'},
         { token: 'operators.semicolon', foreground: 'BADA55', fontStyle: 'bold'},
-        { token: 'variable', foreground: '31CAA3' },
+        { token: 'variable', foreground: '8AC4B3' },
         { token: 'string', foreground: 'AB9471'}
 
 
