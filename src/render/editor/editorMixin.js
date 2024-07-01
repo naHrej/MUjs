@@ -131,31 +131,6 @@ export const editorMixin = {
       },
     });
 
-    monaco.languages.registerInlayHintsProvider("moocode", {
-      provideInlayHints: function (model, range, token) {
-        const hints = [];
-        for (
-          let lineNumber = range.startLineNumber;
-          lineNumber <= range.endLineNumber;
-          lineNumber++
-        ) {
-          const lineContent = model.getLineContent(lineNumber);
-          // Example: Add an inlay hint for lines starting with a specific keyword
-          if (lineContent.startsWith("@program")) {
-            hints.push({
-              text: "Hint text",
-              position: {
-                lineNumber: lineNumber,
-                column: lineContent.length + 1,
-              }, // Position at end of line
-              kind: monaco.languages.InlayHintKind.Type,
-            });
-          }
-        }
-        return { hints: hints };
-      },
-    });
-
     this.initEditor();
 
     window.api.on("update-editor", (event, data) => {

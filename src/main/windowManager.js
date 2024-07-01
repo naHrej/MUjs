@@ -212,6 +212,7 @@ export function spawnNewWindow(id, html) {
             // unregister any listeners for update-editor
             windows['editor'].removeAllListeners('update-editor');
         }
+        windows[id].setMaxListeners(1000);
         // add event listener for onfocus
         windows[id].on('focus', () => {
             windows[id].flashFrame(false);
