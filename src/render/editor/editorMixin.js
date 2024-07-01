@@ -34,7 +34,7 @@ export const editorMixin = {
           [/[\{\}]+/, "delimeter.curly"],
           [/[\(\)]+/, "delimeter.parenthesis"],
           [/[\<\>]+/, "delimeter.angle"],          
-          [/;+/, "operators,semicolon"],          
+          [/[;]+/, "operators.semicolon"],          
 
           //These work like I expect them to in that we define the patterns and we define the colors:
           [/(#\d+)/, "object"],
@@ -47,20 +47,22 @@ export const editorMixin = {
 
 
           // Keywords
-          [/\b(if|while|for|return|endif|endwhile|endfor|else|elseif|in|this|try|except|finally|endtry)\b/, 
+          [/\b(if|while|for|in|this|try|except)\b/, 
             "keyword.control"],
+          [/\b(return|endif|endwhile|endfor|else|elseif|finally|endtry)\b/, 
+            "keyword.control.end"],
 
-          [/\b(abs|acos|add_property|add_verb|asin|atan|binary_hash|boot_player|buffered_output_length|call_function|caller_perms|callers|ceil|children|chparent|clear_property|connected_players|connected_seconds|connection_name|connection_option|connection_options|cos|cosh|create|crypt|ctime|db_disk_size|decode_binary|delete_property|delete_verb|disassemble|dump_database|encode_binary|equal|eval|exp|floatstr|floor|flush_input|force_input|function_info|idle_seconds|index|is_clear_property|is_member|is_player|kill_task|length|listappend|listdelete|listen|listeners|listinsert|listset|load_server_options|log|log10|log_cache_stats|match|max|max_object|memory_usage|min|move|notify|object_bytes|open_network_connection|output_delimiters|parent|pass|players|properties|property_info|queue_info|queued_tasks|raise|random|read|recycle|renumber|reset_max_object|resume|rindex|rmatch|seconds_left|server_log|server_version|set_connection_option|set_player_flag|set_property_info|set_task_perms|set_verb_args|set_verb_code|set_verb_info|setadd|setremove|shutdown|sin|sinh|sqrt|strcmp|string_hash|strsub|substitute|suspend|tan|tanh|task_id|task_stack|ticks_left|time|tofloat|toint|toliteral|tonum|toobj|tostr|trunc|typeof|unlisten|valid|value_bytes|value_hash|verb_args|verb_cache_stats|verb_code|verb_info|verbs)\b/, 
-            "keyword.function"],
+          [/\b(abs|acos|add_property|add_verb|asin|atan|binary_hash|boot_player|buffered_output_length|call_function|caller_perms|callers|ceil|children|chparent|clear_property|connected_players|connected_seconds|connection_name|connection_option|connection_options|cos|cosh|create|crypt|ctime|db_disk_size|decode_binary|delete_property|delete_verb|disassemble|dump_database|encode_binary|equal|eval|exp|floatstr|floor|flush_input|force_input|function_info|idle_seconds|index|is_clear_property|is_member|is_player|kill_task|length|listappend|listdelete|listen|listeners|listinsert|listset|load_server_options|log|log10|log_cache_stats|match|max|max_object|memory_usage|min|move|notify|object_bytes|open_network_connection|output_delimiters|parent|pass|players|properties|property_info|queue_info|queued_tasks|raise|random|read|recycle|renumber|reset_max_object|resume|rindex|rmatch|seconds_left|server_log|server_version|set_connection_option|set_player_flag|set_property_info|set_task_perms|set_verb_args|set_verb_code|set_verb_info|setadd|setremove|shutdown|sin|sinh|sqrt|strcmp|string_hash|strsub|substitute|suspend|tan|tanh|task_id|task_stack|ticks_left|time|tofloat|toint|toliteral|tonum|toobj|tostr|trunc|typeof|unlisten|valid|value_bytes|value_hash|verb_args|verb_cache_stats|verb_code|verb_info|verbs)\b/, "keyword.function"],
 
-          [/\b(verb|args|argspec|obj|objspec|dobj|dobjspec|iobj|iobjspec)\b/, 
-            "keyword.params"],
+          [/\b(verb|args|argspec|obj|objspec|dobj|dobjspec|iobj|iobjspec)\b/, "keyword.params"],
           
           [/\b(INT|NUM|FLOAT|LIST|MAP|STR|ANON|OBJ|ERR|ANY)\b/, "constant.numeric"],
 
 
           [/(\$\w+)([:])(\w+)\b/, ["objectref", "delimiter", "verb"]],       
           [/(\$\w+)([.])(\w+)\b/, ["objectref", "delimiter", "property"]],
+
+          
           [/(\w+)([:])(\w+)\b/, ["object", "delimiter", "verb"]], 
           [/(\w+)([.])(\w+)\b/, ["object", "delimiter", "property"]],
           
@@ -69,7 +71,8 @@ export const editorMixin = {
           [/\b(?:\d+(?:\.\d*)?|\.\d+)\b/, "constant.numeric.moo"],
           // Strings
           [/"/, { token: "string.quoted.double.moo", next: "@string" }],
-          [/(\w+)b/, { token: "variable" }]
+
+          [/(\w+)\b/, { token: "variable" }]
         ],
         string: [
           [/[^\\"]+/, "string"],
@@ -83,21 +86,24 @@ export const editorMixin = {
       base: 'vs-dark',
       inherit: true,
       rules: [
-        { token: 'dollar', foreground: 'ffff00' }, // Bright yellow
-        { token: 'constant.error', foreground: 'ff2525' }, // Bright red
-        { token: 'number', foreground: '00FF99' },
-        { token: 'property', foreground: '2596be' },
-        { token: 'verb', foreground: 'ffff00' },
+        { token: 'constant.error', foreground: 'EF7587' }, // Bright red
+        { token: 'number', foreground: '81e274' },
+        { token: 'property', foreground: '2596be' }, //2596be
+        { token: 'verb', foreground: 'DCDCAA' },
         { token: 'delimiter', foreground: 'EA3FF7' },
-        { token: 'object', foreground: '00FFFF' },
-        { token: 'objectref', foreground: 'FFFF00' },
+        { token: 'object', foreground: '8AC4B3' },
+        { token: 'objectref', foreground: '9BD3C0' },
         { token: 'markup.heading', foreground: 'f9f93d' },
         { token: 'comment', fontStyle: 'italic'},
         { token: 'keyword.control', foreground: 'C586C0', fontStyle: 'bold'},
+        { token: 'keyword.control.end', foreground: 'A776C5', fontStyle: 'bold'},
+        
       //  { token: 'keyword.params', fontStyle: 'bold'},  
-        { token: 'keyword.function', foreground: '8686C0'},     
-        { token: 'operators.semicolon', foreground: '00FF00', fontStyle: 'bold'},
-        { token: 'variable', foreground: '2596be' },
+        { token: 'keyword.function', foreground: '8686C0'}, 
+        { token: 'operators', foreground: 'BADA55'},
+        { token: 'operators.semicolon', foreground: 'BADA55', fontStyle: 'bold'},
+        { token: 'variable', foreground: 'D8BAEC' },
+        { token: 'string', foreground: 'AB9471'}
 
 
         
