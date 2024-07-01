@@ -77,7 +77,7 @@ export const editorMixin = {
       base: 'vs-dark',
       inherit: true,
       rules: [
-        { token: 'constant.error', foreground: 'EF7587' }, // Bright red
+        { token: 'constant.error', foreground: 'EF5547' }, // Bright red
         { token: 'number', foreground: '81e274' },
         { token: 'property', foreground: '3FCA31' }, //2596be
         { token: 'verb', foreground: 'ee9966' },
@@ -159,7 +159,9 @@ export const editorMixin = {
         language: 'moocode', // Use 'plaintext' initially or the language id if known
         theme: 'moocode',
         automaticLayout: true,
-        "bracketPairColorization.enabled": true
+        lineNumbers: function (lineNumber) {
+          return lineNumber - 1;
+        }        
       });
 
       // Add shortcuts for submitting code ControlOrCommand + S
