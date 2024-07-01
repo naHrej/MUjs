@@ -70,7 +70,7 @@ const app = Vue.createApp({
 
         handleCommandElement(element) {
             let command = element.getAttribute('onCommand');
-            textarea.value = command;
+            this.inputField = command;
             this.inputHistory.push(command);
             this.currentInputIndex = -1;
             window.api.write(command);

@@ -157,10 +157,10 @@ export const editorMixin = {
     });
 
     this.initEditor();
+
     window.api.on("update-editor", (event, data) => {
       editor.setValue(editor.getValue() + data);
     });
-    // add a DOM READY event listener
 
     window.addEventListener("DOMContentLoaded", () => {
       window.api.send("editor-ready");
@@ -193,6 +193,19 @@ export const editorMixin = {
         sessionStorage.setItem("editorContent", editorContent);
         
       });
+      // Add keydown event listener for window
+      window.addEventListener("keydown", (e) => {
+        // Control-Shift-S
+        if (e.ctrlKey && e.shiftKey && e.key === "S") {
+          e.preventDefault();
+          this.submitSelectedToServer();
+        }
+        // Control-S
+        if (e.ctrlKey && e.key === "s") {
+          e.preventDefault();
+          this.SubmitToServer();
+        }
+      });
 
       editor.onDidScrollChange((e) => {
         this.UpdateTitle();
@@ -221,6 +234,16 @@ export const editorMixin = {
       }
       // set the title to the content of the nearest @program line
       document.title = programLineContent + " - Moocode Editor";
+    },
+    submitSelectedToServer() {
+      const selection = editor.getSelection();
+      // Check if the selection is not empty
+      if (!selection.isEmpty()) {
+        const selectedText = editor.getModel().getValueInRange(editor.getSelection());
+        window.api.send("submit", selectedText);
+      } else {
+        console.log("No text is selected.");
+      }
     },
     SubmitToServer() {
       // Send the contents of the editor to the server
@@ -273,18 +296,15 @@ export const editorMixin = {
             }
             return lineNumber.toString(); // Default line number if model is not accessible
           },
-        }
-      );
+        });
+                  // Add keydown event listener
+                  editor.onKeyDown((e) => {
+                      this.UpdateTitle();
+                  });
+      
+      
 
-      // Add shortcuts for submitting code ControlOrCommand + S
-      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
-        this.SubmitToServer();
-      });
 
-      // Add keydown event listener
-      editor.onKeyDown((e) => {
-          this.UpdateTitle();
-      });
     },
   },
 };
