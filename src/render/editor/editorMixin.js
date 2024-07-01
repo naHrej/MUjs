@@ -215,6 +215,10 @@ export const editorMixin = {
             } else {
               // Adjust line number based on the last @program line
               let adjustedLineNumber = lineNumber - atLineCount;
+              if (adjustedLineNumber < 1) {
+                adjustedLineNumber = 1;
+                atLineCount = 0;
+              }
               return adjustedLineNumber.toString();
             }
           }
