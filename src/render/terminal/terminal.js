@@ -18,7 +18,7 @@ const app = Vue.createApp({
             showApp: false,
             styleURL: null,
             sessionKey: null,
-            resizeHanfdle: null,
+            resizeHandle: null,
             textarea: null,
             connStr: null,
             acEnabled: false,
