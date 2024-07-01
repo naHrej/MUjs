@@ -195,22 +195,7 @@ export const editorMixin = {
       });
 
       editor.onDidScrollChange((e) => {
-        const position = editor.getPosition();
-        const model = editor.getModel();
-        let programLineContent = "No @program line found";
-        for (
-          let lineNumber = position.lineNumber;
-          lineNumber > 0;
-          lineNumber--
-        ) {
-          const lineContent = model.getLineContent(lineNumber);
-          if (lineContent.includes("@program")) {
-            programLineContent = lineContent;
-            break; // Stop searching once the nearest @program line is found
-          }
-        }
-        // set the title to the content of the nearest @program line
-        document.title = programLineContent + " - Moocode Editor";
+        this.UpdateTitle();
       });
 
       const savedContent = sessionStorage.getItem("editorContent");
@@ -218,6 +203,24 @@ export const editorMixin = {
         editor.setValue(savedContent);
         // Restore any other state you've saved as needed
       }
+    },
+    UpdateTitle() {
+      const position = editor.getPosition();
+      const model = editor.getModel();
+      let programLineContent = "No @program line found";
+      for (
+        let lineNumber = position.lineNumber;
+        lineNumber > 0;
+        lineNumber--
+      ) {
+        const lineContent = model.getLineContent(lineNumber);
+        if (lineContent.includes("@program")) {
+          programLineContent = lineContent;
+          break; // Stop searching once the nearest @program line is found
+        }
+      }
+      // set the title to the content of the nearest @program line
+      document.title = programLineContent + " - Moocode Editor";
     },
     SubmitToServer() {
       // Send the contents of the editor to the server
@@ -276,6 +279,11 @@ export const editorMixin = {
       // Add shortcuts for submitting code ControlOrCommand + S
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
         this.SubmitToServer();
+      });
+
+      // Add keydown event listener
+      editor.onKeyDown((e) => {
+          this.UpdateTitle();
       });
     },
   },
