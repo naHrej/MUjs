@@ -1,5 +1,12 @@
 # MUjs
 
+**Features**
+- Full HTML5 support
+- Separate code editor window with syntax hilighting for MOO
+
+
+
+**Building from source**
 To build npm (nodeJS) is required
 
 ```
