@@ -1,8 +1,9 @@
-/* We have two elements, a console
- That takes up 90% of the screen height 
- and 100% of the screen width
- 
- And a textbox that takes up the remainder */
+// Dark Mode Theme Variables
+@dark-bg-color: #333; // Dark background color
+@dark-text-color: #fff; // Light text color for contrast
+@button-hover-bg-color: #555; // Slightly lighter background color for hover state
+@button-hover-text-color: #ddd; // Slightly darker text color for hover state
+
 
  @font-face {
   font-family: "TNG_Title";
@@ -48,6 +49,9 @@
 #monaco-editor-toolbar {
   flex: 0 1 auto; // Adjusted to only take the space it needs without growing
   max-height: 10%; // Limits the toolbar to 10% of the container's height
+  // darkmode background
+  background-color: #333;
+  // fontAwesome buttons should also be dark
 }
 
 #monaco-editor-moocode {
@@ -132,6 +136,25 @@
     padding: 5px 10px; // Reduces padding inside the buttons
     font-size: 12px; // Reduces font size for the text inside the buttons
     // Adjust padding and font-size values as needed
+  }
+}
+
+// Button Styles
+button {
+  background-color: @dark-bg-color;
+  color: @dark-text-color;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+
+  &:hover {
+    background-color: @button-hover-bg-color;
+    color: @button-hover-text-color;
+  }
+
+  i.fas {
+    margin-right: 5px; // Optional: Adjust if you add text to buttons
   }
 }
 
