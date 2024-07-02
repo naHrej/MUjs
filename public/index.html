@@ -83,11 +83,11 @@
                 </ul>
               </div>
             </div>
-            <div v-else class="card mb-3">
+            <div v-else class="card" >
               <!-- Site details -->
 
               <div class="details">
-                <p class="card-text">{{ site.host }}:{{ site.port }}</p>
+                {{ site.host }}:{{ site.port }}
                 <div class="button-row">
                   <!-- Button row wrapper -->
                   <button @click="deleteSite(key)" class="btn btn-danger">
