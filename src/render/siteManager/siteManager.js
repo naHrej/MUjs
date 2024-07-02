@@ -1,3 +1,5 @@
+import WarpSpeed from './warpspeed.js';
+
 const conmgr = Vue.createApp({
     data() {
         return {
@@ -8,6 +10,7 @@ const conmgr = Vue.createApp({
         }
     },
     async mounted() {
+        new WarpSpeed('canvas', '{"speed":5,"speedAdjFactor":0.03,"density":0.7,"shape":"square","warpEffect":true,"warpEffectLength":7,"depthFade":false,"starSize":2,"backgroundColor":"hsl(263,45%,7%)","starColor":"#FFFFFF"}');
         this.sites = Object.values(await window.store.get('sites') || {});
         window.api.on('disconnected', () => {
             this.showMgr = true;
