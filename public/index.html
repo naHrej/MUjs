@@ -1,96 +1,129 @@
 <!-- index.html -->
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <title>MU*JS</title>
+    <!-- Include the style sheet style.css -->
+    <link rel="stylesheet/less" type="text/css" href="style.less" />
+    <link
+      rel="stylesheet"
+      href="../node_modules/bootstrap/dist/css/bootstrap.min.css"
+    />
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/less"></script>
+  </head>
 
-<head>
-        <meta charset="UTF-8" />
-        <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-        <title>MU*JS</title>
-        <!-- Include the style sheet style.css -->
-        <link rel="stylesheet/less" type="text/css" href="style.less" />
-        <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
-        <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-        <script src="https://cdn.jsdelivr.net/npm/less"></script>
-
-</head>
-
-<body>
-        <script>
-                let editor = null;
-        </script>
-        <div id="appRoot">
-                <canvas id="canvas" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index: -99;"></canvas>
-                <div id="conmgr" v-show="showMgr">
-                        <h4 class="connection-manager-title">Connection Manager</h4>
-                        <div class="addSite-button">
-                                <button @click="addSite" class="btn btn-success"><i class="fas fa-plus"></i></button>
-                        </div><br/>
-                        <div class="cards-container">
-                                <div class="card-background" v-for="(site, key) in sites" :key="key">
-                                        <h5 class="card-title">{{ site.name }}</h5>
-                                        <div v-if="editingSiteKey === key" class="card mb-3">
-                                                <!-- Editable form -->
-                                                <div class="details card mb-3">
-                                                        <ul>
-                                                                <li>Name: <input v-model="site.name" type="text"></li>
-                                                                <li>Host: <input v-model="site.host" type="text"></li>
-                                                                <li>Port: <input v-model="site.port" type="text"></li>
-                                                                <li>OnConnect: <input v-model="site.connectionString" type="text"></li>
-                                                                <li><!-- Checkbox Input -->
-                                                                        <input type="checkbox" id="customCheckbox" class="checkbox-hidden" v-model="site.acEnabled"/>
-                                                                        <label for="customCheckbox">
-                                                                            <i class="far fa-square"></i> <!-- Unchecked icon -->
-                                                                            <i class="fas fa-check-square"></i> <!-- Checked icon -->
-                                                                            Custom Checkbox
-                                                                        </label></li>
-                                                                <li><button @click="saveSite" class="btn btn-primary">
-                                                                                <i class="fas fa-save"></i> Save
-                                                                        </button>
-                                                        </ul>
-                                                </div>
-                                        </div>
-                                        <div v-else class="card mb-3">
-                                                <!-- Site details -->
-
-                                                <div class="details">
-                                                        <p class="card-text">{{ site.host }}:{{ site.port }}
-                                                        <div class="button-row"> <!-- Button row wrapper -->
-                                                                <button @click="deleteSite(key)" class="btn btn-danger">
-                                                                        <i class="fas fa-trash"></i>
-                                                                </button>
-                                                                <button @click="editSite(key)"
-                                                                        class="btn btn-secondary">
-                                                                        <i class="fas fa-edit"></i>
-                                                                </button>
-                                                                <button @click="selectSite(key)"
-                                                                        class="btn btn-primary">
-                                                                        <i class="fas fa-check"></i>
-                                                                </button>
-                                                        </div>
-                                                        </p>
-                                                </div>
-                                        </div>
-                                </div>
-                        </div>
-
-                </div>
+  <body>
+    <script>
+      let editor = null;
+    </script>
+    <div id="appRoot">
+      <canvas
+        id="canvas"
+        style="
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: -99;
+        "
+      ></canvas>
+      <div id="conmgr" v-show="showMgr">
+        <h4 class="connection-manager-title">Connection Manager</h4>
+        <div class="addSite-button">
+          <button @click="addSite" class="btn btn-success">
+            <i class="fas fa-plus"></i>
+          </button>
         </div>
+        <br />
+        <div class="cards-container">
+          <div class="card-background" v-for="(site, key) in sites" :key="key">
+            <div class="card-title-bar">
+              <h5 class="card-title">{{ site.name }}</h5>
+            </div>
+            <div v-if="editingSiteKey === key" class="card mb-3">
+              <!-- Editable form -->
+              <div class="details card mb-3">
+                <ul>
+                  <li>Name: <input v-model="site.name" type="text" /></li>
+                  <li>Host: <input v-model="site.host" type="text" /></li>
+                  <li>Port: <input v-model="site.port" type="text" /></li>
+                  <li>
+                    OnConnect:
+                    <input v-model="site.connectionString" type="text" />
+                  </li>
+                  <li>
+                    <!-- Checkbox Input -->
+                    <input
+                      type="checkbox"
+                      id="customCheckbox"
+                      class="checkbox-hidden"
+                      v-model="site.acEnabled"
+                    />
+                    <label for="customCheckbox">
+                      <i class="far fa-square"></i>
+                      <!-- Unchecked icon -->
+                      <i class="fas fa-check-square"></i>
+                      <!-- Checked icon -->
+                      Custom Checkbox
+                    </label>
+                  </li>
+                  <li>
+                    <button @click="saveSite" class="btn btn-primary">
+                      <i class="fas fa-save"></i> Save
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div v-else class="card mb-3">
+              <!-- Site details -->
 
-
-        <div id="app" class="flex-container" v-show="showApp">
-                <div id="AZUHz3kQsgMj" v-show="showApp">
+              <div class="details">
+                <p class="card-text">{{ site.host }}:{{ site.port }}</p>
+                <div class="button-row">
+                  <!-- Button row wrapper -->
+                  <button @click="deleteSite(key)" class="btn btn-danger">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                  <button @click="editSite(key)" class="btn btn-secondary">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button @click="selectSite(key)" class="btn btn-primary">
+                    <i class="fas fa-check"></i>
+                  </button>
                 </div>
-                <div id="resizeHandle" v-show="showApp">
-                </div>
-                <textarea v-model="inputField" id="SdWiqHtqa" v-show="showApp" @keydown="handleKeydown">
-                </textarea>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+    </div>
 
-        <script src="../node_modules/vue/dist/vue.global.js"></script>
-        <script type="module" src="../src/render/terminal/terminal.js"></script>
-        <script type="module" src="../src/render/siteManager/siteManager.js"></script>
+    <div id="app" class="flex-container" v-show="showApp">
+      <div id="AZUHz3kQsgMj" v-show="showApp"></div>
+      <div id="resizeHandle" v-show="showApp"></div>
+      <textarea
+        v-model="inputField"
+        id="SdWiqHtqa"
+        v-show="showApp"
+        @keydown="handleKeydown"
+      >
+      </textarea>
+    </div>
 
-</body>
-
+    <script src="../node_modules/vue/dist/vue.global.js"></script>
+    <script type="module" src="../src/render/terminal/terminal.js"></script>
+    <script
+      type="module"
+      src="../src/render/siteManager/siteManager.js"
+    ></script>
+  </body>
 </html>

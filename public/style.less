@@ -4,13 +4,13 @@
 @button-hover-bg-color: #555; // Slightly lighter background color for hover state
 @button-hover-text-color: #ddd; // Slightly darker text color for hover state
 
-
- @font-face {
+@font-face {
   font-family: "TNG_Title";
   src: url("https://code.deanpool.net/fonts/TNG_Title.woff2");
 }
 
- html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -24,26 +24,24 @@
   // );
 }
 
- 
- .flex-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh; // Full height of the viewport
-    width: 100vw; // Full width of the viewport
-    overflow: hidden; // Prevents content from overflowing the container
-  }
-
-
-  .editor-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+.flex-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; // Full height of the viewport
+  width: 100vw; // Full width of the viewport
+  overflow: hidden; // Prevents content from overflowing the container
 }
-  
 
-#resizeHandle
-{
-  height: 5px; cursor: ns-resize; background-color: #ccc;
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#resizeHandle {
+  height: 5px;
+  cursor: ns-resize;
+  background-color: #ccc;
 }
 
 #monaco-editor-toolbar {
@@ -59,84 +57,58 @@
   // Ensures it fills 90% of the container's height
 }
 
-  #SdWiqHtqa {
-    min-height: 10%;
-    width: 100%;
-    background-color: black;
-    color: white;
-    flex-grow: 1;
-    resize: none;
-    // Removed flex-grow to allow content-based sizing
-  }
-  
-  #AZUHz3kQsgMj {
-    max-height: 90%;
-    width: 100%;
-    background-color: black;
-    color: white;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    display: flex;
-    flex-direction: column;
-    white-space: break-spaces;
-    flex-shrink: 1; // Keeps this to fill remaining space
-  }
+#SdWiqHtqa {
+  min-height: 10%;
+  width: 100%;
+  background-color: black;
+  color: white;
+  flex-grow: 1;
+  resize: none;
+  // Removed flex-grow to allow content-based sizing
+}
+
+#AZUHz3kQsgMj {
+  max-height: 90%;
+  width: 100%;
+  background-color: black;
+  color: white;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  white-space: break-spaces;
+  flex-shrink: 1; // Keeps this to fill remaining space
+}
 
 #appRoot {
-
-
-    h5 {
-      background-color:dodgerblue;
-      color: white;
-      padding:.5em;
-      border-top-left-radius:5px;
-      border-top-right-radius:5px;
-
-    } 
-    ul {
-      list-style: none;
-    }  
-    div.details{  
-      .card-text {
-        margin: 0; /* Removes default margin from the card text */
-        justify-content: center;
-      }
-      p {
-        margin-left:1em;
-        margin-bottom:1em;
-        
-      }       
-      button.btn {
-        margin-right:1em;
-        margin-bottom:1em;
-        float:right;
-      }
-    }
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
 .cards-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: start; /* Adjusts spacing between cards */
-    gap: 20px; /* Adjusts spacing between cards */
+  display: flex;
+  flex-wrap: wrap;
+  align-self: center;
+  gap: 5px; /* Adjust based on your design */
 }
 
 .card {
-    flex: 0 1 calc(33.333% - 20px); /* Adjusts card width to fit 3 per row, accounting for some margin */
-    margin: 10px; /* Adjusts spacing around cards */
-    
+  display: flex;
+  flex-direction: column;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
 }
 
 .button-row {
   display: flex;
   justify-content: center; // Centers the buttons in the button row
   gap: 1px; // Reduces the space between buttons for a closer appearance
-
-  button {
-    padding: 5px 10px; // Reduces padding inside the buttons
-    font-size: 12px; // Reduces font size for the text inside the buttons
-    // Adjust padding and font-size values as needed
-  }
+  
+  padding-top: 10px;
+  padding-bottom: 5px;
 }
 
 // Button Styles
@@ -158,32 +130,59 @@ button {
   }
 }
 
-.card-background {
-  background-color: darkslategray; // Adjusts the background color of the card
-  padding: 0px; // Adjusts padding inside the card
-  border-radius: 10px; // Rounds the corners of the card
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Adds a shadow to the card
+.details {
+  // set the bottom border radius to 5px, leave the top alone
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+
+
 }
 
-.center-button {
+/* Example of how you might style control buttons if you add them */
+.control-buttons {
   display: flex;
-  justify-content: center; /* Centers the button horizontally */
-  width: 100%; /* Ensures the div takes the full width */
+  gap: 8px; /* Space between buttons */
 }
 
-.connection-manager-title {
-  font-family: 'TNG_title'; /* Soft, modern font */
-  color: #2b53a7; /* Soft, dark gray color */
-  font-size: 48px; /* Large font size */
-  text-align: center; /* Center-aligns the text */
-  padding: 20px 0; /* Adds more padding above and below the text */
-  border-radius: 10px; /* Slightly rounded corners for a modern look */
-  margin: 20px auto; /* Centers the title block with auto margins */
-  width: fit-content; /* Ensures the background only covers the text */
-  padding: 10px 20px; /* Adequate padding around the text */
+.control-button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%; /* Make them circular */
+  background-color: #fff; /* White background */
 }
 
-.fa-check-square, .fa-square {
+.card {
+  display: flex;
+  flex-direction: column;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+
+  /* Add any additional styling here */
+}
+
+.card-content {
+  flex-grow: 1; /* Allow the main content to take up available space, pushing the .button-row to the bottom */
+  /* Add styling for your main content here */
+}
+
+.host-label {
+  margin: 0;
+  display: flex;
+  align-items: center; /* Aligns the label text and input field */
+  gap: 5px; /* Space between the label text and the input field */
+  color: #545050;
+  font-weight: 600; /* Modern UIs often use semi-bold or bold labels */
+  font-size: 16px; /* Adjust based on your design */
+}
+.card-text {
+  margin: 0; /* Removes default margin */
+  font-size: 16px; /* Consistent font size with labels */
+  color: #9f9a9a; /* Dark gray text color */
+}
+.fa-check-square,
+.fa-square {
   cursor: pointer;
 }
 .checkbox-hidden {
@@ -206,4 +205,25 @@ button {
   position: fixed;
   bottom: 20px;
   right: 20px;
+}
+.card-title-bar {
+  // background-colour should be a gradient
+  background: linear-gradient(90deg, #2d3338 0%, #112131 100%);
+  width: 100%;
+  align-content: center;
+  display: flex; /* Use flexbox for layout */
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  opacity: 60%;
+  
+  font-weight: bold; /* Bold text */
+}
+
+.card-title {
+  margin: 0; /* Remove default margin from <h5> */
+  padding: 0.5rem; /* Add padding to the title */
+  color: #98a39e;
+  // shadow the text
+  text-shadow: 2px 2px 4px #000000;
+
 }
