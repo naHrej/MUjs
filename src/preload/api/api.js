@@ -16,9 +16,9 @@ export const api = {
     return ipcRenderer.invoke(channel, ...args);
   },
   flashFrame: (flash) => ipcRenderer.send("flash-frame", flash),
-  ansi_to_html: (data) => {
+  ansi_to_html: (data, htmlEnabled) => {
     let ansi_up = new AnsiUp();
-    ansi_up.escape_html = false;
+    ansi_up.escape_html = !htmlEnabled;
     let html = ansi_up.ansi_to_html(data);
     return html;
   },

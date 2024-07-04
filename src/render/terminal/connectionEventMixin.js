@@ -35,9 +35,8 @@ export const connectionEventMixin = {
 
       console.log("ANSI Enabled: " + this.ansiEnabled);
       if (this.ansiEnabled) {
-        data = window.api.ansi_to_html(data);
+        data = window.api.ansi_to_html(data, this.htmlEnabled);
       }
-      console.log("HTML Enabled: " + this.htmlEnabled);
 
       // trim any unprintable characters
       data = data.replace(/[\x00-\x1F\x7F-\x9F]/g, "");
@@ -93,7 +92,6 @@ export const connectionEventMixin = {
 
       let doc = parser.parseFromString(data, "text/html");
 
-      if(this.htmlEnabled) {
       // Find all <script tags>
       let scripts = doc.querySelectorAll("script");
       scripts.forEach((script) => {
@@ -151,9 +149,6 @@ export const connectionEventMixin = {
             }
           });
         });
-      } else {
-        newElement.innerText = data;
-      }
       if (!omit) {
         // if the window is not focused flash the icon in the toolbar
         if (!document.hasFocus()) {
