@@ -50,7 +50,10 @@ const conmgr = Vue.createApp({
         selectSite(key) {
             window.api.send('site-selected', this.sites[key].name, 
                 this.sites[key].host, this.sites[key].port,
-                 this.sites[key].connectionString, this.sites[key].acEnabled);
+                 this.sites[key].connectionString, this.sites[key].acEnabled, 
+                 this.sites[key].ansiEnabled, this.sites[key].htmlEnabled);
+                 console.log('htmlEnabled: ' + this.sites[key].htmlEnabled);
+                 
             this.showMgr = false;
         }
 
