@@ -35,6 +35,10 @@ export const eventMixin = {
       });
   
       window.api.on('disconnected', () => {
+        // remove all children from the terminal
+        while (this.terminal.firstChild) {
+          this.terminal.removeChild(this.terminal.firstChild);
+        }
         this.showApp = false;
       });
 
