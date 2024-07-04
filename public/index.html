@@ -37,11 +37,13 @@
       ></canvas>
       <div id="conmgr" v-show="showMgr">
         <h4 class="connection-manager-title">Connection Manager</h4>
+
         <div class="addSite-button">
           <button @click="addSite" class="btn btn-success">
             <i class="fas fa-plus"></i>
           </button>
         </div>
+
         <br />
         <div class="cards-container">
           <div class="card-background" v-for="(site, key) in sites" :key="key">
@@ -72,7 +74,7 @@
                       <!-- Unchecked icon -->
                       <i class="fas fa-check-square"></i>
                       <!-- Checked icon -->
-                      Custom Checkbox
+                      Send On Connect?
                     </label>
                   </li>
                   <li>
@@ -90,15 +92,17 @@
                 {{ site.host }}:{{ site.port }}
                 <div class="button-row">
                   <!-- Button row wrapper -->
-                  <button @click="deleteSite(key)" class="btn btn-danger">
+                  <button @click="selectSite(key)" class="btn btn-primary" title="Connect">
+                        <i class="fas fa-circle-play"></i>
+                  </button>
+                  <button @click="editSite(key)" class="btn btn-secondary" title="Settings">
+                        <i class="fas fa-gears"></i>
+                  </button>
+    
+                  <button @click="deleteSite(key)" class="btn btn-danger" title="Delete">
                     <i class="fas fa-trash"></i>
                   </button>
-                  <button @click="editSite(key)" class="btn btn-secondary">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button @click="selectSite(key)" class="btn btn-primary">
-                    <i class="fas fa-check"></i>
-                  </button>
+
                 </div>
               </div>
             </div>

@@ -111,9 +111,10 @@ button {
   background-color: @dark-bg-color;
   color: @dark-text-color;
   border: none;
-  padding: 10px 20px;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
+  align-content:center;
+  vertical-align: middle;
 
   &:hover {
     background-color: @button-hover-bg-color;
@@ -121,7 +122,7 @@ button {
   }
 
   i.fas {
-    margin-right: 5px; // Optional: Adjust if you add text to buttons
+    //margin-right: 5px; // Optional: Adjust if you add text to buttons
   }
 }
 
@@ -138,6 +139,9 @@ button {
   background-color: #fff; /* White background */
 }
 
+.cards-container {
+  padding:5em;
+}
 .card {
   display: flex;
   flex-direction: column;
@@ -145,6 +149,7 @@ button {
   border-top-right-radius: 0 !important;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
+  width:20em;
 }
 
 .card-content {
