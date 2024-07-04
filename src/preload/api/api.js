@@ -107,6 +107,9 @@ client.on("data", (data) => {
                 break;
             }
             let line = buffer + data.toString("utf-8", 0, index);
+            // remove any characters that arent typable characters
+            line = line.replace(/[^ -~]/g, "");
+
             ipcRenderer.send("received-data", line);
             data = data.slice(index + 1);
             buffer = "";
