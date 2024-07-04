@@ -20,6 +20,7 @@ function updateMenu() {
             submenu: [
                 ...(connected ? [{
                     label: 'Disconnect',
+                    accelerator: 'Ctrl+F4',
                     id: "disconnect",
                     enabled: true,
                     click: () => {

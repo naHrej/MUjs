@@ -35,7 +35,7 @@ export const connectionEventMixin = {
 
       // trim any unprintable characters
       data = data.replace(/[\x00-\x1F\x7F-\x9F]/g, "");
-      data = data.trim();
+      //data = data.trim();
 
       if (data.startsWith("FugueEdit")) {
         data = data.replace("FugueEdit > ", "");
@@ -79,6 +79,12 @@ export const connectionEventMixin = {
       }
       //data = window.api.ansi_to_html(data);
       let parser = new DOMParser();
+
+      // please do not let the parser trim all the spaces out of the string
+      if (data.charAt(0) ===' ') {
+        data = "&nbsp;" + data.slice(1);
+      }
+
       let doc = parser.parseFromString(data, "text/html");
 
       // Find all <script tags>
