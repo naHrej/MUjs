@@ -58,6 +58,7 @@ const settings = Vue.createApp({
 
         async saveSettings() {
             await window.store.set('settings.ansiEnabled', this.ansiEnabled);
+            await window.store.set('settings.htmlEnabled', this.htmlEnabled);
             await window.store.set('settings.authString', this.authString);
             await window.store.set('settings.connectOnStartup', this.connectOnStartup);
             window.api.send('settings-updated');
@@ -90,6 +91,7 @@ const settings = Vue.createApp({
     async mounted() {
         this.watchPath = await window.store.get('watchPath');
         this.ansiEnabled = await window.store.get('settings.ansiEnabled');
+        this.htmlEnabled = await window.store.get('settings.htmlEnabled');
         this.fontFamily = await window.store.get('settings.fontFamily');
         this.fontSize = await window.store.get('settings.fontSize');
         this.authString = await window.store.get('settings.authString');

@@ -42,6 +42,8 @@ const conmgr = Vue.createApp({
                 port: 80,
                 connectionString: '',
                 acEnabled: false,
+                ansiEnabled: true,
+                htmlEnabled: false
             });
             this.saveSite(this.sites.length - 1);
         },

@@ -58,11 +58,11 @@
                   <li>Host: <input v-model="site.host" type="text" /></li>
                   <li>Port: <input v-model="site.port" type="text" /></li>
                   <li>
-                    OnConnect:
+                    Connection Text:
                     <input v-model="site.connectionString" type="text" />
                   </li>
                   <li>
-                    <!-- Checkbox Input -->
+                    <!-- Autoconnect Checkbox Input -->
                     <input
                       type="checkbox"
                       id="customCheckbox"
@@ -77,6 +77,41 @@
                       Send On Connect?
                     </label>
                   </li>
+                  
+                  <li>
+                    <!-- ansi Checkbox Input -->
+                    <input
+                      type="checkbox"
+                      id="ansiCheckbox"
+                      class="checkbox-hidden"
+                      v-model="site.ansiEnabled"
+                    />
+                    <label for="ansiCheckbox">
+                      <i class="far fa-square"></i>
+                      <!-- Unchecked icon -->
+                      <i class="fas fa-check-square"></i>
+                      <!-- Checked icon -->
+                      Enable ANSI?
+                    </label>
+                  </li>
+
+                  <li>
+                    <!-- HTML Checkbox Input -->
+                    <input
+                      type="checkbox"
+                      id="htmlCheckbox"
+                      class="checkbox-hidden"
+                      v-model="site.htmlEnabled"
+                    />
+                    <label for="htmlCheckbox">
+                      <i class="far fa-square"></i>
+                      <!-- Unchecked icon -->
+                      <i class="fas fa-check-square"></i>
+                      <!-- Checked icon -->
+                      Enable HTML?
+                    </label>
+                  </li>
+
                   <li>
                     <button @click="saveSite" class="btn btn-primary">
                       <i class="fas fa-save"></i> Save

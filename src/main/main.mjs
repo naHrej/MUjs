@@ -40,8 +40,9 @@ const store = new Store(
           name: 'klinMoo',
           host: 'code.deanpool.net',
           port: 1701,
+          htmlEnabled: true,
+          ansiEnabled: false
         },
-
       }
     }
   }

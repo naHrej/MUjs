@@ -12,25 +12,35 @@ export const connectionEventMixin = {
         Math.random().toString(36).substring(2, 15) +
         Math.random().toString(36).substring(2, 15);
     });
+
     window.api.on("reconnect", () => {
       console.log("Reconnecting");
       window.api.connect(this.port, this.host);
     });
+
     window.api.on("disconnect", () => {
       window.api.end();
     });
+
     window.api.on("close", () => {
       console.log("Connection closed");
     });
+
     window.api.on("error", (error) => {
       console.error("Error:", error);
     });
+
     window.api.on("received-data", (event, data) => {
       let omit = false;
 
+      console.log("ANSI Enabled: " + this.ansiEnabled);
       if (this.ansiEnabled) {
-        console.log("ANSI Enabled: " + this.ansiEnabled);
         data = window.api.ansi_to_html(data);
+      }
+      console.log("HTML Enabled: " + this.htmlEnabled);
+      if (!this.htmlEnabled) {
+        data = data.replaceAll(/</g, "&lt;");
+        data = data.replace(/>/g, "&gt;");
       }
 
       // trim any unprintable characters

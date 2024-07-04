@@ -23,11 +23,14 @@ const app = Vue.createApp({
             connStr: null,
             acEnabled: false,
             ansiEnabled: false,
+            htmlEnabled: false
         };
     },
     async mounted() {
         this.loading = false;
         this.ansiEnabled = await window.store.get('settings.ansiEnabled') || false;
+        this.htmlEnabled = await window.store.get('settings.htmlEnabled') || false;
+        
 
     },
     methods: {
@@ -115,7 +118,7 @@ const app = Vue.createApp({
 
         async ApplySettings() {
             this.ansiEnabled = await window.store.get('settings.ansiEnabled') || false;
-
+            this.htmlEnabled = await window.store.get('settings.htmlEnabled') || false;
         }
     }
 });
