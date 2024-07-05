@@ -50,77 +50,8 @@
             <div class="card-title-bar">
               <h5 class="card-title">{{ site.name }}</h5>
             </div>
-            <div v-if="editingSiteKey === key" class="card mb-3">
-              <!-- Editable form -->
-              <div class="details card mb-3">
-                <ul>
-                  <li>Name: <input v-model="site.name" type="text" /></li>
-                  <li>Host: <input v-model="site.host" type="text" /></li>
-                  <li>Port: <input v-model="site.port" type="text" /></li>
-                  <li>
-                    Connection Text:
-                    <input v-model="site.connectionString" type="text" />
-                  </li>
-                  <li>
-                    <!-- Autoconnect Checkbox Input -->
-                    <input
-                      type="checkbox"
-                      id="customCheckbox"
-                      class="checkbox-hidden"
-                      v-model="site.acEnabled"
-                    />
-                    <label for="customCheckbox">
-                      <i class="far fa-square"></i>
-                      <!-- Unchecked icon -->
-                      <i class="fas fa-check-square"></i>
-                      <!-- Checked icon -->
-                      Send On Connect?
-                    </label>
-                  </li>
-                  
-                  <li>
-                    <!-- ansi Checkbox Input -->
-                    <input
-                      type="checkbox"
-                      id="ansiCheckbox"
-                      class="checkbox-hidden"
-                      v-model="site.ansiEnabled"
-                    />
-                    <label for="ansiCheckbox">
-                      <i class="far fa-square"></i>
-                      <!-- Unchecked icon -->
-                      <i class="fas fa-check-square"></i>
-                      <!-- Checked icon -->
-                      Enable ANSI?
-                    </label>
-                  </li>
-
-                  <li>
-                    <!-- HTML Checkbox Input -->
-                    <input
-                      type="checkbox"
-                      id="htmlCheckbox"
-                      class="checkbox-hidden"
-                      v-model="site.htmlEnabled"
-                    />
-                    <label for="htmlCheckbox">
-                      <i class="far fa-square"></i>
-                      <!-- Unchecked icon -->
-                      <i class="fas fa-check-square"></i>
-                      <!-- Checked icon -->
-                      Enable HTML?
-                    </label>
-                  </li>
-
-                  <li>
-                    <button @click="saveSite" class="btn btn-primary">
-                      <i class="fas fa-save"></i> Save
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div v-else class="card" >
+            
+            <div class="card" >
               <!-- Site details -->
 
               <div class="details">
@@ -142,6 +73,77 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+      <div id="edit-modal" class="edit-modal" v-show="editingSite">
+        <!-- Editable form -->
+        <div class="edit-modal-content">
+          <span class="close">&times;</span>
+          <ul>
+            <li>Name: <input v-model="currentSite.name" type="text" /></li>
+            <li>Host: <input v-model="currentSite.host" type="text" /></li>
+            <li>Port: <input v-model="currentSite.port" type="text" /></li>
+            <li>
+              Connection Text:
+              <input v-model="currentSite.connectionString" type="text" />
+            </li>
+            <li>
+              <!-- Autoconnect Checkbox Input -->
+              <input
+                type="checkbox"
+                id="customCheckbox"
+                class="checkbox-hidden"
+                v-model="currentSite.acEnabled"
+              />
+              <label for="customCheckbox">
+                <i class="far fa-square"></i>
+                <!-- Unchecked icon -->
+                <i class="fas fa-check-square"></i>
+                <!-- Checked icon -->
+                Send On Connect?
+              </label>
+            </li>
+            
+            <li>
+              <!-- ansi Checkbox Input -->
+              <input
+                type="checkbox"
+                id="ansiCheckbox"
+                class="checkbox-hidden"
+                v-model="currentSite.ansiEnabled"
+              />
+              <label for="ansiCheckbox">
+                <i class="far fa-square"></i>
+                <!-- Unchecked icon -->
+                <i class="fas fa-check-square"></i>
+                <!-- Checked icon -->
+                Enable ANSI?
+              </label>
+            </li>
+
+            <li>
+              <!-- HTML Checkbox Input -->
+              <input
+                type="checkbox"
+                id="htmlCheckbox"
+                class="checkbox-hidden"
+                v-model="currentSite.htmlEnabled"
+              />
+              <label for="htmlCheckbox">
+                <i class="far fa-square"></i>
+                <!-- Unchecked icon -->
+                <i class="fas fa-check-square"></i>
+                <!-- Checked icon -->
+                Enable HTML?
+              </label>
+            </li>
+
+            <li>
+              <button @click="saveSite" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save
+              </button>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
