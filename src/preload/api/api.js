@@ -48,8 +48,9 @@ export const api = {
     });
   },
   end: () => {
-    client.end();
-    ipcRenderer.send("disconnected");
+        client.destroy();
+        ipcRenderer.send("disconnected");
+
   },
   getFonts: async () => {
     let ssf = new SystemFonts();
@@ -92,6 +93,10 @@ export const api = {
   },
 };
 
+
+ipcRenderer.on('disconnect', () => {
+    client.end();
+});
 let buffer = "";
 
 client.on("data", (data) => {
