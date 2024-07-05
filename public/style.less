@@ -78,77 +78,62 @@ body {
   flex-direction: column;
   white-space: break-spaces;
   flex-shrink: 1; // Keeps this to fill remaining space
-  font-family:'Consolas','Courier New', Courier, monospace; // default for console games
-  padding:3px;
+  font-family: "Consolas", "Courier New", Courier, monospace; // default for console games
+  padding: 3px;
 }
 
 #appRoot {
-
   align-items: center;
   .cards-container {
     font-family: Arial, Helvetica, sans-serif;
     display: flex;
-    flex-wrap:wrap;
+    flex-wrap: wrap;
     justify-content: center;
-    padding:5em;
-    margin:1em;
-    opacity: 60%;  
+    padding: 5em;
+    margin: 1em;
+    opacity: 60%;
     .card-background {
       margin: 1em;
       border-radius: 1em;
       border-left-width: 1em;
       border-left-style: solid;
-      border-left-color: #2b53a7; 
-      background-color: #112131; 
-      width:25em;
+      border-left-color: #2b53a7;
+      background-color: #112131;
+      width: 25em;
       .card-title-bar {
         // background-colour should be a gradient
         border-top-right-radius: 1em;
         border-bottom-right-radius: 1em;
-        color:white;
-        background: linear-gradient(90deg, #2b53a7  0%, #2d3338 100%);
+        color: white;
+        background: linear-gradient(90deg, #2b53a7 0%, #2d3338 100%);
         width: 100%;
         align-content: center;
         display: flex; /* Use flexbox for layout */
 
         font-weight: bold; /* Bold text */
-        .card-title {          
+        .card-title {
           margin: 0; /* Remove default margin from <h5> */
           padding: 0.5rem; /* Add padding to the title */
           color: #98a39e;
           // shadow the text
           text-shadow: 2px 2px 4px #000000;
         }
-
       }
-      .details
-      {
-        color:#2b53a7;
+      .details {
+        color: #2b53a7;
         display: flex;
         flex-direction: column;
         border-bottom-left-radius: 5px;
         border-bottom-right-radius: 5px;
-        padding:.5em;
-      
+        padding: 0.5em;
       }
       .card {
         display: flex;
         flex-direction: column;
-
       }
-
     }
-
   }
 }
-
-
-
-
-
-
-
-
 
 .card-content {
   flex-grow: 1; /* Allow the main content to take up available space, pushing the .button-row to the bottom */
@@ -170,7 +155,6 @@ body {
   color: #9f9a9a; /* Dark gray text color */
 }
 
-
 .button-row {
   display: flex;
   justify-content: center; // Centers the buttons in the button row
@@ -185,36 +169,33 @@ button {
   font-family: Arial, Helvetica, sans-serif;
   width: 2em;
   height: 2em;
-  margin:2px;
-  border-radius: .5em; /* Make them circular */
+  margin: 2px;
+  border-radius: 0.5em; /* Make them circular */
   color: @dark-text-color;
   border: none;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
-  align-content:center;
+  align-content: center;
   vertical-align: middle;
   &:hover {
     background-color: @button-hover-bg-color;
     color: @button-hover-text-color;
   }
 
-  i.fas {
-    //margin-right: 5px; // Optional: Adjust if you add text to buttons
-  }
   &.btn-primary {
-    width:5em;
-    background-color:green;
+    width: 5em;
+    background-color: green;
   }
   &.btn-secondary {
-    background-color:#2b53a7;
+    background-color: #2b53a7;
   }
   &.btn-danger {
-    background-color:brown;
+    background-color: brown;
   }
   &.btn-success {
-    background-color:Yellow;
-    color:#000000;
-    width:5em;
+    background-color: Yellow;
+    color: #000000;
+    width: 5em;
   }
 }
 
@@ -257,9 +238,7 @@ button {
   right: 20px;
 }
 
-
 .connection-manager-title {
-
   font-family: "TNG_title"; /* Soft, modern font */
   color: #2b53a7; /* Soft, dark gray color */
   font-size: 48px; /* Large font size */
@@ -271,7 +250,6 @@ button {
   padding: 10px 20px; /* Adequate padding around the text */
 }
 
-
 /* The Modal (background) */
 .edit-modal {
   position: fixed; /* Stay in place */
@@ -281,30 +259,60 @@ button {
   width: 100%; /* Full width */
   height: 100%; /* Full height */
   overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  background-color: rgb(0, 0, 0); /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
 }
 
 /* Modal Content */
 .edit-modal-content {
-  background-color: #fefefe;
+  background-color: #2b53a7;
   margin: 15% auto; /* 15% from the top and centered */
   padding: 20px;
   border: 1px solid #888;
-  width: 80%; /* Could be more or less, depending on screen size */
-}
+  width: 60%; /* Could be more or less, depending on screen size */
+  margin: 1em;
+  position: absolute;
+  // center it on the screen
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 1em;
+  border-left-width: 1em;
+  border-left-style: solid;
+  border-left-color: #2b53a7;
+  border-top-width: 2em;
+  border-top-color: #2b53a7;
+  background-color: #112131;
+  /* The Close Button */
+  .close {
+    color: #cbd5d0;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
 
-/* The Close Button */
-.close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-  color: black;
-  text-decoration: none;
-  cursor: pointer;
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .edit-modal-content-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    flex-direction: column;
+    margin: 1em;
+    color: #cbd5d0;
+    label {
+      color: #cbd5d0;
+      font-weight: bold;
+    }
+    input {
+      background-color: #333;
+      color: #cbd5d0;
+      border: 1px solid #fff;
+      border-radius: 5px;
+      padding: 5px;
+    }
+  }
 }

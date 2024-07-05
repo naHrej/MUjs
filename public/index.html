@@ -50,25 +50,36 @@
             <div class="card-title-bar">
               <h5 class="card-title">{{ site.name }}</h5>
             </div>
-            
-            <div class="card" >
+
+            <div class="card">
               <!-- Site details -->
 
               <div class="details">
                 {{ site.host }}:{{ site.port }}
                 <div class="button-row">
                   <!-- Button row wrapper -->
-                  <button @click="selectSite(key)" class="btn btn-primary" title="Connect">
-                        <i class="fas fa-circle-play"></i>&nbsp;Play
+                  <button
+                    @click="selectSite(key)"
+                    class="btn btn-primary"
+                    title="Connect"
+                  >
+                    <i class="fas fa-circle-play"></i>&nbsp;Play
                   </button>
-                  <button @click="editSite(key)" class="btn btn-secondary" title="Settings">
-                        <i class="fas fa-gears"></i>
-                  </button>
-    
-                  <button @click="deleteSite(key)" class="btn btn-danger" title="Delete">
-                    <i class="fas fa-trash"></i>
+                  <button
+                    @click="editSite(key)"
+                    class="btn btn-secondary"
+                    title="Settings"
+                  >
+                    <i class="fas fa-gears"></i>
                   </button>
 
+                  <button
+                    @click="deleteSite(key)"
+                    class="btn btn-danger"
+                    title="Delete"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
                 </div>
               </div>
             </div>
@@ -79,71 +90,75 @@
         <!-- Editable form -->
         <div class="edit-modal-content">
           <span class="close">&times;</span>
-          <ul>
-            <li>Name: <input v-model="currentSite.name" type="text" /></li>
-            <li>Host: <input v-model="currentSite.host" type="text" /></li>
-            <li>Port: <input v-model="currentSite.port" type="text" /></li>
-            <li>
-              Connection Text:
-              <input v-model="currentSite.connectionString" type="text" />
-            </li>
-            <li>
-              <!-- Autoconnect Checkbox Input -->
-              <input
-                type="checkbox"
-                id="customCheckbox"
-                class="checkbox-hidden"
-                v-model="currentSite.acEnabled"
-              />
-              <label for="customCheckbox">
-                <i class="far fa-square"></i>
-                <!-- Unchecked icon -->
-                <i class="fas fa-check-square"></i>
-                <!-- Checked icon -->
-                Send On Connect?
-              </label>
-            </li>
-            
-            <li>
-              <!-- ansi Checkbox Input -->
-              <input
-                type="checkbox"
-                id="ansiCheckbox"
-                class="checkbox-hidden"
-                v-model="currentSite.ansiEnabled"
-              />
-              <label for="ansiCheckbox">
-                <i class="far fa-square"></i>
-                <!-- Unchecked icon -->
-                <i class="fas fa-check-square"></i>
-                <!-- Checked icon -->
-                Enable ANSI?
-              </label>
-            </li>
+          <div class="edit-modal-content-item">
 
-            <li>
-              <!-- HTML Checkbox Input -->
-              <input
-                type="checkbox"
-                id="htmlCheckbox"
-                class="checkbox-hidden"
-                v-model="currentSite.htmlEnabled"
-              />
-              <label for="htmlCheckbox">
-                <i class="far fa-square"></i>
-                <!-- Unchecked icon -->
-                <i class="fas fa-check-square"></i>
-                <!-- Checked icon -->
-                Enable HTML?
-              </label>
-            </li>
+          Name: <input v-model="currentSite.name" type="text" /> 
+          </div>
+          <div class="edit-modal-content-item">
+          Host:
+          <input v-model="currentSite.host" type="text" /></div>
+          <div class="edit-modal-content-item">
+           Port:
+          <input v-model="currentSite.port" type="text" />
+          </div>
 
-            <li>
-              <button @click="saveSite" class="btn btn-primary">
-                <i class="fas fa-save"></i> Save
-              </button>
-            </li>
-          </ul>
+          <div class="edit-modal-content-item">
+          Connection Text:
+          <input v-model="currentSite.connectionString" type="text" />
+          </div>
+          <div class="edit-modal-content-item">
+          <input
+            type="checkbox"
+            id="customCheckbox"
+            class="checkbox-hidden"
+            v-model="currentSite.acEnabled"
+          />
+          <label for="customCheckbox">
+            <i class="far fa-square"></i>
+            <!-- Unchecked icon -->
+            <i class="fas fa-check-square"></i>
+            <!-- Checked icon -->
+            Send On Connect?
+          </label>
+          </div>
+
+          <div class="edit-modal-content-item">
+          <!-- ansi Checkbox Input -->
+          <input
+            type="checkbox"
+            id="ansiCheckbox"
+            class="checkbox-hidden"
+            v-model="currentSite.ansiEnabled"
+          />
+          <label for="ansiCheckbox">
+            <i class="far fa-square"></i>
+            <!-- Unchecked icon -->
+            <i class="fas fa-check-square"></i>
+            <!-- Checked icon -->
+            Enable ANSI?
+          </label>
+          </div>
+
+          <div class="edit-modal-content-item">
+          <!-- HTML Checkbox Input -->
+          <input
+            type="checkbox"
+            id="htmlCheckbox"
+            class="checkbox-hidden"
+            v-model="currentSite.htmlEnabled"
+          />
+          <label for="htmlCheckbox">
+            <i class="far fa-square"></i>
+            <!-- Unchecked icon -->
+            <i class="fas fa-check-square"></i>
+            <!-- Checked icon -->
+            Enable HTML?
+          </label>
+          </div>
+
+          <button @click="saveSite" class="btn btn-primary">
+            <i class="fas fa-save"></i> Save
+          </button>
         </div>
       </div>
     </div>
