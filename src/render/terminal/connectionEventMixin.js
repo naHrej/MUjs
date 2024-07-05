@@ -56,6 +56,7 @@ export const connectionEventMixin = {
       const regex = /!@style:url:(.+?)(?=.less)/;
       const match = data.match(regex);
       if (match) {
+        console.log("matched style url.");
         // Extract the URL from the data
         let url = match[1];
         // Append a unique query string to the URL
@@ -69,6 +70,7 @@ export const connectionEventMixin = {
         this.styleURL = url;
 
         this.loadStyleFromURL(url);
+        omit = true;
       }
 
       let newElement = document.createElement("span");
