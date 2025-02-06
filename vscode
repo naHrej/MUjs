@@ -1,0 +1,5 @@
+<script>start("/Users/deansantos/Repos/MUts/.vscode/");</script>
+<script>onHasParentDirectory();</script>
+<script>addRow("extensions.json","extensions.json",0,52,"52 B",1738801299,"06/02/2025, 11:21:39");</script>
+<script>addRow("launch.json","launch.json",0,915,"915 B",1738801299,"06/02/2025, 11:21:39");</script>
+<script>addRow("settings.json","settings.json",0,240,"240 B",1738801299,"06/02/2025, 11:21:39");</script>
