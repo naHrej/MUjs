@@ -23,7 +23,8 @@ const app = Vue.createApp({
             connStr: null,
             acEnabled: false,
             ansiEnabled: false,
-            htmlEnabled: false
+            htmlEnabled: false,
+            websocketEnabled: false
         };
     },
     async mounted() {

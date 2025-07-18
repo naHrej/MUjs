@@ -15,7 +15,11 @@ export const connectionEventMixin = {
 
     window.api.on("reconnect", () => {
       console.log("Reconnecting");
-      window.api.connect(this.port, this.host);
+      if (this.websocketEnabled) {
+        window.api.connectWebSocket(this.host, this.port);
+      } else {
+        window.api.connect(this.port, this.host);
+      }
     });
 
     window.api.on("disconnect", () => {
