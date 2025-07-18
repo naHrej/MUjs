@@ -3,7 +3,9 @@
 ## Features
 
 - Full HTML5 support
+- **Unicode Support** - Full Unicode text display and input support for international characters, symbols, and emojis
 - Separate code editor window
+  - **Multi-Language Support** - Switch between MOOcode and C# syntax highlighting
   - Smart syntax hilighting tailored for MOO
   - Captures code listings when lines begin with the "FugueEdit > " prefix
   - Numbers lines from line 1 for each verb in the editor

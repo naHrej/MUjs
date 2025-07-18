@@ -50,6 +50,36 @@ body {
   // darkmode background
   background-color: #333;
   // fontAwesome buttons should also be dark
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  gap: 10px;
+}
+
+#language-selector {
+  background-color: @dark-bg-color;
+  color: @dark-text-color;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: @button-hover-bg-color;
+    border-color: #777;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #007acc;
+    box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.3);
+  }
+
+  option {
+    background-color: @dark-bg-color;
+    color: @dark-text-color;
+  }
 }
 
 #monaco-editor-moocode {
