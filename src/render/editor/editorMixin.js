@@ -279,7 +279,15 @@ export const editorMixin = {
       } else {
         // For C# and other languages, use a generic title
         const languageName = this.currentLanguage.charAt(0).toUpperCase() + this.currentLanguage.slice(1);
+        // If the header is populated, use the first line as the title
+        const headerInfo = document.getElementById('editor-header-info');
+        if (headerInfo && headerInfo.firstChild) {
+          document.title = headerInfo.firstChild.textContent + " - " + languageName + " Code Editor";
+        } else {
+          // Otherwise, use the default title format
+          
         document.title = `${languageName} Code Editor - MUjs`;
+        }
       }
     },
     submitSelectedToServer() {
