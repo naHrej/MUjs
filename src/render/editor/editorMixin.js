@@ -13,6 +13,8 @@ export const editorMixin = {
     };
   },
   async mounted() {
+    // Reference to ProgStart input
+    const progstartInput = document.getElementById('progstart-input');
     monaco.languages.register({ id: "moocode" });
 
     monaco.languages.setMonarchTokensProvider("moocode", {
@@ -133,25 +135,43 @@ export const editorMixin = {
       },
     });
 
-    // Create header info container above the editor
-    const editorContainer = document.getElementById('editor');
-    let headerInfo = document.getElementById('editor-header-info');
-    if (!headerInfo) {
-      headerInfo = document.createElement('div');
-      headerInfo.id = 'editor-header-info';
-      headerInfo.style.maxHeight = '120px'; // 8 lines * 15px
-      headerInfo.style.overflowY = 'auto';
-      headerInfo.style.background = '#222';
-      headerInfo.style.color = '#cbd5d0';
-      headerInfo.style.fontFamily = 'monospace';
-      headerInfo.style.fontSize = '14px';
-      headerInfo.style.padding = '8px';
-      headerInfo.style.marginBottom = '8px';
-      headerInfo.style.borderRadius = '6px';
-      headerInfo.style.border = '1px solid #444';
-      headerInfo.style.boxSizing = 'border-box';
-      editorContainer.insertBefore(headerInfo, editorContainer.firstChild);
-    }
+    // Header, drag handle, and editor are now in HTML. Add drag logic.
+    const headerInfo = document.getElementById('editor-header-info');
+    const resizeHandle = document.getElementById('resizeHandle');
+    const monacoEditorDiv = document.getElementById('monaco-editor-moocode');
+
+    let isResizing = false;
+    let startY = 0;
+    let startHeaderHeight = 0;
+
+    resizeHandle.addEventListener('mousedown', function(e) {
+      isResizing = true;
+      startY = e.clientY;
+      startHeaderHeight = headerInfo.offsetHeight;
+      document.body.style.cursor = 'ns-resize';
+    });
+
+    document.addEventListener('mousemove', function(e) {
+      if (!isResizing) return;
+      let dy = e.clientY - startY;
+      let newHeight = Math.max(60, Math.min(240, startHeaderHeight + dy)); // min 4 lines, max 16 lines
+      headerInfo.style.height = newHeight + 'px';
+      // Adjust editor height
+      monacoEditorDiv.style.height = `calc(100% - ${newHeight + 60}px)`; // 60px for toolbar+handle
+      if (window.editor && window.editor.layout) {
+        window.editor.layout();
+      }
+    });
+
+    document.addEventListener('mouseup', function(e) {
+      if (isResizing) {
+        isResizing = false;
+        document.body.style.cursor = '';
+        if (window.editor && window.editor.layout) {
+          window.editor.layout();
+        }
+      }
+    });
 
     // Listen for code editor open event to update header info
     window.api.on('open-code-editor', (event, payload) => {
@@ -171,6 +191,10 @@ export const editorMixin = {
         codeLines: payload.codeLines,
         endMarker: payload.endMarker
       };
+      // Set input value to ProgStart value
+      if (progstartInput) {
+        progstartInput.value = payload.saveCommand || '';
+      }
       // Set code in editor
       if (Array.isArray(payload.codeLines)) {
         editor.setValue(payload.codeLines.join('\n'));
@@ -302,13 +326,15 @@ export const editorMixin = {
     },
     SubmitToServer() {
       // If code editing session info is available, use it
-      if (this.codeEditSession && this.codeEditSession.saveCommand && this.codeEditSession.endMarker) {
+      if (this.codeEditSession && this.codeEditSession.endMarker) {
         // Get the code from the editor (as array of lines)
         let code = editor.getValue();
         let codeLines = code.split(/\r?\n/);
+        // Use the value from the input for ProgStart
+        let saveCommand = document.getElementById('progstart-input')?.value || this.codeEditSession.saveCommand || '';
         // Compose the message to send back to the server as a single string
         let message = [
-          this.codeEditSession.saveCommand,
+          saveCommand,
           ...codeLines,
           this.codeEditSession.endMarker
         ].join('\n');
