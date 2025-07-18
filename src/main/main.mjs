@@ -41,7 +41,8 @@ const store = new Store(
           host: 'code.deanpool.net',
           port: 1701,
           htmlEnabled: true,
-          ansiEnabled: false
+          ansiEnabled: false,
+          websocketEnabled: false
         },
       }
     }

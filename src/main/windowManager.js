@@ -153,10 +153,10 @@ export function setupWindowIpcHandlers() {
         });
     });
 
-    ipcMain.on('site-selected', (event, name, host, port, connectionString, acEnabled, ansiEnabled, htmlEnabled) => {
+    ipcMain.on('site-selected', (event, name, host, port, connectionString, acEnabled, ansiEnabled, htmlEnabled, websocketEnabled) => {
 
         Object.values(windows).forEach(win => {
-            win.webContents.send('site-selected', name, host, port, connectionString, acEnabled, ansiEnabled, htmlEnabled);
+            win.webContents.send('site-selected', name, host, port, connectionString, acEnabled, ansiEnabled, htmlEnabled, websocketEnabled);
         });
     });
 

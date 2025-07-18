@@ -19,7 +19,7 @@ export const eventMixin = {
         this.inputHistory = Object.values(inputHistory || {});
       });
   
-      window.api.on('site-selected', async (event, name, host, port, connstr, acEnabled, ansiEnabled, htmlEnabled) => {
+      window.api.on('site-selected', async (event, name, host, port, connstr, acEnabled, ansiEnabled, htmlEnabled, websocketEnabled) => {
         this.name = name;
         this.host = host;
         this.port = port;
@@ -27,11 +27,17 @@ export const eventMixin = {
         this.acEnabled = acEnabled;
         this.ansiEnabled = ansiEnabled;
         this.htmlEnabled = htmlEnabled;
+        this.websocketEnabled = websocketEnabled;
         console.log(connstr);
   
         let versionNumber = await window.api.version();
         document.title = `${this.name} - MUjs v${versionNumber}`;
-        window.api.connect(this.port, this.host);
+        
+        if (websocketEnabled) {
+          window.api.connectWebSocket(this.host, this.port);
+        } else {
+          window.api.connect(this.port, this.host);
+        }
       });
   
       window.api.on('disconnected', () => {

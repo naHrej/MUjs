@@ -156,6 +156,23 @@
           </label>
           </div>
 
+          <div class="edit-modal-content-item">
+          <!-- WebSocket Checkbox Input -->
+          <input
+            type="checkbox"
+            id="websocketCheckbox"
+            class="checkbox-hidden"
+            v-model="currentSite.websocketEnabled"
+          />
+          <label for="websocketCheckbox">
+            <i class="far fa-square"></i>
+            <!-- Unchecked icon -->
+            <i class="fas fa-check-square"></i>
+            <!-- Checked icon -->
+            Use WebSocket?
+          </label>
+          </div>
+
           <button @click="saveSite" class="btn btn-primary">
             <i class="fas fa-save"></i> Save
           </button>

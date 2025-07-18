@@ -4,6 +4,7 @@
 
 - Full HTML5 support
 - **Unicode Support** - Full Unicode text display and input support for international characters, symbols, and emojis
+- **WebSocket Support** - Modern WebSocket connections with dedicated API channel for enhanced features
 - Separate code editor window
   - **Multi-Language Support** - Switch between MOOcode and C# syntax highlighting
   - Smart syntax hilighting tailored for MOO

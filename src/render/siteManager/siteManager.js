@@ -69,6 +69,7 @@ const conmgr = Vue.createApp({
         acEnabled: false,
         ansiEnabled: true,
         htmlEnabled: false,
+        websocketEnabled: false,
       });
       this.saveSite(this.sites.length - 1);
     },
@@ -81,9 +82,11 @@ const conmgr = Vue.createApp({
         this.sites[key].connectionString,
         this.sites[key].acEnabled,
         this.sites[key].ansiEnabled,
-        this.sites[key].htmlEnabled
+        this.sites[key].htmlEnabled,
+        this.sites[key].websocketEnabled
       );
       console.log("htmlEnabled: " + this.sites[key].htmlEnabled);
+      console.log("websocketEnabled: " + this.sites[key].websocketEnabled);
 
       this.showMgr = false;
     },
