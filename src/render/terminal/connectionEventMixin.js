@@ -38,8 +38,8 @@ export const connectionEventMixin = {
         data = window.api.ansi_to_html(data, this.htmlEnabled);
       }
 
-      // trim any unprintable characters
-      data = data.replace(/[\x00-\x1F\x7F-\x9F]/g, "");
+      // Only remove problematic control characters, preserve Unicode and printable chars
+      data = data.replace(/[\x00\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
       //data = data.trim();
 
       if (data.startsWith("FugueEdit")) {

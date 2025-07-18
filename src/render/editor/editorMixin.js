@@ -8,6 +8,8 @@ export const editorMixin = {
       currentInputIndex: -1,
       grammar: null,
       registry: null,
+      currentLanguage: 'moocode', // Track current language
+      atLineCount: 0, // Track line count for MOOcode
     };
   },
   async mounted() {
@@ -148,6 +150,7 @@ export const editorMixin = {
       const loadButton = document.getElementById("load");
       const saveButton = document.getElementById("save");
       const submitButton = document.getElementById("submit");
+      const languageSelector = document.getElementById("language-selector");
 
       loadButton.addEventListener("click", () => {
         const text = this.OpenFile();
@@ -160,7 +163,23 @@ export const editorMixin = {
 
       submitButton.addEventListener("click", () => {
         this.SubmitToServer();
+      });
 
+      // Language selector event listener
+      languageSelector.addEventListener("change", (e) => {
+        this.switchLanguage(e.target.value);
+      });
+
+      // Set initial language selector value
+      languageSelector.value = this.currentLanguage;
+
+      // Load saved language preference
+      window.store.get('editorLanguage').then((savedLanguage) => {
+        if (savedLanguage && savedLanguage !== this.currentLanguage) {
+          this.currentLanguage = savedLanguage;
+          languageSelector.value = savedLanguage;
+          this.switchLanguage(savedLanguage);
+        }
       });
 
       window.addEventListener("beforeunload", function () {
@@ -195,22 +214,29 @@ export const editorMixin = {
     UpdateTitle() {
       const position = editor.getPosition();
       const model = editor.getModel();
-      let programLineContent = "No @program line found";
-      for (
-        let lineNumber = position.lineNumber;
-        lineNumber > 0;
-        lineNumber--
-      ) {
-        const lineContent = model.getLineContent(lineNumber);
-        if (lineContent.includes("@program")) {
-          programLineContent = lineContent;
-          // remove the @program keyword from the title
-          programLineContent = programLineContent.replace("@program", "").trim();
-          break; // Stop searching once the nearest @program line is found
+      
+      if (this.currentLanguage === 'moocode') {
+        let programLineContent = "No @program line found";
+        for (
+          let lineNumber = position.lineNumber;
+          lineNumber > 0;
+          lineNumber--
+        ) {
+          const lineContent = model.getLineContent(lineNumber);
+          if (lineContent.includes("@program")) {
+            programLineContent = lineContent;
+            // remove the @program keyword from the title
+            programLineContent = programLineContent.replace("@program", "").trim();
+            break; // Stop searching once the nearest @program line is found
+          }
         }
+        // set the title to the content of the nearest @program line
+        document.title = programLineContent + " - Moocode Editor";
+      } else {
+        // For C# and other languages, use a generic title
+        const languageName = this.currentLanguage.charAt(0).toUpperCase() + this.currentLanguage.slice(1);
+        document.title = `${languageName} Code Editor - MUjs`;
       }
-      // set the title to the content of the nearest @program line
-      document.title = programLineContent + " - Moocode Editor";
     },
     submitSelectedToServer() {
       const selection = editor.getSelection();
@@ -234,50 +260,96 @@ export const editorMixin = {
       editor.setValue(text);
     },
 
+    switchLanguage(language) {
+      this.currentLanguage = language;
+      
+      // Save language preference
+      window.store.set('editorLanguage', language);
+      
+      // Get current editor content and position
+      const currentContent = editor.getValue();
+      const currentPosition = editor.getPosition();
+      
+      // Update the language model
+      monaco.editor.setModelLanguage(editor.getModel(), language);
+      
+      // Update line numbers based on language
+      if (language === 'moocode') {
+        this.setupMoocodeLineNumbers();
+      } else {
+        this.setupStandardLineNumbers();
+      }
+      
+      // Restore position
+      editor.setPosition(currentPosition);
+      
+      console.log(`Switched to ${language} language`);
+    },
+
+    setupMoocodeLineNumbers() {
+      // Apply MOOcode-specific line numbering
+      editor.updateOptions({
+        lineNumbers: (lineNumber) => {
+          const model = editor.getModel();
+          if (model) {
+            const lineContent = model.getLineContent(lineNumber);
+            // if the line starts with @@ stop the line number incrementing and display blank
+            if (lineContent.startsWith('@@') || lineContent == '.') {
+              return '';
+            }
+
+            if (lineContent.startsWith("@program")) {
+              // Reset the line number for the next line
+              this.atLineCount = lineNumber;
+              // Return no line number for lines starting with @program
+              return "";
+            } else {
+              // Adjust line number based on the last @program line
+              let adjustedLineNumber = lineNumber - (this.atLineCount || 0);
+              if (adjustedLineNumber < 1) {
+                adjustedLineNumber = 1;
+                this.atLineCount = 0;
+              }
+              return adjustedLineNumber.toString();
+            }
+          }
+          return lineNumber.toString(); // Default line number if model is not accessible
+        }
+      });
+    },
+
+    setupStandardLineNumbers() {
+      // Apply standard line numbering for C# and other languages
+      editor.updateOptions({
+        lineNumbers: 'on'
+      });
+    },
+
     initEditor() {
       let atLineCount = 0;
       // Initialize your Monaco editor instance
       // For example:
       editor = monaco.editor.create(document.getElementById('monaco-editor-moocode'), {
         value: '',
-        language: 'moocode', // Use 'plaintext' initially or the language id if known
+        language: this.currentLanguage,
         theme: 'moocode',
         automaticLayout: true,
         inlayHints: {
           enabled: true,
         },
-        lineNumbers: function (lineNumber) {
-          const model = editor.getModel();
-          if (model) {
-            const lineContent = model.getLineContent(lineNumber);
-            // if the line starts with @@ stop the line number incrementing and display blank
-            if (lineContent.startsWith('@@') || lineContent == '.') {
-              atLineCount++;
-              return '';
-            }
+      });
 
-              if (lineContent.startsWith("@program")) {
-                // Reset the line number for the next line
-                atLineCount = lineNumber;
-                // Return no line number for lines starting with @program
-                return "";
-              } else {
-                // Adjust line number based on the last @program line
-                let adjustedLineNumber = lineNumber - atLineCount;
-                if (adjustedLineNumber < 1) {
-                  adjustedLineNumber = 1;
-                  atLineCount = 0;
-                }
-                return adjustedLineNumber.toString();
-              }
-            }
-            return lineNumber.toString(); // Default line number if model is not accessible
-          },
-        });
-                  // Add keydown event listener
-                  editor.onKeyDown((e) => {
-                      this.UpdateTitle();
-                  });
+      // Set up initial line numbers based on current language
+      if (this.currentLanguage === 'moocode') {
+        this.setupMoocodeLineNumbers();
+      } else {
+        this.setupStandardLineNumbers();
+      }
+
+      // Add keydown event listener
+      editor.onKeyDown((e) => {
+        this.UpdateTitle();
+      });
       
       
 
