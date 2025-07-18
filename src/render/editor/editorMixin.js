@@ -305,7 +305,7 @@ export const editorMixin = {
           this.codeEditSession.endMarker
         ].join('\n');
         console.debug('[SubmitToServer] Sending code block to server:', message);
-        window.api.write(message)
+        window.api.send("submit",message)
           .then(() => {
             console.debug('[SubmitToServer] Code block sent successfully.');
           })
