@@ -133,6 +133,50 @@ export const editorMixin = {
       },
     });
 
+    // Create header info container above the editor
+    const editorContainer = document.getElementById('editor');
+    let headerInfo = document.getElementById('editor-header-info');
+    if (!headerInfo) {
+      headerInfo = document.createElement('div');
+      headerInfo.id = 'editor-header-info';
+      headerInfo.style.maxHeight = '120px'; // 8 lines * 15px
+      headerInfo.style.overflowY = 'auto';
+      headerInfo.style.background = '#222';
+      headerInfo.style.color = '#cbd5d0';
+      headerInfo.style.fontFamily = 'monospace';
+      headerInfo.style.fontSize = '14px';
+      headerInfo.style.padding = '8px';
+      headerInfo.style.marginBottom = '8px';
+      headerInfo.style.borderRadius = '6px';
+      headerInfo.style.border = '1px solid #444';
+      headerInfo.style.boxSizing = 'border-box';
+      editorContainer.insertBefore(headerInfo, editorContainer.firstChild);
+    }
+
+    // Listen for code editor open event to update header info
+    window.api.on('open-code-editor', (event, payload) => {
+      // payload.headerData is an array of strings
+      if (Array.isArray(payload.headerData)) {
+        headerInfo.innerHTML = '';
+        payload.headerData.forEach(line => {
+          const div = document.createElement('div');
+          div.textContent = line;
+          headerInfo.appendChild(div);
+        });
+      }
+      // Store session info for saving
+      this.codeEditSession = {
+        saveCommand: payload.saveCommand,
+        headerData: payload.headerData,
+        codeLines: payload.codeLines,
+        endMarker: payload.endMarker
+      };
+      // Set code in editor
+      if (Array.isArray(payload.codeLines)) {
+        editor.setValue(payload.codeLines.join('\n'));
+      }
+    });
+
     this.initEditor();
 
     window.api.on("update-editor", (event, data) => {
@@ -249,8 +293,30 @@ export const editorMixin = {
       }
     },
     SubmitToServer() {
-      // Send the contents of the editor to the server
-      window.api.send("submit", editor.getValue());
+      // If code editing session info is available, use it
+      if (this.codeEditSession && this.codeEditSession.saveCommand && this.codeEditSession.endMarker) {
+        // Get the code from the editor (as array of lines)
+        let code = editor.getValue();
+        let codeLines = code.split(/\r?\n/);
+        // Compose the message to send back to the server as a single string
+        let message = [
+          this.codeEditSession.saveCommand,
+          ...codeLines,
+          this.codeEditSession.endMarker
+        ].join('\n');
+        console.debug('[SubmitToServer] Sending code block to server:', message);
+        window.api.write(message)
+          .then(() => {
+            console.debug('[SubmitToServer] Code block sent successfully.');
+          })
+          .catch((err) => {
+            console.error('[SubmitToServer] Error sending code block:', err);
+          });
+      } else {
+        // Fallback: just send the editor contents
+        console.debug('[SubmitToServer] No codeEditSession, sending editor contents.');
+        window.api.send("submit", editor.getValue());
+      }
     },
     async SaveToFile() {
       await window.api.saveFile(editor.getValue());

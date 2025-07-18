@@ -116,6 +116,18 @@ export function setupWindowIpcHandlers() {
         }
     });
 
+    // Handle open-code-editor event from renderer
+    ipcMain.on('open-code-editor', (event, payload) => {
+        // Open the editor window if not already open
+        if (!windows['editor']) {
+            spawnNewWindow('editor', '').then(() => {
+                windows['editor'].webContents.send('open-code-editor', payload);
+            });
+        } else {
+            windows['editor'].webContents.send('open-code-editor', payload);
+        }
+    });
+
     // retransmit submit event
     ipcMain.on('submit', (event, data) => {
         Object.values(windows).forEach(win => {

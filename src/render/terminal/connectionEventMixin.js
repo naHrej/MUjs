@@ -33,6 +33,52 @@ export const connectionEventMixin = {
     window.api.on("received-data", (event, data) => {
       let omit = false;
 
+      // New code editing protocol
+      if (!this.codeEditSession) {
+        this.codeEditSession = {
+          active: false,
+          saveCommand: '',
+          headerData: [],
+          codeLines: [],
+          endMarker: '',
+        };
+      }
+
+      // Handle code editing prompts
+      if (data.startsWith("ProgStart > ")) {
+        this.codeEditSession.active = true;
+        this.codeEditSession.saveCommand = data.replace("ProgStart > ", "").trim();
+        this.codeEditSession.headerData = [];
+        this.codeEditSession.codeLines = [];
+        this.codeEditSession.endMarker = '';
+        omit = true;
+        return;
+      }
+      if (this.codeEditSession.active && data.startsWith("ProgData > ")) {
+        this.codeEditSession.headerData.push(data.replace("ProgData > ", "").trim());
+        omit = true;
+        return;
+      }
+      if (this.codeEditSession.active && data.startsWith("ProgEdit > ")) {
+        this.codeEditSession.codeLines.push(data.replace("ProgEdit > ", ""));
+        omit = true;
+        return;
+      }
+      if (this.codeEditSession.active && data.startsWith("ProgEnd > ")) {
+        this.codeEditSession.endMarker = data.replace("ProgEnd > ", "").trim();
+        // Send all collected info to the editor popup
+        window.api.send("open-code-editor", {
+          saveCommand: this.codeEditSession.saveCommand,
+          headerData: this.codeEditSession.headerData,
+          codeLines: this.codeEditSession.codeLines,
+          endMarker: this.codeEditSession.endMarker
+        });
+        this.codeEditSession.active = false;
+        omit = true;
+        return;
+      }
+
+      // ...existing code...
       console.log("ANSI Enabled: " + this.ansiEnabled);
       if (this.ansiEnabled) {
         data = window.api.ansi_to_html(data, this.htmlEnabled);
@@ -42,17 +88,6 @@ export const connectionEventMixin = {
       data = data.replace(/[\x00\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
       //data = data.trim();
 
-      if (data.startsWith("FugueEdit")) {
-        data = data.replace("FugueEdit > ", "");
-
-        data = data.replace("FugueEdit &gt; ", "");
-
-        data = data + "\n";
-
-        // send an update-editor back to electron via IPC
-        window.api.send("update-editor", data);
-        omit = true;
-      }
       const regex = /!@style:url:(.+?)(?=.less)/;
       const match = data.match(regex);
       if (match) {

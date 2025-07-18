@@ -6,11 +6,17 @@
 - **Unicode Support** - Full Unicode text display and input support for international characters, symbols, and emojis
 - Separate code editor window
   - **Multi-Language Support** - Switch between MOOcode and C# syntax highlighting
-  - Smart syntax hilighting tailored for MOO
-  - Captures code listings when lines begin with the "FugueEdit > " prefix
+  - Smart syntax highlighting tailored for MOO
+  - Captures code listings using a new protocol:
+    - `ProgStart > <save command>`: Marks the start of a code block and provides the command to send back when saving.
+    - `ProgData > <header info>`: Displays up to 8 lines of informational header data above the code editor (read-only, scrollable).
+    - `ProgEdit > <code line>`: Each line of code to be edited in the code editor.
+    - `ProgEnd > <end marker>`: Marks the end of the code block and is sent back to the server when saving.
+  - The code editor popup now displays header info above the code editor, separate from the editable code area.
+  - When saving, only the save command, code lines, and end marker are sent back to the server (header info is not sent).
   - Numbers lines from line 1 for each verb in the editor
   - Control-S submits the code back to the server
-  - Control-Shift-S submits only the hilighted code to the server
+  - Control-Shift-S submits only the highlighted code to the server
   - Supports loading and saving files to disk
 
 - Accepts and dynamically updates stylesheets from the game server
