@@ -40,7 +40,7 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
     "@electron-forge/plugin-fuses": "^7.4.0",
     "@electron/fuses": "^1.8.0",
-    "electron": "^29.2.0"
+    "electron": "^29.4.6"
   },
   "dependencies": {
     "@guolao/vue-monaco-editor": "^1.5.1",
