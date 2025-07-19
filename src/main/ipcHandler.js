@@ -51,4 +51,29 @@ export function setupIpcHandlers(app) {
         }
     })
 
+    // Handle read file content
+    ipcMain.handle('read-file-content', async (event, filePath) => {
+        try {
+            if (fs.existsSync(filePath)) {
+                return fs.readFileSync(filePath, 'utf8');
+            } else {
+                throw new Error('File does not exist: ' + filePath);
+            }
+        } catch (error) {
+            console.error('Error reading file:', error);
+            throw error;
+        }
+    });
+
+    // Handle save file content
+    ipcMain.handle('save-file-content', async (event, filePath, content) => {
+        try {
+            fs.writeFileSync(filePath, content, 'utf8');
+            return true;
+        } catch (error) {
+            console.error('Error saving file:', error);
+            throw error;
+        }
+    });
+
 }

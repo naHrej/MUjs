@@ -1,6 +1,7 @@
 
 import { app, Menu, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -214,9 +215,10 @@ export function spawnNewWindow(id, html) {
             width: 800,
             height: 600,
             webPreferences: {
-                preload: id == 'index' || id == 'settings' || 'editor' ? preloadPath : undefined,
-                contextIsolation: false,
-                nodeIntegration: true,
+                preload: id == 'index' || id == 'settings' || id == 'editor' ? preloadPath : undefined,
+                contextIsolation: true,
+                nodeIntegration: false,
+                enableRemoteModule: false,
                 sandbox: false
             }
         });
@@ -231,9 +233,61 @@ export function spawnNewWindow(id, html) {
             windows[id].flashFrame(false);
         });
 
-
-
-        windows[id].loadFile(`public/${id == 'index' || id == 'settings' || id == 'editor' ? id : 'blank'}.html`);
+        // Load the appropriate HTML file based on environment
+        // Check if built files exist (production build) or use Vite dev server
+        const isBuilt = fs.existsSync(path.join(__dirname, '../../dist/public/index.html'));
+        
+        if (app.isPackaged) {
+            // Packaged production: load from built files in resources
+            let htmlFile;
+            if (id === 'index') {
+                htmlFile = 'index.html';
+            } else if (id === 'editor') {
+                htmlFile = 'editor.html';
+            } else if (id === 'settings') {
+                htmlFile = 'settings.html';
+            } else {
+                htmlFile = 'blank.html';
+            }
+            
+            const htmlPath = path.join(process.resourcesPath, 'app', 'dist', 'public', htmlFile);
+            console.log(`Loading window ${id} from ${htmlPath}`);
+            windows[id].loadFile(htmlPath);
+        } else if (isBuilt) {
+            // Development with built files: load from local dist directory
+            let htmlFile;
+            if (id === 'index') {
+                htmlFile = 'index.html';
+            } else if (id === 'editor') {
+                htmlFile = 'editor.html';
+            } else if (id === 'settings') {
+                htmlFile = 'settings.html';
+            } else {
+                htmlFile = 'blank.html';
+            }
+            
+            const htmlPath = path.join(__dirname, '../../dist/public', htmlFile);
+            console.log(`Loading window ${id} from ${htmlPath}`);
+            windows[id].loadFile(htmlPath);
+        } else {
+            // Development with Vite dev server
+            const vitePort = 5173;
+            let htmlFile;
+            
+            if (id === 'index') {
+                htmlFile = 'index.html';
+            } else if (id === 'editor') {
+                htmlFile = 'editor.html';
+            } else if (id === 'settings') {
+                htmlFile = 'settings.html';
+            } else {
+                htmlFile = 'blank.html';
+            }
+            
+            const url = `http://localhost:${vitePort}/${htmlFile}`;
+            console.log(`Loading window ${id} from ${url}`);
+            windows[id].loadURL(url);
+        }
 
         windows[id].once('ready-to-show', () => {
             windows[id].on('closed', () => {

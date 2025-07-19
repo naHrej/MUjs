@@ -27,7 +27,65 @@ export const api = {
   },
   version: () => ipcRenderer.invoke("get-app-version"),
   send: (channel, ...args) => {
-    ipcRenderer.send(channel, ...args);
+    // Ensure all arguments are serializable
+    const serializableArgs = args.map(arg => {
+      if (typeof arg === 'string' || typeof arg === 'number' || typeof arg === 'boolean') {
+        return arg;
+      } else if (arg === null || arg === undefined) {
+        return arg;
+      } else if (Array.isArray(arg)) {
+        return arg.map(item => String(item));
+      } else if (typeof arg === 'object') {
+        // Deep clone and ensure serializable
+        return JSON.parse(JSON.stringify(arg));
+      } else {
+        return String(arg);
+      }
+    });
+    ipcRenderer.send(channel, ...serializableArgs);
+  },
+  
+  // Convenience methods for event handling
+  onReceivedData: (callback) => {
+    ipcRenderer.on('received-data', (event, data) => callback(data));
+  },
+  onSiteSelected: (callback) => {
+    ipcRenderer.on('site-selected', (event, name, host, port, connectionString, acEnabled, ansiEnabled, htmlEnabled, websocketEnabled) => {
+      callback(name, host, port, connectionString, acEnabled, ansiEnabled, htmlEnabled, websocketEnabled);
+    });
+  },
+  onConnect: (callback) => {
+    ipcRenderer.on('connect', callback);
+  },
+  onDisconnected: (callback) => {
+    ipcRenderer.on('disconnected', callback);
+  },
+  onSubmit: (callback) => {
+    ipcRenderer.on('submit', callback);
+  },
+  onOpenCodeEditor: (callback) => {
+    ipcRenderer.on('open-code-editor', (event, payload) => callback(payload));
+  },
+  onUpdateEditor: (callback) => {
+    ipcRenderer.on('update-editor', (event, data) => callback(data));
+  },
+  onSettingsUpdated: (callback) => {
+    ipcRenderer.on('settings-updated', callback);
+  },
+  
+  // Site management
+  siteSelected: (name, host, port, connectionString, acEnabled, ansiEnabled, htmlEnabled, websocketEnabled) => {
+    ipcRenderer.send('site-selected', name, host, port, connectionString, acEnabled, ansiEnabled, htmlEnabled, websocketEnabled);
+  },
+  
+  // Editor operations
+  openCodeEditor: (payload) => {
+    ipcRenderer.send('open-code-editor', payload);
+  },
+  
+  // Settings
+  settingsUpdated: () => {
+    ipcRenderer.send('settings-updated');
   },
   connect: (port, host) => {
     isWebSocketMode = false;
@@ -95,6 +153,8 @@ export const api = {
       console.error('WebSocket API error:', error);
     };
   },
+  
+  // Connection status
   connected: () => {
     if (isWebSocketMode) {
       return websocket && websocket.readyState === WebSocket.OPEN;

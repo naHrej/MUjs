@@ -1,12 +1,12 @@
-import { ipcRenderer } from 'electron';
+import { ipcRenderer, contextBridge } from 'electron';
 import fs from 'fs';
 import chokidar from 'chokidar';
 import { api } from './api/api.js';
 import store from './api/store.js';
 
-
-window.api = api;
-window.store = store;
+// Expose APIs to renderer process through contextBridge
+contextBridge.exposeInMainWorld('api', api);
+contextBridge.exposeInMainWorld('store', store);
 let watchPath;
 let watcher;
 let watchEnabled = false;
