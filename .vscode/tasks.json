@@ -7,7 +7,13 @@
 			"command": "npm install; npm run start",
 			"group": "build",
 			"isBackground": false,
-			"problemMatcher": []
+			"problemMatcher": [],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
 		}
 	]
 }
