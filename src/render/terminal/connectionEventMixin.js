@@ -132,6 +132,16 @@ export const connectionEventMixin = {
       }
 
       let doc = parser.parseFromString(data, "text/html");
+      let styles = doc.querySelectorAll("style");
+
+      if (styles.length > 0) {
+        styles.forEach((style) => {
+          let newStyle = document.createElement("style");
+          newStyle.textContent = style.textContent;
+          document.head.appendChild(newStyle);
+        });
+        omit = true;
+      }
 
       // Find all <script tags>
       let scripts = doc.querySelectorAll("script");
