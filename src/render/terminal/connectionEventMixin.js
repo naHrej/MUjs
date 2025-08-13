@@ -107,7 +107,8 @@ export const connectionEventMixin = {
 
 
       let newElement = document.createElement("span");
-
+      newElement.style.margin = "0 0px";
+      newElement.style.padding = "0 0px";
       newElement.title = new Date().toLocaleString();
 
       // if data starts with: ANSI Version 2.6 is currently active

@@ -198,15 +198,12 @@ export const api = {
 
 // WebSocket data processing function
 function processWebSocketData(data) {
-  // Process WebSocket data line by line, similar to telnet processing
-  const lines = data.split('\n');
-  lines.forEach(line => {
-    if (line.trim()) {
-      // Only remove problematic control characters, preserve Unicode
-      line = line.replace(/[\x00\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
-      ipcRenderer.send("received-data", line);
-    }
-  });
+  // Treat incoming data as HTML - send it as-is without line splitting
+  if (data.trim()) {
+    // Only remove problematic control characters, preserve Unicode
+    data = data.replace(/[\x00\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
+    ipcRenderer.send("received-data", data);
+  }
 }
 
 // API WebSocket message handler
@@ -255,26 +252,17 @@ ipcRenderer.on('disconnect', () => {
 let buffer = "";
 
 client.on("data", (data) => {
-  // split the data on newlines
-    
-    // iterate the data and send it individually to the receiver
-    while(true)
-        {
-            let index = data.indexOf("\n");
-            if(index === -1)
-            {
-                buffer += data.toString("utf-8");
-                break;
-            }
-            let line = buffer + data.toString("utf-8", 0, index);
-            // Only remove null characters and other problematic control chars, preserve Unicode
-            line = line.replace(/[\x00\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
-
-            ipcRenderer.send("received-data", line);
-            data = data.slice(index + 1);
-            buffer = "";
-        }
+  // Treat incoming data as HTML - accumulate and send complete chunks
+  buffer += data.toString("utf-8");
   
+  // Look for complete HTML blocks or natural breakpoints
+  // For now, send data immediately as HTML chunks
+  if (buffer.trim()) {
+    // Only remove problematic control characters, preserve Unicode
+    let processedData = buffer.replace(/[\x00\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
+    ipcRenderer.send("received-data", processedData);
+    buffer = "";
+  }
 });
 
 client.on("close", () => {
