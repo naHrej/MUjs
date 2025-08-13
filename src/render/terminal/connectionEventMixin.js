@@ -92,25 +92,19 @@ export const connectionEventMixin = {
       data = data.replace(/[\x00\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
       //data = data.trim();
 
-      const regex = /!@style:url:(.+?)(?=.less)/;
-      const match = data.match(regex);
-      if (match) {
-        console.log("matched style url.");
-        // Extract the URL from the data
-        let url = match[1];
-        // Append a unique query string to the URL
-        url += ".less?" + new Date().getTime();
-
-        // replace http with https
-        url = url.replace("http://", "https://");
-        // trim the url
-        url = url.trim();
-
-        this.styleURL = url;
-
-        this.loadStyleFromURL(url);
-        omit = true;
+            let mujsElem = document.querySelector("MUjs");
+      if(mujsElem) {
+        let url = mujsElem.getAttribute("style");
+        if(url) {
+            url += (url.includes("?") ? "&" : "?") + new Date().getTime();
+            this.styleURL = url;
+            this.loadStyleFromURL(url);
+        }
+        mujsElem.parentNode.removeChild(mujsElem);
       }
+
+
+
 
       let newElement = document.createElement("span");
 
