@@ -94,4 +94,5 @@ src/.DS_Store
 
 dist/
 out/
+.vite/
 .DS_Store

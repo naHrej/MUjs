@@ -1,0 +1,38 @@
+appId: com.mujs.client
+productName: MUjs
+directories:
+  output: dist
+  buildResources: public
+files:
+  - '!**/.vscode/*'
+  - '!**/.idea/*'
+  - '!**/*.md'
+  - '!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}'
+  - '!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}'
+  - '!**/node_modules/*.d.ts'
+  - '!**/node_modules/.bin'
+  - '!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}'
+  - '!.editorconfig'
+  - '!**/._*'
+  - '!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}'
+  - '!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}'
+  - '!**/{appveyor.yml,.travis.yml,circle.yml}'
+  - '!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}'
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: public/icon.ico
+
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Network
+  icon: public/icon.png
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true

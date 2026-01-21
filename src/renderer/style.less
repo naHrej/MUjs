@@ -1,0 +1,234 @@
+body.enable-motion {
+  background: #000 !important;
+}
+// Dark Mode Theme Variables
+@dark-bg-color: #333; // Dark background color
+@dark-text-color: #fff; // Light text color for contrast
+@button-hover-bg-color: #555; // Slightly lighter background color for hover state
+@button-hover-text-color: #ddd; // Slightly darker text color for hover state
+
+@font-face {
+  font-family: "TNG_Title";
+  src: url("https://code.deanpool.net/fonts/TNG_Title.woff2");
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  overflow-y: auto;
+}
+
+// PrimeVue dark theme background
+html.p-dark,
+html.dark-mode,
+html[data-theme="dark"] {
+  background-color: var(--p-surface-ground, #1e1e1e);
+  color: var(--p-text-color, #ffffff);
+}
+
+body {
+  background-color: var(--p-surface-ground, #1e1e1e);
+  color: var(--p-text-color, #ffffff);
+}
+
+.flex-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; // Full height of the viewport
+  width: 100vw; // Full width of the viewport
+  overflow: hidden; // Prevents content from overflowing the container
+}
+
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#resizeHandle {
+  height: 5px !important;
+  min-height: 5px !important;
+  max-height: 5px !important;
+  flex-grow: 0 !important;
+  flex-shrink: 0 !important;
+  cursor: ns-resize;
+  background-color: #ccc;
+  display: block !important;
+  visibility: visible !important;
+  z-index: 10;
+}
+
+#monaco-editor-toolbar {
+  flex: 0 1 auto; // Adjusted to only take the space it needs without growing
+  max-height: 10%; // Limits the toolbar to 10% of the container's height
+  // darkmode background
+  background-color: #333;
+  // fontAwesome buttons should also be dark
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  gap: 10px;
+}
+
+#language-selector {
+  background-color: @dark-bg-color;
+  color: @dark-text-color;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: @button-hover-bg-color;
+    border-color: #777;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #007acc;
+    box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.3);
+  }
+
+  option {
+    background-color: @dark-bg-color;
+    color: @dark-text-color;
+  }
+}
+
+#monaco-editor-moocode {
+  flex: 9; // Takes up the remaining space
+  // Ensures it fills 90% of the container's height
+}
+
+#SdWiqHtqa {
+  min-height: 10%;
+  width: 100%;
+  background-color: black;
+  color: white;
+  flex-grow: 1;
+  resize: none;
+  // Removed flex-grow to allow content-based sizing
+}
+
+#AZUHz3kQsgMj {
+  max-height: 90%;
+  width: 100%;
+  background-color: black;
+  color: white;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  //white-space: break-spaces;
+  flex-shrink: 1; // Keeps this to fill remaining space
+  font-family: "Consolas", "Courier New", Courier, monospace; // default for console games
+  padding: 3px;
+}
+
+// SiteManager styles removed - now using PrimeVue components
+
+.card-content {
+  flex-grow: 1; /* Allow the main content to take up available space, pushing the .button-row to the bottom */
+  /* Add styling for your main content here */
+}
+
+.host-label {
+  margin: 0;
+  display: flex;
+  align-items: center; /* Aligns the label text and input field */
+  gap: 5px; /* Space between the label text and the input field */
+  color: #545050;
+  font-weight: 600; /* Modern UIs often use semi-bold or bold labels */
+  font-size: 16px; /* Adjust based on your design */
+}
+.card-text {
+  margin: 0; /* Removes default margin */
+  font-size: 16px; /* Consistent font size with labels */
+  color: #9f9a9a; /* Dark gray text color */
+}
+
+.button-row {
+  display: flex;
+  justify-content: center; // Centers the buttons in the button row
+  gap: 1px; // Reduces the space between buttons for a closer appearance
+
+  padding-top: 10px;
+  padding-bottom: 5px;
+}
+
+// Button Styles
+button {
+  font-family: Arial, Helvetica, sans-serif;
+  width: 2em;
+  height: 2em;
+  margin: 2px;
+  border-radius: 0.5em; /* Make them circular */
+  color: #e0e6ed;
+  background-color: #222e3a;
+  border: 1px solid #444c5c;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  align-content: center;
+  vertical-align: middle;
+  &:hover {
+    background-color: #e0e6ed;
+    color: #222e3a;
+    border-color: #222e3a;
+  }
+
+  &.btn-primary {
+    width: 5em;
+    background-color: green;
+  }
+  &.btn-secondary {
+    background-color: #2b53a7;
+  }
+  &.btn-danger {
+    background-color: brown;
+  }
+  &.btn-success {
+    background-color: Yellow;
+    color: #000000;
+    width: 5em;
+  }
+}
+
+/* Example of how you might style control buttons if you add them */
+.control-buttons {
+  display: flex;
+  gap: 8px; /* Space between buttons */
+}
+
+.control-button {
+  width: 12px;
+  height: 12px;
+  border-radius: 1em; /* Make them circular */
+  background-color: #fff; /* White background */
+}
+
+.fa-check-square,
+.fa-square {
+  cursor: pointer;
+}
+.checkbox-hidden {
+  display: none;
+}
+.checkbox-hidden + label .fa-square {
+  display: inline-block;
+}
+.checkbox-hidden:checked + label .fa-square {
+  display: none;
+}
+.checkbox-hidden + label .fa-check-square {
+  display: none;
+}
+.checkbox-hidden:checked + label .fa-check-square {
+  display: inline-block;
+}
+// SiteManager add button styles removed - now using PrimeVue Button component
+
+// SiteManager modal styles removed - now using PrimeVue Dialog component

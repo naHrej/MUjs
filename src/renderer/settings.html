@@ -1,0 +1,108 @@
+<html lang="en" data-bs-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+
+  <title>MU*JS</title>
+  <!-- Include the style sheet style.css -->
+</head>
+
+<body>
+  <div id="settings" class="container py-5">
+    <div class="accordion" id="settingsAccordion">
+      <!-- Connection-->
+      
+        <!-- fonts-->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="fontsHeading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#fontsCollapse" aria-expanded="false" aria-controls="fontsCollapse">
+            World Options
+          </button>
+        </h2>
+
+        <div id="fontsCollapse" class="accordion-collapse collapse" 
+        aria-labelledby="fontsHeading" data-bs-parent="#settingsAccordion">
+          <div class="accordion-body">
+            <form @submit.prevent="saveSettings" class="row g-3">
+                <div>ANSI Support: <input type="checkbox" v-model="ansiEnabled" /></div>
+                <div>HTML Support: <input type="checkbox" v-model="htmlEnabled" /></div>
+                <button type="submit" class="btn btn-primary" @click="saveSettings">Save</button>   
+            </form>
+          </div>
+        </div>
+      </div>
+      <!-- timers -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="timersHeading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#timersCollapse" aria-expanded="false" aria-controls="timersCollapse">
+            Timers
+          </button>
+        </h2>
+        <div id="timersCollapse" class="accordion-collapse collapse" 
+        aria-labelledby="timersHeading" data-bs-parent="#settingsAccordion">
+          <div class="accordion-body">
+            <div id="timersCollapse" class="accordion-collapse collapse" aria-labelledby="timersHeading"
+              data-bs-parent="#settingsAccordion">
+              <div class="accordion-body">
+                <!-- start of timers -->
+                <div class="mt-3">
+                  <h5>Existing Timers:</h5>
+                  <div v-for="(timer, key) in timers" :key="key" class="mb-2 row d-flex align-items-center">
+                    <div class="col-3">
+                      <label for="timer-name" class="form-label">Timer Name:</label>
+                      <input id="timer-name" v-model="timer.name" class="form-control" />
+                    </div>
+
+                    <div class="col-3">
+                      <label for="timer-duration" class="form-label">Interval:</label>
+                      <input id="timer-duration" type="number" v-model="timer.interval" class="form-control" />
+                    </div>
+
+                    <div class="col-3">
+                      <label for="timer-send" class="form-label">Send:</label>
+                      <input id="timer-send" v-model="timer.send" class="form-control" />
+                    </div>
+
+                    <div class="col-3 d-flex align-items-center">
+                      <button @click="saveTimer(key)" class="btn btn-primary btn-sm mr-2">Save</button>
+                      <button @click="deleteTimer(key)" class="btn btn-danger btn-sm">Delete</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-3">
+                  <button @click="addTimer" class="btn btn-success">Add New Timer</button>
+                </div>
+                <!-- end of timers -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <!-- Misc -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="headingMisc">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMisc" aria-expanded="false" aria-controls="collapseMisc">
+            Misc
+          </button>
+        </h2>
+        <div id="collapseMisc" class="accordion-collapse collapse" 
+        aria-labelledby="headingMisc" data-bs-parent="#settingsAccordion">
+          <div class="accordion-body">
+            <form @submit.prevent="updateWatchPath">
+              <div class="mb-3">
+                <label for="watchPath" class="form-label">Watch Path: {{ watchPath }}</label> &nbsp;
+                <button type="button" class="btn btn-primary" v-on:click="updateWatchPath">Folder Select</button>
+
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="./entry/settings.ts"></script>
+</body>
+
+</html>

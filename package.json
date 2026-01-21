@@ -1,60 +1,55 @@
 {
   "name": "MUjs",
-  "version": "1.0.6",
+  "version": "2.0.0",
   "description": "A HTML5 compliant MU* client",
   "type": "module",
-  "main": "src/main/main.mjs",
+  "main": "out/main/main.js",
   "scripts": {
-    "build": "webpack --mode=production",
-    "start": "electron-forge start",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "package": "electron-forge package",
-    "make": "electron-forge make",
-    "make:win": "electron-forge make --platform=win32 --arch=x64"
+    "dev": "node scripts/ensure-main.js && node scripts/watch-main.js & electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "type-check": "vue-tsc --noEmit",
+    "package": "electron-builder",
+    "package:win": "electron-builder --win",
+    "package:linux": "electron-builder --linux",
+    "package:all": "electron-builder --win --linux"
   },
-  "config": {
-    "forge": {
-      "directories": {
-        "app": "src",
-        "buildResources": "public",
-        "output": "out"
-      },
-      "packagerConfig": {},
-      "makers": [
-        {
-          "name": "@electron-forge/maker-zip"
-        }
-      ]
-    }
+  "author": {
+    "name": "Dean Santos",
+    "email": "dean@santos.ws",
+    "url": "https://github.com/naHrej"
   },
-  "author": "naHrej and Krenath",
-  "license": "GPL-3.0-only",
   "devDependencies": {
     "@babel/core": "^7.24.7",
     "@babel/preset-env": "^7.24.7",
-    "@electron-forge/cli": "^7.4.0",
-    "@electron-forge/maker-deb": "^7.4.0",
-    "@electron-forge/maker-rpm": "^7.4.0",
-    "@electron-forge/maker-squirrel": "^7.4.0",
-    "@electron-forge/maker-zip": "^7.4.0",
-    "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
-    "@electron-forge/plugin-fuses": "^7.4.0",
     "@electron/fuses": "^1.8.0",
-    "electron": "^29.4.6"
+    "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "@vitejs/plugin-vue": "^5.0.3",
+    "electron": "^29.4.6",
+    "electron-builder": "^26.4.0",
+    "electron-vite": "^5.0.0",
+    "less": "^4.2.0",
+    "typescript": "^5.3.3",
+    "vue-tsc": "^1.8.27"
   },
   "dependencies": {
     "@guolao/vue-monaco-editor": "^1.5.1",
+    "@primevue/themes": "^4.5.4",
     "ansi_up": "^6.0.2",
     "bootstrap": "^5.3.3",
     "buffer": "^6.0.3",
     "chokidar": "^3.6.0",
     "electron-squirrel-startup": "^1.0.1",
     "electron-store": "^8.2.0",
-    "fengari": "^0.1.4",
     "monaco-editor": "^0.50.0",
     "monaco-editor-textmate": "^4.0.0",
     "monaco-textmate": "^3.0.1",
     "onigasm": "^2.2.5",
+    "primeflex": "^4.0.0",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.5.4",
     "system-font-families": "^0.6.0",
     "url": "^0.11.3",
     "vue": "^3.4.21"
