@@ -34,6 +34,8 @@
           libsecret
           libappindicator-gtk3
           wine
+          zip
+          gh
           # Provide libcrypt.so.1 for fpm/ruby
           libxcrypt-legacy
         ];

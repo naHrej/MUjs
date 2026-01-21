@@ -97,6 +97,7 @@ export function spawnNewWindow(id: string, html: string): Promise<BrowserWindow>
     windows[id] = new BrowserWindow({
       width: 800,
       height: 600,
+      show: false, // Don't show until ready-to-show fires
       webPreferences: {
         preload: actualPreloadPath,
         contextIsolation: true, // Security fix
@@ -116,11 +117,30 @@ export function spawnNewWindow(id: string, html: string): Promise<BrowserWindow>
       windows[id].flashFrame(false)
     })
 
+    // Add error handling for failed loads
+    windows[id].webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+      logger.error(`Window ${id} failed to load: ${errorCode} - ${errorDescription} (${validatedURL})`)
+      // Show the window anyway so user can see the error
+      windows[id].show()
+      reject(new Error(`Failed to load ${validatedURL}: ${errorDescription}`))
+    })
+
+    windows[id].webContents.on('render-process-gone', (event, details) => {
+      logger.error(`Window ${id} render process crashed:`, details)
+      windows[id].show() // Show window even if renderer crashed
+    })
+
     const htmlFile = (id === 'index' || id === 'settings' || id === 'editor') ? id : 'blank'
     // electron-vite builds HTML files to out/renderer (both dev build output and packaged inside app.asar)
     // In dev: electron-vite dev server, in production: use built files
     if (app.isPackaged) {
-      windows[id].loadFile(path.join(app.getAppPath(), 'out', 'renderer', `${htmlFile}.html`))
+      const htmlPath = path.join(app.getAppPath(), 'out', 'renderer', `${htmlFile}.html`)
+      logger.debug(`Loading HTML from: ${htmlPath}`)
+      windows[id].loadFile(htmlPath).catch((error) => {
+        logger.error(`Failed to loadFile for ${id}:`, error)
+        windows[id].show() // Show window even on error
+        reject(error)
+      })
     } else {
       // In dev mode, electron-vite serves from the Vite dev server.
       // Don't hardcode the port; electron-vite will pick the next available one.
@@ -136,10 +156,17 @@ export function spawnNewWindow(id: string, html: string): Promise<BrowserWindow>
 
       // With renderer.root configured to src/renderer in electron.vite.config.ts,
       // the correct URL is /index.html (NOT /src/renderer/index.html).
-      windows[id].loadURL(`${devServerUrl.replace(/\/$/, '')}/${htmlFile}.html`)
+      const url = `${devServerUrl.replace(/\/$/, '')}/${htmlFile}.html`
+      logger.debug(`Loading HTML from URL: ${url}`)
+      windows[id].loadURL(url).catch((error) => {
+        logger.error(`Failed to loadURL for ${id}:`, error)
+        windows[id].show() // Show window even on error
+        reject(error)
+      })
     }
 
     windows[id].once('ready-to-show', () => {
+      windows[id].show() // Explicitly show the window
       windows[id].on('closed', () => {
         delete windows[id]
       })
