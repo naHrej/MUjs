@@ -26,7 +26,7 @@ export function setupFileWatcher() {
     return watchPath
   })
 
-  ipcMain.handle('file-watcher:set-path', async (event, newPath: string) => {
+  ipcMain.handle('file-watcher:set-path', async (_event, newPath: string) => {
     if (watcher) {
       watcher.close()
       watcher = null
@@ -39,13 +39,12 @@ export function setupFileWatcher() {
 
 async function initializeWatcher() {
   // Get watch path from store
-  const storedPath = store.get('watchPath') as string | undefined
-  const defaultPath = path.resolve('../../')
+  const storedPath = (store.get('settings.watchPath') || store.get('watchPath')) as string | undefined
   
-  watchPath = storedPath || defaultPath
+  watchPath = storedPath && storedPath.trim() !== '' ? storedPath : null
 
-  if (!watchPath) {
-    logger.warn('No watch path configured')
+  if (!watchPath || watchPath === path.resolve('/') || !fs.existsSync(watchPath)) {
+    logger.info('No valid watch path configured, file watcher idle.')
     return
   }
 

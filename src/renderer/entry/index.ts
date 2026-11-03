@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import PrimeVue from 'primevue/config'
+import Tooltip from 'primevue/tooltip'
 import Aura from '@primeuix/themes/aura'
 import Terminal from '../components/Terminal.vue'
 import SiteManager from '../components/SiteManager.vue'
@@ -47,7 +48,6 @@ siteManagerApp.use(PrimeVue, {
 })
 
 // Register Tooltip directive globally
-import Tooltip from 'primevue/tooltip'
 siteManagerApp.directive('tooltip', Tooltip)
 
 // Mount SiteManager

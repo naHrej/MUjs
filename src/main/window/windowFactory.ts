@@ -97,7 +97,7 @@ export function spawnNewWindow(id: string, html: string): Promise<BrowserWindow>
     windows[id] = new BrowserWindow({
       width: 800,
       height: 600,
-      show: false, // Don't show until ready-to-show fires
+      show: true,
       webPreferences: {
         preload: actualPreloadPath,
         contextIsolation: true, // Security fix
@@ -115,6 +115,9 @@ export function spawnNewWindow(id: string, html: string): Promise<BrowserWindow>
     // add event listener for onfocus
     windows[id].on('focus', () => {
       windows[id].flashFrame(false)
+    })
+    windows[id].webContents.on('console-message', (_event, _level, message, line, sourceId) => {
+      logger.info(`[Renderer ${id}] ${message} (${sourceId}:${line})`)
     })
 
     // Add error handling for failed loads
@@ -157,7 +160,7 @@ export function spawnNewWindow(id: string, html: string): Promise<BrowserWindow>
       // With renderer.root configured to src/renderer in electron.vite.config.ts,
       // the correct URL is /index.html (NOT /src/renderer/index.html).
       const url = `${devServerUrl.replace(/\/$/, '')}/${htmlFile}.html`
-      logger.debug(`Loading HTML from URL: ${url}`)
+      logger.info(`Loading HTML from URL: ${url}`)
       windows[id].loadURL(url).catch((error) => {
         logger.error(`Failed to loadURL for ${id}:`, error)
         windows[id].show() // Show window even on error

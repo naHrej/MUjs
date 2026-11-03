@@ -7,7 +7,7 @@ export const store = new Store({
     settings: {
       fontFamily: 'Consolas-pIqaD',
       fontSize: 14,
-      watchPath: path.resolve('../../'),
+      watchPath: '',
       ansiEnabled: false,
       htmlEnabled: false,
       connectOnStartup: false,
