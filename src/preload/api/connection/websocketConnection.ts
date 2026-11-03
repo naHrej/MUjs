@@ -27,6 +27,10 @@ export class WebSocketConnection {
   private isMujsNegotiated: boolean = false
   private sessionToken: string | null = null
 
+  public getSessionToken(): string | null {
+    return this.sessionToken
+  }
+
   constructor() {
     // Listen for editor-save IPC from editor window
     ipcRenderer.on('editor-save', (_event, payload: { sessionId: string; code: string }) => {

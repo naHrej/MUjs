@@ -69,7 +69,7 @@ const languageOptions = [
   { label: 'MOOcode', value: 'moocode' },
   { label: 'MUSHcode', value: 'mushcode' },
   { label: 'C#', value: 'csharp' }
-] as const
+]
 let atLineCount = 0
 let codeEditSession: CodeEditSession | null = null
 
@@ -249,7 +249,7 @@ async function initEditor() {
     theme: 'moocode',
     automaticLayout: true,
     inlayHints: {
-      enabled: true
+      enabled: 'on'
     }
   })
 

@@ -4,7 +4,6 @@ import { getWindowsRegistry } from '../menu/menuManager'
 import { setConnectedState } from '../menu/menuManager'
 import { spawnNewWindow } from '../window/windowFactory'
 import { logger } from '../../shared/utils/logger'
-import type { CodeEditPayload } from '../../shared/types/ipc'
 
 export function setupWindowIpcHandlers() {
   const windows = getWindowsRegistry()
@@ -58,14 +57,14 @@ export function setupWindowIpcHandlers() {
   })
 
   // retransmit editor-save event
-  ipcMain.on('editor-save', (event: IpcMainEvent, payload: unknown) => {
+  ipcMain.on('editor-save', (_event: IpcMainEvent, payload: unknown) => {
     Object.values(windows).forEach(win => {
       win.webContents.send('editor-save', payload)
     })
   })
 
   // retransmit editor-result event
-  ipcMain.on('editor-result', (event: IpcMainEvent, payload: unknown) => {
+  ipcMain.on('editor-result', (_event: IpcMainEvent, payload: unknown) => {
     Object.values(windows).forEach(win => {
       win.webContents.send('editor-result', payload)
     })
