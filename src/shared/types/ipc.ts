@@ -23,6 +23,8 @@ export interface IPCSendChannels {
   'open-code-editor': (payload: CodeEditPayload) => void
   'update-editor': (data: string) => void
   'submit': (data: string) => void
+  'editor-save': (payload: { sessionId: string; code: string }) => void
+  'editor-result': (result: { sessionId: string; success: boolean; diagnostics: any[] }) => void
   'watchPath-changed': () => void
 }
 
@@ -31,4 +33,6 @@ export interface CodeEditPayload {
   headerData: string[]
   codeLines: string[]
   endMarker: string
+  sessionId?: string
+  language?: string
 }

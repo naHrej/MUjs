@@ -56,6 +56,20 @@ export function setupWindowIpcHandlers() {
       win.webContents.send('submit', data)
     })
   })
+
+  // retransmit editor-save event
+  ipcMain.on('editor-save', (event: IpcMainEvent, payload: unknown) => {
+    Object.values(windows).forEach(win => {
+      win.webContents.send('editor-save', payload)
+    })
+  })
+
+  // retransmit editor-result event
+  ipcMain.on('editor-result', (event: IpcMainEvent, payload: unknown) => {
+    Object.values(windows).forEach(win => {
+      win.webContents.send('editor-result', payload)
+    })
+  })
   
   // Add a listener for the disconnected event
   ipcMain.on('disconnect', () => {

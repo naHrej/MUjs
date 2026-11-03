@@ -12,6 +12,9 @@
             placeholder="Language"
             class="mujs-language-select"
           />
+          <span v-if="statusMessage" :class="['mujs-status-badge', statusSuccess ? 'mujs-status-success' : 'mujs-status-error']">
+            {{ statusMessage }}
+          </span>
         </div>
       </template>
       <template #end>
@@ -64,10 +67,26 @@ let editor: monaco.editor.IStandaloneCodeEditor | null = null
 const currentLanguage = ref('moocode')
 const languageOptions = [
   { label: 'MOOcode', value: 'moocode' },
+  { label: 'MUSHcode', value: 'mushcode' },
   { label: 'C#', value: 'csharp' }
 ] as const
 let atLineCount = 0
 let codeEditSession: CodeEditSession | null = null
+
+const statusMessage = ref('')
+const statusSuccess = ref(true)
+let statusTimeout: ReturnType<typeof setTimeout> | null = null
+
+function showStatus(message: string, success: boolean = true) {
+  statusMessage.value = message
+  statusSuccess.value = success
+  if (statusTimeout) {
+    clearTimeout(statusTimeout)
+  }
+  statusTimeout = setTimeout(() => {
+    statusMessage.value = ''
+  }, 5000)
+}
 
 onMounted(async () => {
   try {
@@ -88,15 +107,24 @@ onMounted(async () => {
     switchLanguage(savedLanguage)
   }
 
-      // Listen for code editor open event
-      window.api.on('open-code-editor', (_event: IpcRendererEvent, payload: CodeEditPayload) => {
-        handleOpenCodeEditor(payload)
-      })
+  // Listen for code editor open event
+  window.api.on('open-code-editor', (_event: IpcRendererEvent, payload: CodeEditPayload) => {
+    handleOpenCodeEditor(payload)
+  })
 
-      // Listen for editor updates
-      window.api.on('update-editor', (_event: IpcRendererEvent, data: string) => {
+  // Listen for editor updates
+  window.api.on('update-editor', (_event: IpcRendererEvent, data: string) => {
     if (editor) {
       editor.setValue(editor.getValue() + data)
+    }
+  })
+
+  // Listen for editor result from server save
+  window.api.on('editor-result', (_event: IpcRendererEvent, result: { success: boolean; error?: string }) => {
+    if (result.success) {
+      showStatus('Saved successfully!', true)
+    } else {
+      showStatus(`Save failed: ${result.error || 'Unknown error'}`, false)
     }
   })
 
@@ -107,6 +135,9 @@ onMounted(async () => {
 onUnmounted(() => {
   if (editor) {
     editor.dispose()
+  }
+  if (statusTimeout) {
+    clearTimeout(statusTimeout)
   }
   window.removeEventListener('keydown', handleKeydown)
 })
@@ -150,6 +181,35 @@ async function initEditor() {
         [/[^\\"]+/, 'string'],
         [/\\./, 'constant.character.escape.moo'],
         [/"/, { token: 'string.quoted.double.moo', next: '@pop' }]
+      ]
+    }
+  })
+
+  // Register MUSHcode language
+  monaco.languages.register({ id: 'mushcode' })
+  monaco.languages.setMonarchTokensProvider('mushcode', {
+    tokenizer: {
+      root: [
+        [/@@.*$/, 'comment'],
+        [/\/\*.*?\*\//, 'comment'],
+        [/^&[A-Za-z0-9_#]+/, 'variable'],
+        [/^@\w+/, 'markup.heading'],
+        [/(#\d+)/, 'object'],
+        [/(\d+)/, 'number'],
+        [/\[\w+/, 'keyword.function'],
+        [/\]/, 'keyword.function'],
+        [/(\%[0-9a-zA-Z#])/, 'constant.numeric'],
+        [/(\%q[0-9a-zA-Z])/, 'variable.predefined'],
+        [/(\%va|\%vb|\%vc|\%vd|\%ve|\%vf|\%vg|\%vh|\%vi|\%vj|\%vk|\%vl|\%vm|\%vn|\%vo|\%vp|\%vq|\%vr|\%vs|\%vt|\%vu|\%vv|\%vw|\%vx|\%vy|\%vz)/i, 'variable.predefined'],
+        [/(\%\{[^\}]+\})/, 'variable.predefined'],
+        [/[\{\}\(\)]/, 'delimiter.bracket'],
+        [/[\.,`\'=><!~?:&|+\-*\/\^%]+/, 'operators'],
+        [/"/, { token: 'string.quoted.double', next: '@string' }]
+      ],
+      string: [
+        [/[^\\"]+/, 'string'],
+        [/\\./, 'constant.character.escape'],
+        [/"/, { token: 'string.quoted.double', next: '@pop' }]
       ]
     }
   })
@@ -300,7 +360,14 @@ function handleOpenCodeEditor(payload: CodeEditPayload) {
     saveCommand: payload.saveCommand,
     headerData: payload.headerData,
     codeLines: payload.codeLines,
-    endMarker: payload.endMarker
+    endMarker: payload.endMarker,
+    sessionId: payload.sessionId,
+    language: payload.language
+  }
+
+  // Switch language if specified
+  if (payload.language) {
+    switchLanguage(payload.language)
   }
 
   // Update header info
@@ -315,7 +382,7 @@ function handleOpenCodeEditor(payload: CodeEditPayload) {
 
   // Set progstart input
   if (progstartInputRef.value) {
-    progstartInputRef.value.value = payload.saveCommand || ''
+    progstartInputRef.value.value = payload.saveCommand || (payload.sessionId ? `Session: ${payload.sessionId}` : '')
   }
 
   // Set code in editor
@@ -340,6 +407,18 @@ async function saveToFile() {
 function submitToServer() {
   if (!editor) return
 
+  // Direct structured protocol save
+  if (codeEditSession && codeEditSession.sessionId) {
+    showStatus('Saving...', true)
+    const code = editor.getValue()
+    window.api.send('editor-save', {
+      sessionId: codeEditSession.sessionId,
+      code
+    })
+    return
+  }
+
+  // Legacy fallback
   if (codeEditSession && codeEditSession.endMarker) {
     const code = editor.getValue()
     const codeLines = code.split(/\r?\n/)
@@ -408,6 +487,26 @@ function handleKeydown(e: KeyboardEvent) {
 
 .mujs-language-select {
   min-width: 180px;
+}
+
+.mujs-status-badge {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: opacity 0.3s ease;
+}
+
+.mujs-status-success {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.mujs-status-error {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
 }
 
 .mujs-header-card {

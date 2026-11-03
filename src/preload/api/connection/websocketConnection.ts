@@ -1,6 +1,7 @@
 import { ipcRenderer } from "electron"
 import { LineBuffer } from "../../../services/lineBuffer"
 import { logger } from "../../../shared/utils/logger"
+import type { CodeEditPayload } from "../../../shared/types/ipc"
 
 interface ApiMessage {
   type: string
@@ -11,21 +12,32 @@ interface ApiMessage {
   [key: string]: any
 }
 
+interface ProtocolEnvelope<T = any> {
+  type: string
+  id?: string
+  timestamp?: number
+  payload?: T
+}
+
 export class WebSocketConnection {
   private websocket: WebSocket | null = null
   private apiWebsocket: WebSocket | null = null
   private websocketLineBuffer: LineBuffer | null = null
   private isConnected: boolean = false
+  private isMujsNegotiated: boolean = false
+  private sessionToken: string | null = null
+
+  constructor() {
+    // Listen for editor-save IPC from editor window
+    ipcRenderer.on('editor-save', (_event, payload: { sessionId: string; code: string }) => {
+      this.sendEditorSave(payload.sessionId, payload.code)
+    })
+  }
 
   private processWebSocketData(data: string): void {
-    // WebSocket messages from the server are sent line-by-line with \r\n
-    // Each message event should contain one complete line, but handle edge cases
-    
-    // Create line buffer if it doesn't exist
     if (!this.websocketLineBuffer) {
       this.websocketLineBuffer = new LineBuffer((line: string) => {
         try {
-          // Remove problematic control characters, preserve Unicode
           const processedLine = line.replace(/[\x00\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
           if (processedLine.trim()) {
             ipcRenderer.send("received-data", processedLine)
@@ -35,15 +47,77 @@ export class WebSocketConnection {
         }
       })
     }
-    
-    // Add data to line buffer (handles multiple lines if present)
     this.websocketLineBuffer.addData(data)
   }
 
+  private handleProtocolEnvelope(env: ProtocolEnvelope): void {
+    logger.debug('Received MUjs Protocol envelope:', env.type, env)
+
+    switch (env.type) {
+      case 'server.hello':
+        this.isMujsNegotiated = true
+        this.sessionToken = env.payload?.sessionToken || null
+        logger.connection(`MUjs Protocol v1.0 negotiated successfully with server: ${env.payload?.server || 'PennMUSH'}`)
+        break
+
+      case 'terminal.output':
+        if (env.payload?.html !== undefined) {
+          ipcRenderer.send('received-data', env.payload.html)
+        } else if (env.payload?.plain !== undefined) {
+          ipcRenderer.send('received-data', env.payload.plain)
+        }
+        break
+
+      case 'editor.open':
+        const open = env.payload
+        if (open) {
+          const payload: CodeEditPayload = {
+            saveCommand: open.sessionId,
+            headerData: open.headers || [],
+            codeLines: (open.code || '').split(/\r?\n/),
+            endMarker: '',
+            sessionId: open.sessionId,
+            language: open.language || 'mushcode'
+          }
+          ipcRenderer.send('open-code-editor', payload)
+        }
+        break
+
+      case 'editor.result':
+        ipcRenderer.send('editor-result', env.payload)
+        break
+
+      case 'window.update':
+        if (env.payload) {
+          ipcRenderer.send('window', env.payload.windowId, env.payload.action, env.payload.html)
+        }
+        break
+
+      case 'style.load':
+        ipcRenderer.send('reload-styles')
+        break
+
+      case 'audio.play':
+        if (env.payload?.url) {
+          try {
+            const audio = new Audio(env.payload.url)
+            audio.volume = env.payload.volume !== undefined ? env.payload.volume : 1.0
+            audio.loop = !!env.payload.loop
+            audio.play().catch(e => logger.warn('Audio playback failed:', e))
+          } catch (e) {
+            logger.warn('Audio initialization error:', e)
+          }
+        }
+        break
+
+      default:
+        logger.debug('Unhandled protocol envelope:', env.type)
+        break
+    }
+  }
+
   private handleApiMessage(apiMessage: ApiMessage): void {
-    logger.debug('Processing API message:', apiMessage)
-    
-    // Handle different types of API messages
+    logger.debug('Processing legacy API message:', apiMessage)
     switch (apiMessage.type) {
       case 'editor-update':
         ipcRenderer.send('update-editor', apiMessage.data)
@@ -57,7 +131,6 @@ export class WebSocketConnection {
         logger.info('Server notification:', apiMessage.message)
         break
       case 'command':
-        // Handle server commands through API channel
         if (apiMessage.command) {
           logger.debug('Server command:', apiMessage.command)
         }
@@ -69,40 +142,65 @@ export class WebSocketConnection {
 
   connect(host: string, port: number): void {
     this.isConnected = false
+    this.isMujsNegotiated = false
+    this.sessionToken = null
     
-    // Reset WebSocket line buffer for new connection
     if (this.websocketLineBuffer) {
       this.websocketLineBuffer.clear()
       this.websocketLineBuffer = null
     }
     
-    // Construct WebSocket URLs
     const protocol = port === 443 ? 'wss:' : 'ws:'
-    const gameUrl = `${protocol}//${host}:${port}/game`
+    // Connect to unified /ws endpoint (or /game if legacy)
+    const gameUrl = `${protocol}//${host}:${port}/ws`
     const apiUrl = `${protocol}//${host}:${port}/api`
     
     logger.connection(`Connecting to WebSocket: ${gameUrl}`)
-    logger.connection(`Connecting to API WebSocket: ${apiUrl}`)
     
-    // Create game WebSocket connection
     this.websocket = new WebSocket(gameUrl)
     
     this.websocket.onopen = () => {
-      logger.connection('WebSocket game connection opened')
+      logger.connection('WebSocket connection opened. Sending client.hello handshake...')
       this.isConnected = true
+      
+      // Dispatch client.hello handshake
+      const helloEnvelope = {
+        type: 'client.hello',
+        id: 'init-handshake',
+        timestamp: Date.now(),
+        payload: {
+          client: 'MUjs',
+          version: '2.0.0',
+          capabilities: ['html5', 'editor', 'docking', 'styles', 'audio', 'signed-scripts']
+        }
+      }
+      this.websocket?.send(JSON.stringify(helloEnvelope))
+
       ipcRenderer.send("connect")
     }
     
     this.websocket.onmessage = (event: MessageEvent) => {
-      logger.debug('Received WebSocket data:', event.data)
-      // Process the data similar to telnet
-      this.processWebSocketData(event.data as string)
+      const dataStr = event.data as string
+      // Check if message is a typed JSON protocol envelope
+      if (typeof dataStr === 'string' && dataStr.trim().startsWith('{')) {
+        try {
+          const envelope = JSON.parse(dataStr) as ProtocolEnvelope
+          if (envelope && typeof envelope.type === 'string') {
+            this.handleProtocolEnvelope(envelope)
+            return
+          }
+        } catch {
+          // Fall through to normal line processing
+        }
+      }
+
+      this.processWebSocketData(dataStr)
     }
     
     this.websocket.onclose = () => {
-      logger.connection('WebSocket game connection closed')
+      logger.connection('WebSocket connection closed')
       this.isConnected = false
-      // Clear WebSocket line buffer on close
+      this.isMujsNegotiated = false
       if (this.websocketLineBuffer) {
         this.websocketLineBuffer.clear()
         this.websocketLineBuffer = null
@@ -111,51 +209,52 @@ export class WebSocketConnection {
     }
     
     this.websocket.onerror = (error: Event) => {
-      logger.error('WebSocket game error:', error)
+      logger.error('WebSocket error:', error)
       this.isConnected = false
-      // Clear WebSocket line buffer on error
       if (this.websocketLineBuffer) {
         this.websocketLineBuffer.clear()
         this.websocketLineBuffer = null
       }
-      // Send error message to renderer
-      const errorMessage = 'WebSocket connection failed'
-      ipcRenderer.send("connection-error", errorMessage)
+      ipcRenderer.send("connection-error", 'WebSocket connection failed')
       ipcRenderer.send("disconnected")
     }
     
-    // Create API WebSocket connection
-    this.apiWebsocket = new WebSocket(apiUrl)
-    
-    this.apiWebsocket.onopen = () => {
-      logger.connection('WebSocket API connection opened')
-    }
-    
-    this.apiWebsocket.onmessage = (event: MessageEvent) => {
-      logger.debug('Received API WebSocket data:', event.data)
-      // Handle API-specific messages here
-      try {
-        const apiMessage = JSON.parse(event.data as string) as ApiMessage
-        this.handleApiMessage(apiMessage)
-      } catch (e) {
-        logger.debug('Non-JSON API message:', event.data)
+    // Connect to optional secondary API socket for legacy servers
+    try {
+      this.apiWebsocket = new WebSocket(apiUrl)
+      this.apiWebsocket.onopen = () => {
+        logger.connection('Optional API WebSocket connection opened')
       }
-    }
-    
-    this.apiWebsocket.onclose = () => {
-      logger.connection('WebSocket API connection closed')
-    }
-    
-    this.apiWebsocket.onerror = (error: Event) => {
-      logger.error('WebSocket API error:', error)
+      this.apiWebsocket.onmessage = (event: MessageEvent) => {
+        try {
+          const apiMessage = JSON.parse(event.data as string) as ApiMessage
+          this.handleApiMessage(apiMessage)
+        } catch {
+          // ignore
+        }
+      }
+      this.apiWebsocket.onclose = () => {}
+      this.apiWebsocket.onerror = () => {}
+    } catch {
+      // Optional API connection ignored if server doesn't support dual-socket
     }
   }
 
   write(data: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
-        data += "\n" // Append a newline character to the data
-        this.websocket.send(data)
+        if (this.isMujsNegotiated) {
+          const inputEnvelope = {
+            type: 'terminal.input',
+            timestamp: Date.now(),
+            payload: {
+              command: data
+            }
+          }
+          this.websocket.send(JSON.stringify(inputEnvelope))
+        } else {
+          this.websocket.send(data + "\n")
+        }
         resolve()
       } else {
         reject(new Error('WebSocket not connected'))
@@ -163,10 +262,26 @@ export class WebSocketConnection {
     })
   }
 
+  sendEditorSave(sessionId: string, code: string): void {
+    if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+      const saveEnvelope = {
+        type: 'editor.save',
+        timestamp: Date.now(),
+        payload: {
+          sessionId,
+          code
+        }
+      }
+      this.websocket.send(JSON.stringify(saveEnvelope))
+      logger.debug('Sent editor.save envelope:', sessionId)
+    } else {
+      logger.warn('Cannot send editor.save - WebSocket not open')
+    }
+  }
+
   sendApiCommand(command: string, data: any, serializeArgs: (args: any[], channel?: string) => any[]): void {
     if (this.apiWebsocket && this.apiWebsocket.readyState === WebSocket.OPEN) {
       try {
-        // Explicitly serialize data parameter
         const serializedData = serializeArgs([data], "sendApiCommand")[0]
         const message = {
           type: 'command',
@@ -175,11 +290,17 @@ export class WebSocketConnection {
           timestamp: Date.now()
         }
         this.apiWebsocket.send(JSON.stringify(message))
-        logger.debug('Sent API command:', message)
       } catch (error) {
         logger.error('Error serializing API command data:', error)
         throw error
       }
+    } else if (this.websocket && this.isMujsNegotiated) {
+      const envelope = {
+        type: 'client.command',
+        timestamp: Date.now(),
+        payload: { command, data }
+      }
+      this.websocket.send(JSON.stringify(envelope))
     } else {
       logger.warn('API WebSocket not available or not in WebSocket mode')
     }
@@ -187,6 +308,8 @@ export class WebSocketConnection {
 
   end(): void {
     this.isConnected = false
+    this.isMujsNegotiated = false
+    this.sessionToken = null
     if (this.websocket) {
       this.websocket.close()
       this.websocket = null
@@ -195,7 +318,6 @@ export class WebSocketConnection {
       this.apiWebsocket.close()
       this.apiWebsocket = null
     }
-    // Clear WebSocket line buffer
     if (this.websocketLineBuffer) {
       this.websocketLineBuffer.clear()
       this.websocketLineBuffer = null

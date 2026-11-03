@@ -12,6 +12,8 @@ export interface CodeEditSession {
   headerData: string[]
   codeLines: string[]
   endMarker: string
+  sessionId?: string
+  language?: string
 }
 
 export type ProtocolEvent =
@@ -27,6 +29,13 @@ export interface ParsedHTML {
   links: Array<{ href: string; rel: string; type: string }>
   styles: string[]
   mujsTags: Array<{ style?: string }>
+}
+
+export interface ProtocolEnvelope<T = any> {
+  type: string
+  id?: string
+  timestamp: number
+  payload: T
 }
 
 export type MiddlewareEvent =
