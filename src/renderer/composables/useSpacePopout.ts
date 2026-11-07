@@ -6,8 +6,30 @@ import SpaceHUD from '../components/space/SpaceHUD.vue'
 import { useSpaceStore } from '../stores/useSpaceStore'
 
 const isPoppedOut = ref(false)
+const hostPaneRequested = ref(false)
 let popoutWindow: Window | null = null
 let popoutApp: App | null = null
+let suppressPopoutUnload = false
+
+function notifyPopoutState(poppedOut: boolean) {
+  try {
+    window.api?.send('space-hud-popped-out', poppedOut)
+  } catch (error) {
+    console.warn('[SpacePopout] Failed to update the application menu:', error)
+  }
+}
+
+function releasePopout(reopenHostPane: boolean) {
+  const hadPopout = isPoppedOut.value || popoutApp != null || popoutWindow != null
+  isPoppedOut.value = false
+  if (hadPopout) hostPaneRequested.value = reopenHostPane
+  notifyPopoutState(false)
+  if (popoutApp) {
+    popoutApp.unmount()
+    popoutApp = null
+  }
+  popoutWindow = null
+}
 
 export function useSpacePopout() {
   const { telemetry } = useSpaceStore()
@@ -36,6 +58,8 @@ export function useSpacePopout() {
 
     popoutWindow = win
     isPoppedOut.value = true
+    hostPaneRequested.value = false
+    notifyPopoutState(true)
 
     const vesselTitle = telemetry.name ? `${telemetry.name} - Space HUD` : 'Space Bridge HUD'
     win.document.title = `${vesselTitle} (Tactical & Helm)`
@@ -71,10 +95,10 @@ export function useSpacePopout() {
     popoutApp = createApp(SpaceHUD, {
       isPopout: true,
       onClose: () => {
-        dockBackSpaceHUD()
+        dockBackSpaceHUD(false)
       },
       onDock: () => {
-        dockBackSpaceHUD()
+        dockBackSpaceHUD(true)
       }
     })
 
@@ -94,12 +118,8 @@ export function useSpacePopout() {
 
     // Window close handler (user clicked OS window close X)
     win.addEventListener('beforeunload', () => {
-      isPoppedOut.value = false
-      popoutWindow = null
-      if (popoutApp) {
-        popoutApp.unmount()
-        popoutApp = null
-      }
+      if (suppressPopoutUnload) return
+      releasePopout(false)
     })
 
     // Close popout if main window is closed/reloaded
@@ -110,16 +130,15 @@ export function useSpacePopout() {
     })
   }
 
-  function dockBackSpaceHUD() {
-    if (popoutWindow && !popoutWindow.closed) {
-      popoutWindow.close()
+  function dockBackSpaceHUD(reopenHostPane = true) {
+    const win = popoutWindow
+    suppressPopoutUnload = true
+    try {
+      if (win && !win.closed) win.close()
+    } finally {
+      suppressPopoutUnload = false
     }
-    isPoppedOut.value = false
-    popoutWindow = null
-    if (popoutApp) {
-      popoutApp.unmount()
-      popoutApp = null
-    }
+    releasePopout(reopenHostPane)
   }
 
   function focusSpaceHUDPopout() {
@@ -130,6 +149,7 @@ export function useSpacePopout() {
 
   return {
     isPoppedOut,
+    hostPaneRequested,
     popOutSpaceHUD,
     dockBackSpaceHUD,
     focusSpaceHUDPopout

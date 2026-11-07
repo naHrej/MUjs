@@ -131,46 +131,53 @@
     <!-- Station Navigation Tabs -->
     <div class="station-tab-bar">
       <div
-        v-for="station in stations"
+        v-for="station in dockedStations"
         :key="station"
-        :class="['tab-group', activeStation === station ? 'tab-active' : '', stationWindows[station] ? 'tab-undocked' : '']"
+        :class="['tab-group', activeStation === station ? 'tab-active' : '']"
       >
         <button class="tab-btn" @click="activeStation = station">
           <i :class="[stationMeta[station].icon, 'mr-1']"></i> {{ stationMeta[station].label }}
         </button>
         <button
           class="tab-undock"
-          :title="stationWindows[station] ? `Dock ${stationMeta[station].label} back into this window` : `Undock ${stationMeta[station].label} into its own window`"
+          :title="`Undock ${stationMeta[station].label} into its own window`"
           @click="toggleStationWindow(station)"
         >
-          <i :class="stationWindows[station] ? 'pi pi-sign-in' : 'pi pi-external-link'"></i>
+          <i class="pi pi-external-link"></i>
         </button>
+      </div>
+      <div v-if="poppedStations.length" class="tab-popped-tray">
+        <div v-for="station in poppedStations" :key="station" class="tab-popped">
+          <button
+            class="tab-popped-btn"
+            :title="`Focus ${stationMeta[station].label}`"
+            @click="focusStationWindow(station)"
+          >
+            <i :class="stationMeta[station].icon"></i>
+          </button>
+          <button
+            class="tab-popped-btn"
+            :title="`Dock ${stationMeta[station].label}`"
+            @click="dockStationWindow(station)"
+          >
+            <i class="pi pi-sign-in"></i>
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- Active Station Console Content -->
     <div class="station-content">
-      <div v-if="stationWindows[activeStation]" class="station-undocked">
-        <i class="pi pi-external-link station-undocked-icon"></i>
-        <div class="station-undocked-title">{{ stationMeta[activeStation].label }} is in its own window</div>
-        <div class="station-undocked-desc">
-          Leave it there to watch this station while another one stays in this panel.
-        </div>
-        <div class="station-undocked-actions">
-          <button class="station-undocked-btn" @click="focusStationWindow(activeStation)">Focus window</button>
-          <button class="station-undocked-btn" @click="dockStationWindow(activeStation)">Dock back</button>
-        </div>
-      </div>
-      <TacticalRadar v-else-if="activeStation === 'radar'" />
-      <HelmConsole v-else-if="activeStation === 'helm'" />
-      <WeaponsConsole v-else-if="activeStation === 'tactical'" />
-      <EngineeringConsole v-else-if="activeStation === 'engineering'" />
+      <TacticalRadar v-if="activeStation === 'radar' && !stationWindows.radar" />
+      <HelmConsole v-else-if="activeStation === 'helm' && !stationWindows.helm" />
+      <WeaponsConsole v-else-if="activeStation === 'tactical' && !stationWindows.tactical" />
+      <EngineeringConsole v-else-if="activeStation === 'engineering' && !stationWindows.engineering" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useSpaceStore } from '../../stores/useSpaceStore'
 import TacticalRadar from './TacticalRadar.vue'
 import HelmConsole from './HelmConsole.vue'
@@ -209,6 +216,26 @@ const {
   dismissLatestAlert,
   clearAlerts
 } = useSpaceStore()
+
+const dockedStations = computed(() => stations.filter((station) => !stationWindows[station]))
+const poppedStations = computed(() => stations.filter((station) => stationWindows[station]))
+
+watch(
+  () => stations.map((station) => stationWindows[station]),
+  (flags, previous) => {
+    const docked = stations.filter((station) => !stationWindows[station])
+    if (previous) {
+      const returned = stations.find((station, index) => previous[index] && !flags[index])
+      if (returned && docked.includes(returned)) {
+        activeStation.value = returned
+        return
+      }
+    }
+    if (stationWindows[activeStation.value] && docked.length) {
+      activeStation.value = docked[0]
+    }
+  }
+)
 
 function cleanMessage(msg: string) {
   if (!msg) return ''
@@ -790,9 +817,42 @@ function formatTime(timestamp: number) {
   font-size: 0.72rem;
 }
 
-.tab-undock:hover,
-.tab-undocked .tab-undock {
+.tab-undock:hover {
   color: #3fb950;
+}
+
+.tab-popped-tray {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px 4px 8px;
+}
+
+.tab-popped {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid #1f334d;
+  border-radius: 4px;
+  background: #0d1520;
+}
+
+.tab-popped-btn {
+  width: auto;
+  height: auto;
+  margin: 0;
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  cursor: pointer;
+  padding: 4px 6px;
+  font-size: 0.75rem;
+}
+
+.tab-popped-btn:hover {
+  color: #58a6ff;
 }
 
 .tab-active {
@@ -802,63 +862,6 @@ function formatTime(timestamp: number) {
 }
 
 .tab-active .tab-btn {
-  color: #58a6ff;
-}
-
-.station-undocked {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 24px;
-  text-align: center;
-  color: #8b949e;
-}
-
-.station-undocked-icon {
-  font-size: 1.4rem;
-  color: #58a6ff;
-}
-
-.station-undocked-title {
-  color: #c9d1d9;
-  font-size: 0.85rem;
-  font-weight: bold;
-  letter-spacing: 0.4px;
-}
-
-.station-undocked-desc {
-  max-width: 28rem;
-  font-size: 0.75rem;
-  line-height: 1.4;
-}
-
-.station-undocked-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 6px;
-}
-
-.station-undocked-btn {
-  width: auto;
-  height: auto;
-  margin: 0;
-  background: #0d1520;
-  border: 1px solid #1f334d;
-  color: #c9d1d9;
-  border-radius: 4px;
-  padding: 6px 10px;
-  font-family: inherit;
-  font-size: 0.72rem;
-  font-weight: bold;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.station-undocked-btn:hover {
-  border-color: #58a6ff;
   color: #58a6ff;
 }
 
