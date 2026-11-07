@@ -40,14 +40,6 @@ export class DataPipeline {
     // Step 1: Check for protocol messages first
     const protocolEvent = this.protocolParser.parse(rawData)
     if (protocolEvent) {
-      if (protocolEvent.type === 'protocol-envelope') {
-        eventMiddleware.emit({
-          type: 'protocol-envelope',
-          envelope: protocolEvent.envelope
-        })
-        return
-      }
-
       if (protocolEvent.type === 'code-edit-end') {
         // Send code edit session to editor
         const payload: CodeEditPayload = {

@@ -62,24 +62,6 @@ const preloadPath = app.isPackaged
   ? path.join(app.getAppPath(), 'out', 'preload', 'preload.mjs')
   : path.join(appRoot, 'out', 'preload', 'preload.mjs')
 
-export function applyWindowHtml(win: BrowserWindow, action: string, html: string): Promise<unknown> {
-  const container = `document.querySelector('.container')`
-  const content = JSON.stringify(html ?? '')
-  let script: string
-  if (action === 'append') {
-    script = `${container}.innerHTML += ${content}`
-  } else if (action === 'prepend') {
-    script = `${container}.innerHTML = ${content} + ${container}.innerHTML`
-  } else if (action === 'clear') {
-    script = `${container}.innerHTML = ''`
-  } else if (action === 'style') {
-    script = `loadStyleFromURL(${content})`
-  } else {
-    script = `${container}.innerHTML = ${content}`
-  }
-  return win.webContents.executeJavaScript(script)
-}
-
 export function spawnNewWindow(id: string, html: string): Promise<BrowserWindow> {
   return new Promise((resolve, reject) => {
     const windows = getWindowsRegistry()
@@ -192,9 +174,7 @@ export function spawnNewWindow(id: string, html: string): Promise<BrowserWindow>
         delete windows[id]
       })
       if (id !== 'index' && id !== 'settings' && id !== 'editor') {
-        applyWindowHtml(windows[id], 'replace', html).catch((error) => {
-          logger.error(`Failed to render HTML in window ${id}:`, error)
-        })
+        windows[id].webContents.executeJavaScript(`document.querySelector('.container').innerHTML += \`${html}\``)
       }
       resolve(windows[id])
     })
