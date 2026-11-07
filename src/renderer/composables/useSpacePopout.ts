@@ -1,0 +1,137 @@
+import { ref, createApp, type App } from 'vue'
+import PrimeVue from 'primevue/config'
+import Tooltip from 'primevue/tooltip'
+import Aura from '@primeuix/themes/aura'
+import SpaceHUD from '../components/space/SpaceHUD.vue'
+import { useSpaceStore } from '../stores/useSpaceStore'
+
+const isPoppedOut = ref(false)
+let popoutWindow: Window | null = null
+let popoutApp: App | null = null
+
+export function useSpacePopout() {
+  const { telemetry } = useSpaceStore()
+
+  function popOutSpaceHUD(preferredWidth = 650) {
+    if (popoutWindow && !popoutWindow.closed) {
+      popoutWindow.focus()
+      return
+    }
+
+    const width = Math.min(1400, Math.max(600, preferredWidth))
+    const height = 820
+    const left = window.screenX + Math.max(20, window.outerWidth - width - 20)
+    const top = window.screenY + 40
+
+    const win = window.open(
+      'about:blank',
+      'mujs_space_hud_popout',
+      `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no,resizable=yes`
+    )
+
+    if (!win) {
+      console.warn('[SpacePopout] Popout window blocked or failed to open.')
+      return
+    }
+
+    popoutWindow = win
+    isPoppedOut.value = true
+
+    const vesselTitle = telemetry.name ? `${telemetry.name} - Space HUD` : 'Space Bridge HUD'
+    win.document.title = `${vesselTitle} (Tactical & Helm)`
+
+    // Copy dark mode class
+    win.document.documentElement.classList.add('p-dark')
+
+    // Copy all style tags and stylesheets from the parent document
+    document.querySelectorAll('link[rel="stylesheet"], style').forEach((node) => {
+      try {
+        win.document.head.appendChild(node.cloneNode(true))
+      } catch (e) {
+        console.warn('[SpacePopout] Failed copying stylesheet node:', e)
+      }
+    })
+
+    // Reset base styles in popout
+    win.document.body.style.margin = '0'
+    win.document.body.style.padding = '0'
+    win.document.body.style.background = '#04080e'
+    win.document.body.style.height = '100vh'
+    win.document.body.style.width = '100vw'
+    win.document.body.style.overflow = 'hidden'
+
+    // Create mount root
+    const rootEl = win.document.createElement('div')
+    rootEl.id = 'space-hud-popout-mount'
+    rootEl.style.height = '100%'
+    rootEl.style.width = '100%'
+    win.document.body.appendChild(rootEl)
+
+    // Mount SpaceHUD into the popout window
+    popoutApp = createApp(SpaceHUD, {
+      isPopout: true,
+      onClose: () => {
+        dockBackSpaceHUD()
+      },
+      onDock: () => {
+        dockBackSpaceHUD()
+      }
+    })
+
+    popoutApp.use(PrimeVue, {
+      theme: {
+        preset: Aura,
+        options: {
+          prefix: 'p',
+          darkModeSelector: '.p-dark',
+          cssLayer: false
+        }
+      }
+    })
+    popoutApp.directive('tooltip', Tooltip)
+
+    popoutApp.mount(rootEl)
+
+    // Window close handler (user clicked OS window close X)
+    win.addEventListener('beforeunload', () => {
+      isPoppedOut.value = false
+      popoutWindow = null
+      if (popoutApp) {
+        popoutApp.unmount()
+        popoutApp = null
+      }
+    })
+
+    // Close popout if main window is closed/reloaded
+    window.addEventListener('beforeunload', () => {
+      if (popoutWindow && !popoutWindow.closed) {
+        popoutWindow.close()
+      }
+    })
+  }
+
+  function dockBackSpaceHUD() {
+    if (popoutWindow && !popoutWindow.closed) {
+      popoutWindow.close()
+    }
+    isPoppedOut.value = false
+    popoutWindow = null
+    if (popoutApp) {
+      popoutApp.unmount()
+      popoutApp = null
+    }
+  }
+
+  function focusSpaceHUDPopout() {
+    if (popoutWindow && !popoutWindow.closed) {
+      popoutWindow.focus()
+    }
+  }
+
+  return {
+    isPoppedOut,
+    popOutSpaceHUD,
+    dockBackSpaceHUD,
+    focusSpaceHUDPopout
+  }
+}
