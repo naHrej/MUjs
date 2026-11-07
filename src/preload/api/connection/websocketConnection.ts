@@ -1,7 +1,6 @@
 import { ipcRenderer } from "electron"
 import { LineBuffer } from "../../../services/lineBuffer"
 import { logger } from "../../../shared/utils/logger"
-import { splitIncoming, type ProtocolEnvelope } from "../../../shared/utils/protocolEnvelope"
 import type { CodeEditPayload } from "../../../shared/types/ipc"
 
 interface ApiMessage {
@@ -11,6 +10,13 @@ interface ApiMessage {
   message?: string
   command?: string
   [key: string]: any
+}
+
+interface ProtocolEnvelope<T = any> {
+  type: string
+  id?: string
+  timestamp?: number
+  payload?: T
 }
 
 export class WebSocketConnection {
@@ -87,12 +93,7 @@ export class WebSocketConnection {
 
       case 'window.update':
         if (env.payload) {
-          const html = typeof env.payload.html === 'string'
-            ? env.payload.html
-            : (typeof env.payload.content === 'string' ? env.payload.content : '')
-          const windowId = env.payload.windowId || 'window'
-          logger.connection(`Client window update: ${windowId} (${env.payload.action || 'replace'})`)
-          ipcRenderer.send('window', windowId, env.payload.action || 'replace', html)
+          ipcRenderer.send('window', env.payload.windowId, env.payload.action, env.payload.html)
         }
         break
 
@@ -183,16 +184,21 @@ export class WebSocketConnection {
     }
     
     this.websocket.onmessage = (event: MessageEvent) => {
-      if (typeof event.data !== 'string') return
-
-      // Protocol JSON stays off the terminal. Only leftover game text is displayed.
-      for (const part of splitIncoming(event.data)) {
-        if (part.kind === 'envelope') {
-          this.handleProtocolEnvelope(part.envelope)
-        } else if (part.text.trim()) {
-          this.processWebSocketData(part.text)
+      const dataStr = event.data as string
+      // Check if message is a typed JSON protocol envelope
+      if (typeof dataStr === 'string' && dataStr.trim().startsWith('{')) {
+        try {
+          const envelope = JSON.parse(dataStr) as ProtocolEnvelope
+          if (envelope && typeof envelope.type === 'string') {
+            this.handleProtocolEnvelope(envelope)
+            return
+          }
+        } catch {
+          // Fall through to normal line processing
         }
       }
+
+      this.processWebSocketData(dataStr)
     }
     
     this.websocket.onclose = () => {

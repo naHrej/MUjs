@@ -1,17 +1,6 @@
 <template>
   <div id="app" class="flex-container" v-show="showApp">
     <button
-      class="mujs-space-btn"
-      :class="{ 'mujs-space-btn-open': spaceOpen }"
-      type="button"
-      :title="spaceOpen ? 'Hide Space HUD' : 'Show Space HUD'"
-      aria-label="Space HUD"
-      @click="spaceOpen = !spaceOpen"
-    >
-      <i class="pi pi-compass"></i>
-    </button>
-
-    <button
       class="mujs-gear"
       type="button"
       title="Settings"
@@ -41,45 +30,6 @@
     >
       <Settings @close="settingsOpen = false" />
     </Drawer>
-
-    <Drawer
-      v-model:visible="spaceOpen"
-      position="right"
-      :dismissable="false"
-      :closeOnEscape="false"
-      :modal="false"
-      :showCloseIcon="false"
-      class="mujs-space-drawer"
-      :style="{ width: `${spaceDrawerWidth}px`, maxWidth: '95vw' }"
-    >
-      <div
-        class="space-drawer-resize-handle"
-        @mousedown.prevent="startDrawerResize"
-        title="Drag left/right to resize Space HUD"
-      >
-        <div class="resize-handle-bar"></div>
-      </div>
-
-      <div v-if="isPoppedOut" class="space-popped-out-placeholder">
-        <div class="placeholder-card">
-          <i class="pi pi-external-link placeholder-icon"></i>
-          <div class="placeholder-title">Space HUD Popped Out</div>
-          <div class="placeholder-desc">
-            The space display is open in a separate window.
-          </div>
-          <div class="placeholder-actions">
-            <button class="ph-btn ph-btn-focus" @click="focusSpaceHUDPopout">Focus Window</button>
-            <button class="ph-btn ph-btn-dock" @click="dockBackSpaceHUD">Dock Back</button>
-          </div>
-        </div>
-      </div>
-      <SpaceHUD
-        v-else
-        @close="spaceOpen = false"
-        @popout="() => popOutSpaceHUD(spaceDrawerWidth)"
-        @dock="dockBackSpaceHUD"
-      />
-    </Drawer>
   </div>
 </template>
 
@@ -87,8 +37,6 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import Drawer from 'primevue/drawer'
 import Settings from './Settings.vue'
-import SpaceHUD from './space/SpaceHUD.vue'
-import { useSpacePopout } from '../composables/useSpacePopout'
 import { eventMiddleware } from '../../services/eventMiddleware'
 import type { MiddlewareEvent } from '../../shared/types/events'
 import { useConnectionEvents } from '../composables/useConnectionEvents'
@@ -109,50 +57,6 @@ const sessionKey = ref<string | null>(null)
 const connectionString = ref('')
 const sendOnConnect = ref(false)
 const settingsOpen = ref(false)
-const spaceOpen = ref(false)
-let consoleWatchOpen = false
-let consoleQuietTimer: ReturnType<typeof setTimeout> | undefined
-
-function noteShipConsole() {
-  if (consoleQuietTimer) clearTimeout(consoleQuietTimer)
-  consoleQuietTimer = setTimeout(() => {
-    consoleWatchOpen = false
-  }, 15000)
-
-  if (!consoleWatchOpen) {
-    consoleWatchOpen = true
-    spaceOpen.value = true
-  }
-}
-
-const { isPoppedOut, popOutSpaceHUD, dockBackSpaceHUD, focusSpaceHUDPopout } = useSpacePopout()
-const spaceDrawerWidth = ref(Number(localStorage.getItem('mujs_space_drawer_width')) || 520)
-let isResizingSpaceDrawer = false
-
-function startDrawerResize() {
-  isResizingSpaceDrawer = true
-  document.body.style.cursor = 'ew-resize'
-  document.body.style.userSelect = 'none'
-
-  const onMouseMove = (moveEvent: MouseEvent) => {
-    if (!isResizingSpaceDrawer) return
-    const newWidth = window.innerWidth - moveEvent.clientX
-    const maxWidth = Math.max(450, window.innerWidth * 0.95)
-    spaceDrawerWidth.value = Math.round(Math.max(380, Math.min(maxWidth, newWidth)))
-  }
-
-  const onMouseUp = () => {
-    isResizingSpaceDrawer = false
-    document.body.style.cursor = ''
-    document.body.style.userSelect = ''
-    window.removeEventListener('mousemove', onMouseMove)
-    window.removeEventListener('mouseup', onMouseUp)
-    localStorage.setItem('mujs_space_drawer_width', String(spaceDrawerWidth.value))
-  }
-
-  window.addEventListener('mousemove', onMouseMove)
-  window.addEventListener('mouseup', onMouseUp)
-}
 
 // Use composables
 const { inputHistory, currentInputIndex, addToHistory, navigateHistory, resetHistoryNavigation } = useInputHistory()
@@ -160,15 +64,10 @@ const { inputHistory, currentInputIndex, addToHistory, navigateHistory, resetHis
 // Subscribe to middleware events (no business logic in component)
 const unsubscribe = eventMiddleware.subscribe((event: MiddlewareEvent) => {
   if (event.type === 'terminal-data') {
+    // Just render the processed data
     appendToTerminal(event.data)
   } else if (event.type === 'connection-state') {
     showApp.value = event.connected
-    if (!event.connected) {
-      consoleWatchOpen = false
-      if (consoleQuietTimer) clearTimeout(consoleQuietTimer)
-    }
-  } else if (event.type === 'protocol-envelope' && event.envelope.type === 'space.telemetry') {
-    noteShipConsole()
   }
 })
 
@@ -454,57 +353,6 @@ onUnmounted(() => {
 
 .mujs-gear:active {
   transform: translateY(0);
-}
-
-.mujs-space-btn {
-  position: absolute;
-  top: 10px;
-  right: 56px;
-  z-index: 1100;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  border: 1px solid #1f334d;
-  background: rgba(8, 13, 20, 0.75);
-  color: #58a6ff;
-  cursor: pointer;
-}
-
-.mujs-space-btn-open {
-  background: rgba(22, 48, 82, 0.95);
-  border-color: #58a6ff;
-}
-</style>
-<style lang="less">
-.mujs-space-drawer {
-  .p-drawer-header { display: none !important; }
-  overflow: visible !important;
-  .p-drawer-content {
-    padding: 0 !important;
-    background: #04080e !important;
-    height: 100%;
-    overflow: hidden;
-  }
-}
-.space-drawer-resize-handle {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 10px;
-  cursor: ew-resize;
-  z-index: 500;
-}
-.space-popped-out-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  background: #04080e;
-  color: #f0f6fc;
 }
 </style>
 <style lang="less" scoped>
