@@ -13,9 +13,15 @@ export function getWindowsRegistry(): Record<string, BrowserWindow> {
 }
 
 let connected = false
+let spaceHudPoppedOut = false
 
 export function setConnectedState(isConnected: boolean) {
   connected = isConnected
+  updateMenu()
+}
+
+export function setSpaceHudPoppedOut(poppedOut: boolean) {
+  spaceHudPoppedOut = poppedOut
   updateMenu()
 }
 
@@ -40,6 +46,14 @@ function updateMenu() {
           enabled: true,
           click: () => {
             windows['index']?.webContents.send('reconnect')
+          }
+        }] : []),
+        ...(spaceHudPoppedOut ? [{
+          label: 'Dock Space HUD',
+          id: 'dock-space-hud',
+          enabled: true,
+          click: () => {
+            windows['index']?.webContents.send('dock-space-hud')
           }
         }] : []),
         {

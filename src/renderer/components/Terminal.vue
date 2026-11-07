@@ -4,9 +4,9 @@
       class="mujs-space-btn"
       :class="{ 'mujs-space-btn-open': spaceOpen }"
       type="button"
-      :title="spaceOpen ? 'Hide Space HUD' : 'Show Space HUD'"
+      :title="isPoppedOut ? 'Dock Space HUD' : spaceOpen ? 'Hide Space HUD' : 'Show Space HUD'"
       aria-label="Space HUD"
-      @click="spaceOpen = !spaceOpen"
+      @click="toggleSpaceHud"
     >
       <i class="pi pi-compass"></i>
     </button>
@@ -60,31 +60,17 @@
         <div class="resize-handle-bar"></div>
       </div>
 
-      <div v-if="isPoppedOut" class="space-popped-out-placeholder">
-        <div class="placeholder-card">
-          <i class="pi pi-external-link placeholder-icon"></i>
-          <div class="placeholder-title">Space HUD Popped Out</div>
-          <div class="placeholder-desc">
-            The space display is open in a separate window.
-          </div>
-          <div class="placeholder-actions">
-            <button class="ph-btn ph-btn-focus" @click="focusSpaceHUDPopout">Focus Window</button>
-            <button class="ph-btn ph-btn-dock" @click="dockBackSpaceHUD">Dock Back</button>
-          </div>
-        </div>
-      </div>
       <SpaceHUD
-        v-else
         @close="spaceOpen = false"
         @popout="() => popOutSpaceHUD(spaceDrawerWidth)"
-        @dock="dockBackSpaceHUD"
+        @dock="dockBackSpaceHUD(true)"
       />
     </Drawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import Drawer from 'primevue/drawer'
 import Settings from './Settings.vue'
 import SpaceHUD from './space/SpaceHUD.vue'
@@ -113,6 +99,8 @@ const spaceOpen = ref(false)
 let consoleWatchOpen = false
 let consoleQuietTimer: ReturnType<typeof setTimeout> | undefined
 
+const { isPoppedOut, hostPaneRequested, popOutSpaceHUD, dockBackSpaceHUD } = useSpacePopout()
+
 function noteShipConsole() {
   if (consoleQuietTimer) clearTimeout(consoleQuietTimer)
   consoleQuietTimer = setTimeout(() => {
@@ -121,11 +109,27 @@ function noteShipConsole() {
 
   if (!consoleWatchOpen) {
     consoleWatchOpen = true
-    spaceOpen.value = true
+    if (!isPoppedOut.value) spaceOpen.value = true
   }
 }
 
-const { isPoppedOut, popOutSpaceHUD, dockBackSpaceHUD, focusSpaceHUDPopout } = useSpacePopout()
+watch(isPoppedOut, (poppedOut) => {
+  if (poppedOut) spaceOpen.value = false
+})
+
+watch(hostPaneRequested, (requested) => {
+  if (!requested) return
+  spaceOpen.value = true
+  hostPaneRequested.value = false
+})
+
+function toggleSpaceHud() {
+  if (isPoppedOut.value) {
+    dockBackSpaceHUD(true)
+    return
+  }
+  spaceOpen.value = !spaceOpen.value
+}
 const spaceDrawerWidth = ref(Number(localStorage.getItem('mujs_space_drawer_width')) || 520)
 let isResizingSpaceDrawer = false
 
@@ -208,6 +212,10 @@ onMounted(async () => {
   // Listen for menu toggle (main process)
   window.api.on('toggle-settings', () => {
     settingsOpen.value = !settingsOpen.value
+  })
+
+  window.api.on('dock-space-hud', () => {
+    dockBackSpaceHUD(true)
   })
 })
 
@@ -497,14 +505,6 @@ onUnmounted(() => {
   width: 10px;
   cursor: ew-resize;
   z-index: 500;
-}
-.space-popped-out-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  background: #04080e;
-  color: #f0f6fc;
 }
 </style>
 <style lang="less" scoped>

@@ -1,7 +1,7 @@
 import { ipcMain, BrowserWindow, Menu, IpcMainEvent, MenuItemConstructorOptions } from 'electron'
 import { deserializeCodeEditPayload, deserializeFromIPC } from '../../shared/utils/serialization'
 import { getWindowsRegistry } from '../menu/menuManager'
-import { setConnectedState } from '../menu/menuManager'
+import { setConnectedState, setSpaceHudPoppedOut } from '../menu/menuManager'
 import { applyWindowHtml, spawnNewWindow } from '../window/windowFactory'
 import { logger } from '../../shared/utils/logger'
 
@@ -65,6 +65,10 @@ export function setupWindowIpcHandlers() {
   // Add a listener for the disconnected event
   ipcMain.on('disconnect', () => {
     setConnectedState(false)
+  })
+
+  ipcMain.on('space-hud-popped-out', (_event: IpcMainEvent, poppedOut: boolean) => {
+    setSpaceHudPoppedOut(Boolean(poppedOut))
   })
 
   ipcMain.on('flash-frame', (event: IpcMainEvent, flash: boolean) => {

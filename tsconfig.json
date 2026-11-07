@@ -17,12 +17,11 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "types": ["node", "vite/client"],
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@shared/*": ["src/shared/*"],
-      "@services/*": ["src/services/*"],
-      "@renderer/*": ["src/renderer/*"]
+      "@/*": ["./src/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@services/*": ["./src/services/*"],
+      "@renderer/*": ["./src/renderer/*"]
     }
   },
   "include": [

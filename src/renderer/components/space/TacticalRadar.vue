@@ -1,5 +1,5 @@
 <template>
-  <div class="tactical-radar-container">
+  <div ref="radarRoot" class="tactical-radar-container">
     <div class="radar-header">
       <div class="radar-title">
         <i class="pi pi-compass mr-2"></i>
@@ -13,9 +13,7 @@
         >
           {{ radarMode === 'head-up' ? 'HEAD-UP' : 'NORTH-UP' }}
         </button>
-        <span class="range-label">Range: {{ maxRangeSU }} SU</span>
-        <button class="zoom-btn" @click="zoomIn" title="Zoom In"><i class="pi pi-plus"></i></button>
-        <button class="zoom-btn" @click="zoomOut" title="Zoom Out"><i class="pi pi-minus"></i></button>
+        <span class="range-label">Range: {{ displayedRangeLabel }}</span>
       </div>
     </div>
 
@@ -25,22 +23,66 @@
       <span>MODE: <strong class="text-blue">{{ radarMode === 'head-up' ? 'RELATIVE (SHIP-CENTRIC)' : 'SECTOR (TRUE NORTH)' }}</strong></span>
     </div>
 
+    <div class="radar-body">
+    <div class="contacts-list" :style="{ width: `${contactsWidth}px` }">
+      <div v-if="telemetry.contacts.length === 0" class="no-contacts">
+        No contacts in sensor range.
+      </div>
+      <div
+        v-for="c in telemetry.contacts"
+        :key="c.entityId || (c as any).EntityId"
+        :class="[
+          'contact-row',
+          inspectedId === (c.entityId || (c as any).EntityId) ? 'inspected-row' : '',
+          telemetry.targetLock?.targetId === (c.entityId || (c as any).EntityId) ? 'locked-row' : ''
+        ]"
+        @click="inspectContact(c.entityId || (c as any).EntityId)"
+      >
+        <span class="contact-name font-semibold">{{ c.name || (c as any).Name }}</span>
+        <span class="contact-meta text-xs">{{ contactSummary(c) }}</span>
+      </div>
+    </div>
+
+    <div
+      ref="splitterRef"
+      class="radar-splitter"
+      title="Drag to resize the contact list"
+      @mousedown.prevent="startContactsResize"
+    ></div>
+
+    <div class="radar-main">
     <div class="radar-stage">
-    <div class="radar-display">
+    <div class="radar-display" @wheel.prevent="onRadarWheel">
       <svg
         ref="svgRef"
-        viewBox="-160 -160 320 320"
+        viewBox="-220 -220 440 440"
         class="radar-svg"
       >
-        <!-- Background grid & rings -->
-        <circle cx="0" cy="0" r="140" class="radar-ring outer-ring" />
-        <circle cx="0" cy="0" r="105" class="radar-ring" />
-        <circle cx="0" cy="0" r="70" class="radar-ring" />
-        <circle cx="0" cy="0" r="35" class="radar-ring" />
+        <!-- Range rings continue until the circle leaves the viewBox -->
+        <g v-for="ring in rangeRings" :key="ring.distance">
+          <circle
+            cx="0"
+            cy="0"
+            :r="ring.radius"
+            :class="['radar-ring', ring.major ? 'radar-ring-major' : '']"
+          />
+          <text
+            x="6"
+            :y="-ring.radius - 3"
+            :class="['range-text', ring.major ? 'range-text-major' : '']"
+          >{{ ring.label }}</text>
+        </g>
+        <circle
+          v-if="sensorRingRadius != null"
+          cx="0"
+          cy="0"
+          :r="sensorRingRadius"
+          class="radar-ring radar-ring-sensor"
+        />
 
         <!-- Crosshairs -->
-        <line x1="-140" y1="0" x2="140" y2="0" class="radar-axis" />
-        <line x1="0" y1="-140" x2="0" y2="140" class="radar-axis" />
+        <line :x1="-VIEW_EDGE" y1="0" :x2="VIEW_EDGE" y2="0" class="radar-axis" />
+        <line x1="0" :y1="-VIEW_EDGE" x2="0" :y2="VIEW_EDGE" class="radar-axis" />
 
         <!-- Bezel Cardinal Labels -->
         <template v-if="radarMode === 'head-up'">
@@ -58,12 +100,6 @@
           <text x="-150" y="4" class="cardinal-text" text-anchor="end">270° (W)</text>
         </template>
 
-        <!-- Range ring markers -->
-        <text x="4" y="-37" class="range-text">{{ (maxRangeSU * 0.25).toFixed(0) }}</text>
-        <text x="4" y="-72" class="range-text">{{ (maxRangeSU * 0.5).toFixed(0) }}</text>
-        <text x="4" y="-107" class="range-text">{{ (maxRangeSU * 0.75).toFixed(0) }}</text>
-        <text x="4" y="-142" class="range-text">{{ maxRangeSU }}</text>
-
         <!-- Desired Turn Indicator (shows where ordered heading is if turning in Head-Up mode) -->
         <g
           v-if="radarMode === 'head-up' && Math.abs(telemetry.heading.desiredYaw - telemetry.heading.yaw) > 1"
@@ -73,11 +109,9 @@
           <polygon points="0,-42 -4,-34 4,-34" class="desired-heading-arrow" />
         </g>
 
-        <!-- Ownship hull points fore, with the heading vector leaving the bow -->
+        <!-- Ownship hull points along its heading -->
         <g :transform="`rotate(${ownshipScreenRotation})`">
           <polygon points="0,-9 -3.6,6 3.6,6" class="ownship-center" />
-          <line x1="0" y1="-9" x2="0" y2="-45" class="heading-vector" />
-          <polygon points="0,-48 -5,-38 5,-38" class="heading-arrow" />
         </g>
         <circle
           cx="0"
@@ -115,16 +149,46 @@
             <path d="M 10 5 L 10 10 L 5 10" class="lock-bracket" />
           </g>
 
-          <!-- Label -->
+        </g>
+
+        <g
+          v-for="callout in contactCallouts"
+          :key="callout.id"
+          class="contact-callout"
+        >
+          <template v-if="callout.stacked">
+            <line
+              v-for="member in callout.members"
+              :key="`${member.entityId}-leader`"
+              :x1="member.leaderX"
+              :y1="member.leaderY"
+              :x2="callout.bracketX"
+              :y2="member.lineY"
+              class="contact-leader"
+            />
+            <path :d="callout.bracket" class="contact-bracket" />
+            <text
+              v-for="member in callout.members"
+              :key="`${member.entityId}-label`"
+              :x="callout.textX"
+              :y="member.textY"
+              class="contact-label"
+              @click.stop="inspectContact(member.entityId)"
+            >{{ member.text }}</text>
+          </template>
           <text
-            :x="c.x + 8"
-            :y="c.y + 4"
+            v-else
+            :x="callout.x"
+            :y="callout.y"
             class="contact-label"
-          >
-            {{ c.name }} ({{ (c.rangeSU ?? 0).toFixed(1) }})
-          </text>
+            @click.stop="inspectContact(callout.entityId)"
+          >{{ callout.text }}</text>
         </g>
       </svg>
+      <div class="radar-zoom">
+        <button class="zoom-btn" :disabled="!canZoomIn" @click="zoomIn" title="Zoom In"><i class="pi pi-plus"></i></button>
+        <button class="zoom-btn" :disabled="!canZoomOut" @click="zoomOut" title="Zoom Out"><i class="pi pi-minus"></i></button>
+      </div>
     </div>
 
     <aside v-if="inspectedContact" class="sensor-report">
@@ -199,100 +263,51 @@
       </dl>
     </aside>
     </div>
-
-    <!-- Contact Quick Roster -->
-    <div class="contacts-list">
-      <div class="contacts-header">
-        <span>CONTACTS ({{ telemetry.contacts.length }})</span>
-        <span class="text-xs text-color-secondary">Click row for sensor report</span>
-      </div>
-      <div v-if="telemetry.contacts.length === 0" class="no-contacts">
-        No contacts in sensor range.
-      </div>
-      <div
-        v-for="c in telemetry.contacts"
-        :key="c.entityId || (c as any).EntityId"
-        :class="[
-          'contact-row',
-          inspectedId === (c.entityId || (c as any).EntityId) ? 'inspected-row' : '',
-          telemetry.targetLock?.targetId === (c.entityId || (c as any).EntityId) ? 'locked-row' : ''
-        ]"
-        @click="inspectContact(c.entityId || (c as any).EntityId)"
+    <div class="radar-actions">
+      <button
+        class="cmd-btn"
+        :disabled="!selectedBerth.enabled"
+        :title="selectedBerth.title"
+        @click="runSelectedBerth"
       >
-        <div class="contact-info">
-          <span class="contact-name font-semibold">{{ c.name || (c as any).Name }}</span>
-          <span class="contact-meta text-xs">
-            Type: {{ c.type || (c as any).Type }} | Range: {{ (c.rangeSU ?? (c as any).RangeSU ?? 0).toFixed(1) }} SU
-            | Bearing: <span title="Relative Bearing">{{ formatPair(c.relativeBearing ?? (c as any).RelativeBearing ?? 0, relativeElevation(c)) }}</span>
-            | Heading: <span :title="contactHeading(c) ? 'Relative Heading' : undefined">{{ relativeHeadingText(c) }}</span>
-          </span>
-        </div>
-        <div class="contact-action" @click.stop>
-          <button
-            v-if="berthAction(c) === 'launch'"
-            class="cmd-btn"
-            title="Leave the surface"
-            @click="departBerth()"
-          >
-            LAUNCH
-          </button>
-          <button
-            v-else-if="berthAction(c) === 'undock'"
-            class="cmd-btn"
-            title="Leave the dock"
-            @click="departBerth()"
-          >
-            UNDOCK
-          </button>
-          <button
-            v-else-if="canApproach(c) === 'land'"
-            class="cmd-btn"
-            title="Land on the surface"
-            @click="landOn(c.entityId)"
-          >
-            LAND
-          </button>
-          <button
-            v-else-if="canApproach(c) === 'dock'"
-            class="cmd-btn"
-            title="Dock with the station"
-            @click="dockWith(c.entityId)"
-          >
-            DOCK
-          </button>
-          <button
-            v-if="isStationaryContact(c) && !isNavActive(c, 'intercept')"
-            :class="['cmd-btn', 'nav-btn', isNavActive(c, 'approach') ? 'nav-active' : '']"
-            :title="isNavActive(c, 'approach') ? 'Cancel course' : 'Face the target, approach, and stop alongside it'"
-            @click="setCourse(c)"
-          >
-            SET COURSE
-          </button>
-          <button
-            v-else
-            :class="['cmd-btn', 'nav-btn', isNavActive(c, 'intercept') ? 'nav-active' : '']"
-            :disabled="!isNavActive(c, 'intercept') && !interceptPlan(c).course"
-            :title="isNavActive(c, 'intercept') ? 'Cancel intercept' : interceptPlan(c).title"
-            @click="plotIntercept(c)"
-          >
-            INTERCEPT
-          </button>
-          <button
-            :class="['lock-btn', isContactLocked(c.entityId) ? 'locked-active' : '']"
-            @click="toggleLock(c.entityId)"
-          >
-            {{ isContactLocked(c.entityId) ? 'UNLOCK' : 'LOCK' }}
-          </button>
-          <button
-            class="cmd-btn cmd-fire"
-            :disabled="!canFireAt(c)"
-            :title="fireTitle(c)"
-            @click="fireAt(c)"
-          >
-            FIRE
-          </button>
-        </div>
-      </div>
+        {{ selectedBerth.label }}
+      </button>
+      <button
+        v-if="!inspectedContact || (isStationaryContact(inspectedContact) && !isNavActive(inspectedContact, 'intercept'))"
+        :class="['cmd-btn', 'nav-btn', inspectedContact && isNavActive(inspectedContact, 'approach') ? 'nav-active' : '']"
+        :disabled="!inspectedContact"
+        :title="inspectedContact ? (isNavActive(inspectedContact, 'approach') ? 'Cancel course' : 'Face the target, approach, and stop alongside it') : 'Select a contact'"
+        @click="inspectedContact && setCourse(inspectedContact)"
+      >
+        SET COURSE
+      </button>
+      <button
+        v-else
+        :class="['cmd-btn', 'nav-btn', isNavActive(inspectedContact, 'intercept') ? 'nav-active' : '']"
+        :disabled="!isNavActive(inspectedContact, 'intercept') && !interceptPlan(inspectedContact).course"
+        :title="isNavActive(inspectedContact, 'intercept') ? 'Cancel intercept' : interceptPlan(inspectedContact).title"
+        @click="plotIntercept(inspectedContact)"
+      >
+        INTERCEPT
+      </button>
+      <button
+        :class="['lock-btn', inspectedContact && isContactLocked(inspectedContact.entityId) ? 'locked-active' : '']"
+        :disabled="!inspectedContact"
+        :title="inspectedContact ? 'Toggle weapons lock' : 'Select a contact'"
+        @click="inspectedContact && toggleLock(inspectedContact.entityId)"
+      >
+        {{ inspectedContact && isContactLocked(inspectedContact.entityId) ? 'UNLOCK' : 'LOCK' }}
+      </button>
+      <button
+        class="cmd-btn cmd-fire"
+        :disabled="!inspectedContact || !canFireAt(inspectedContact)"
+        :title="inspectedContact ? fireTitle(inspectedContact) : 'Select a contact'"
+        @click="inspectedContact && fireAt(inspectedContact)"
+      >
+        FIRE
+      </button>
+    </div>
+    </div>
     </div>
   </div>
 </template>
@@ -319,11 +334,142 @@ const {
   fireTorpedo
 } = useSpaceStore()
 
+const radarRoot = ref<HTMLElement | null>(null)
+const splitterRef = ref<HTMLElement | null>(null)
+const svgRef = ref<SVGSVGElement | null>(null)
+const CONTACTS_WIDTH_KEY = 'mujs_radar_contacts_width'
+const contactsWidth = ref(readContactsWidth())
+
+function readContactsWidth() {
+  const stored = Number(localStorage.getItem(CONTACTS_WIDTH_KEY))
+  return Number.isFinite(stored) && stored >= 160 ? stored : 240
+}
+
+function startContactsResize(event: MouseEvent) {
+  const handle = splitterRef.value
+  const view = handle?.ownerDocument.defaultView
+  if (!handle || !view) return
+
+  const startX = event.clientX
+  const startWidth = contactsWidth.value
+  view.document.body.style.cursor = 'col-resize'
+
+  const onMove = (move: MouseEvent) => {
+    const root = radarRoot.value
+    const limit = root ? Math.max(160, root.getBoundingClientRect().width - 320) : 480
+    const next = startWidth + (move.clientX - startX)
+    contactsWidth.value = Math.round(Math.min(limit, Math.max(160, next)))
+  }
+
+  const onUp = () => {
+    view.document.body.style.cursor = ''
+    localStorage.setItem(CONTACTS_WIDTH_KEY, String(contactsWidth.value))
+    view.removeEventListener('mousemove', onMove)
+    view.removeEventListener('mouseup', onUp)
+  }
+
+  view.addEventListener('mousemove', onMove)
+  view.addEventListener('mouseup', onUp)
+}
+
 const clickPing = ref<{ x: number; y: number; key: number } | null>(null)
 let pingTimer: any = null
 
 const maxRangeSU = ref(50)
-const ranges = [10, 25, 50, 100, 250, 500]
+const RADAR_RADIUS = 140
+const VIEW_EDGE = 220
+const PARSEC_SU = 3085659622.014257
+const AU_SU = PARSEC_SU / 206264.80624709636
+const MIN_RANGE_SU = 0.25
+const MAX_RANGE_SU = (100 * AU_SU * RADAR_RADIUS) / VIEW_EDGE
+const ZOOM_FACTOR = 2
+
+function niceStep(target: number) {
+  if (!Number.isFinite(target) || target <= 0) return 1
+  const magnitude = 10 ** Math.floor(Math.log10(target))
+  const normalized = target / magnitude
+  const nice = normalized >= 5 ? 5 : normalized >= 2 ? 2 : 1
+  return nice * magnitude
+}
+
+const displayedRangeSU = computed(() => maxRangeSU.value * (VIEW_EDGE / RADAR_RADIUS))
+const displayedRangeLabel = computed(() => formatDistance(displayedRangeSU.value))
+
+function trimTrailingZeros(text: string) {
+  return text.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '')
+}
+
+function formatDistance(distance: number) {
+  const au = distance / AU_SU
+  if (au >= 0.05) {
+    const digits = au >= 10 ? 0 : au >= 1 ? 1 : 2
+    return `${trimTrailingZeros(au.toFixed(digits))} AU`
+  }
+  if (distance >= 100) return `${Math.round(distance)} SU`
+  if (distance >= 10) return `${trimTrailingZeros(distance.toFixed(1))} SU`
+  return `${trimTrailingZeros(distance.toFixed(2))} SU`
+}
+const SENSOR_RANGE_SCALE = 1_000_000 / 99
+const SENSOR_THRESHOLD = 0.01
+
+function gridVisibility(x: number, y: number, z: number) {
+  const px = x / PARSEC_SU
+  const py = y / PARSEC_SU
+  const pz = z / PARSEC_SU
+  const dx = Math.abs(px - Math.round(px / 100) * 100)
+  const dy = Math.abs(py - Math.round(py / 100) * 100)
+  const dz = Math.abs(pz - Math.round(pz / 100) * 100)
+  const visibility = 1.1 - 1 / (1 + dx * dx + dy * dy + dz * dz)
+  return Math.min(1, Math.max(0, visibility))
+}
+
+function shortRangeLimitSU(resolution: number, signature: number, visibility: number) {
+  const reach = (resolution + 0.01) * signature * visibility
+  const span = reach / SENSOR_THRESHOLD - 0.1
+  if (span <= 0) return 0
+  return Math.sqrt(span * SENSOR_RANGE_SCALE)
+}
+
+const sensorRangeSU = computed(() => {
+  const ship = telemetry as typeof telemetry & {
+    srsResolution?: number
+    SrsResolution?: number
+    sensorResolution?: number
+  }
+  const reported = Number(ship.srsResolution ?? ship.SrsResolution ?? ship.sensorResolution)
+  const powered = telemetry.power.sensors > 0
+  const resolution = Number.isFinite(reported) ? Math.max(0, reported) : powered ? 1 : 0
+  const visibility = gridVisibility(telemetry.position.x, telemetry.position.y, telemetry.position.z)
+  return shortRangeLimitSU(resolution, 1, visibility)
+})
+
+const sensorRingRadius = computed(() => {
+  const radius = sensorRangeSU.value * (RADAR_RADIUS / maxRangeSU.value)
+  if (radius <= 0 || radius > VIEW_EDGE * Math.SQRT2) return null
+  return radius
+})
+
+const rangeRings = computed(() => {
+  const maxRange = maxRangeSU.value
+  const pixelsPerSU = RADAR_RADIUS / maxRange
+  const limit = VIEW_EDGE * Math.SQRT2
+  const step = niceStep((limit / pixelsPerSU) / 4)
+  const rings: { distance: number; radius: number; major: boolean; label: string }[] = []
+
+  for (let index = 1; index < 24; index++) {
+    const distance = step * index
+    const radius = distance * pixelsPerSU
+    if (radius > limit) break
+    rings.push({
+      distance,
+      radius,
+      major: index % 2 === 0,
+      label: formatDistance(distance)
+    })
+  }
+
+  return rings
+})
 const radarMode = ref<'head-up' | 'north-up'>('head-up')
 const inspectedId = ref<string | null>(null)
 
@@ -334,10 +480,14 @@ function handleRadarContextMenu(event: MouseEvent) {
   const rect = svgRef.value.getBoundingClientRect()
   if (rect.width === 0 || rect.height === 0) return
 
-  const clientX = event.clientX - rect.left
-  const clientY = event.clientY - rect.top
-  const svgX = (clientX / rect.width) * 320 - 160
-  const svgY = (clientY / rect.height) * 320 - 160
+  const point = svgRef.value.createSVGPoint()
+  point.x = event.clientX
+  point.y = event.clientY
+  const matrix = svgRef.value.getScreenCTM()
+  if (!matrix) return
+  const mapped = point.matrixTransform(matrix.inverse())
+  const svgX = mapped.x
+  const svgY = mapped.y
 
   let clickAngle = (Math.atan2(svgX, -svgY) * 180) / Math.PI
   if (clickAngle < 0) clickAngle += 360
@@ -364,14 +514,32 @@ function toggleRadarMode() {
   radarMode.value = radarMode.value === 'head-up' ? 'north-up' : 'head-up'
 }
 
+function clampRange(value: number) {
+  return Math.min(MAX_RANGE_SU, Math.max(MIN_RANGE_SU, value))
+}
+
+const canZoomIn = computed(() => maxRangeSU.value > MIN_RANGE_SU * 1.01)
+const canZoomOut = computed(() => maxRangeSU.value < MAX_RANGE_SU / 1.01)
+
 function zoomIn() {
-  const idx = ranges.indexOf(maxRangeSU.value)
-  if (idx > 0) maxRangeSU.value = ranges[idx - 1]
+  if (!canZoomIn.value) return
+  maxRangeSU.value = clampRange(maxRangeSU.value / ZOOM_FACTOR)
 }
 
 function zoomOut() {
-  const idx = ranges.indexOf(maxRangeSU.value)
-  if (idx < ranges.length - 1) maxRangeSU.value = ranges[idx + 1]
+  if (!canZoomOut.value) return
+  maxRangeSU.value = clampRange(maxRangeSU.value * ZOOM_FACTOR)
+}
+
+let wheelAccum = 0
+function onRadarWheel(event: WheelEvent) {
+  wheelAccum += event.deltaY
+  const threshold = 80
+  if (Math.abs(wheelAccum) < threshold) return
+  const steps = Math.trunc(wheelAccum / threshold)
+  wheelAccum -= steps * threshold
+  const factor = ZOOM_FACTOR ** Math.min(4, Math.abs(steps))
+  maxRangeSU.value = clampRange(steps > 0 ? maxRangeSU.value * factor : maxRangeSU.value / factor)
 }
 
 // Difference between desired yaw and current yaw (for turn indicator)
@@ -448,8 +616,8 @@ watch(() => telemetry.contacts, observeShipCourses, { deep: true, immediate: tru
 
 // Project contacts onto the radar circle (-140 to +140 radius)
 const projectedContacts = computed(() => {
-  const radius = 140
-  const maxR = maxRangeSU.value
+    const radius = RADAR_RADIUS
+    const maxR = maxRangeSU.value
   const contacts = telemetry.contacts || []
 
   return contacts.map((raw: any) => {
@@ -467,9 +635,8 @@ const projectedContacts = computed(() => {
     const bearingDeg = radarMode.value === 'head-up' ? c.relativeBearing : c.bearingYaw
     const angleRad = (bearingDeg - 90) * (Math.PI / 180)
 
-    // Scale distance
-    const distClamped = Math.min(c.rangeSU, maxR)
-    const normDist = (distClamped / maxR) * radius
+    const normDist = (c.rangeSU / maxR) * radius
+    if (normDist > VIEW_EDGE * Math.SQRT2) return null
 
     const x = Math.cos(angleRad) * normDist
     const y = Math.sin(angleRad) * normDist
@@ -518,6 +685,129 @@ const projectedContacts = computed(() => {
       isShip: typeClass === 'type-ship',
       screenRotation
     }
+  }).filter((contact) => contact != null)
+})
+
+const LABEL_CHAR_WIDTH = 4.1
+const LABEL_HEIGHT = 9
+const LABEL_LINE = 11
+const LABEL_GAP = 3
+
+function contactLabel(name: string, rangeSU: number) {
+  return `${name} (${rangeSU.toFixed(1)})`
+}
+
+function labelWidth(text: string) {
+  return Math.max(18, text.length * LABEL_CHAR_WIDTH)
+}
+
+const contactCallouts = computed(() => {
+  const contacts = projectedContacts.value
+  const boxes = contacts.map((contact) => {
+    const text = contactLabel(contact.name, contact.rangeSU)
+    return {
+      contact,
+      text,
+      x: contact.x + 8,
+      y: contact.y - 7,
+      w: labelWidth(text),
+      h: LABEL_HEIGHT
+    }
+  })
+
+  const parent = boxes.map((_, index) => index)
+  const find = (index: number): number => {
+    let root = index
+    while (parent[root] !== root) root = parent[root]
+    let cursor = index
+    while (parent[cursor] !== root) {
+      const next = parent[cursor]
+      parent[cursor] = root
+      cursor = next
+    }
+    return root
+  }
+  const overlaps = (left: (typeof boxes)[number], right: (typeof boxes)[number]) =>
+    left.x < right.x + right.w + LABEL_GAP &&
+    left.x + left.w + LABEL_GAP > right.x &&
+    left.y < right.y + right.h + LABEL_GAP &&
+    left.y + left.h + LABEL_GAP > right.y
+
+  for (let i = 0; i < boxes.length; i++) {
+    for (let j = i + 1; j < boxes.length; j++) {
+      if (overlaps(boxes[i], boxes[j])) {
+        const left = find(i)
+        const right = find(j)
+        if (left !== right) parent[right] = left
+      }
+    }
+  }
+
+  const groups = new Map<number, number[]>()
+  boxes.forEach((_, index) => {
+    const root = find(index)
+    const list = groups.get(root)
+    if (list) list.push(index)
+    else groups.set(root, [index])
+  })
+
+  return [...groups.values()].map((indexes) => {
+    if (indexes.length === 1) {
+      const box = boxes[indexes[0]]
+      return {
+        id: box.contact.entityId || box.text,
+        stacked: false as const,
+        entityId: box.contact.entityId,
+        text: box.text,
+        x: box.x,
+        y: box.contact.y + 3,
+        members: [],
+        bracket: '',
+        bracketX: 0,
+        textX: 0
+      }
+    }
+
+    const members = indexes
+      .map((index) => boxes[index])
+      .sort((left, right) => left.contact.y - right.contact.y || left.contact.x - right.contact.x)
+    const width = Math.max(...members.map((member) => labelWidth(member.text)))
+    const blockHeight = members.length * LABEL_LINE
+    const rightEdge = Math.max(...members.map((member) => member.contact.x))
+    let textX = rightEdge + 18
+    if (textX + width > VIEW_EDGE - 4) textX = VIEW_EDGE - 4 - width
+    const bracketX = textX - 6
+    const preferredTop = members.reduce((sum, member) => sum + member.contact.y, 0) / members.length - blockHeight / 2
+    const top = Math.min(VIEW_EDGE - blockHeight - 2, Math.max(-VIEW_EDGE + 8, preferredTop))
+    const bottom = top + (members.length - 1) * LABEL_LINE + 4
+    const placed = members.map((member, line) => {
+      const textY = top + line * LABEL_LINE + 8
+      const lineY = textY - 3
+      const dx = bracketX - member.contact.x
+      const dy = lineY - member.contact.y
+      const length = Math.hypot(dx, dy) || 1
+      return {
+        entityId: member.contact.entityId,
+        text: member.text,
+        textY,
+        lineY,
+        leaderX: member.contact.x + (dx / length) * 8,
+        leaderY: member.contact.y + (dy / length) * 8
+      }
+    })
+
+    return {
+      id: placed.map((member) => member.entityId).join('|'),
+      stacked: true as const,
+      entityId: '',
+      text: '',
+      x: 0,
+      y: 0,
+      members: placed,
+      bracket: `M ${bracketX + 5} ${top} H ${bracketX} V ${bottom} H ${bracketX + 5}`,
+      bracketX,
+      textX
+    }
   })
 })
 
@@ -550,6 +840,13 @@ function formatPair(azimuth: number, elevation: number | null) {
 
 function relativeElevation(contact: SensorContact) {
   return contact.bearingPitch - telemetry.heading.pitch
+}
+
+function contactSummary(contact: SensorContact) {
+  const type = contact.type || 'Contact'
+  const range = (contact.rangeSU ?? 0).toFixed(1)
+  const bearing = formatPair(contact.relativeBearing ?? 0, relativeElevation(contact))
+  return `${type} ${range}SU @ ${bearing}`
 }
 
 function isShipContact(contact: SensorContact) {
@@ -709,6 +1006,23 @@ function berthAction(contact: SensorContact): 'undock' | 'launch' | null {
   return berthed.value.mode === 'landed' ? 'launch' : 'undock'
 }
 
+const selectedBerth = computed(() => {
+  const contact = inspectedContact.value
+  if (!contact) return { label: 'DOCK', title: 'Select a contact', enabled: false, run: () => {} }
+  const leaving = berthAction(contact)
+  if (leaving === 'launch') return { label: 'LAUNCH', title: 'Leave the surface', enabled: true, run: () => departBerth() }
+  if (leaving === 'undock') return { label: 'UNDOCK', title: 'Leave the dock', enabled: true, run: () => departBerth() }
+  const approach = canApproach(contact)
+  if (approach === 'land') return { label: 'LAND', title: 'Land on the surface', enabled: true, run: () => landOn(contact.entityId) }
+  if (approach === 'dock') return { label: 'DOCK', title: 'Dock with the station', enabled: true, run: () => dockWith(contact.entityId) }
+  return { label: 'DOCK', title: 'This contact cannot be docked with', enabled: false, run: () => {} }
+})
+
+function runSelectedBerth() {
+  if (!selectedBerth.value.enabled) return
+  selectedBerth.value.run()
+}
+
 function weaponsInRange(contact: SensorContact) {
   const beams = telemetry.weapons.beams.filter((beam) => beam.ready && contact.rangeSU <= beam.maxRange)
   const tubes = telemetry.weapons.tubes.filter((tube) => tube.ready && contact.rangeSU <= tube.maxRange)
@@ -842,31 +1156,71 @@ function toggleLock(entityId: string) {
   transition: all 0.2s;
 }
 
-.zoom-btn:hover {
+.zoom-btn:hover:not(:disabled) {
   background: #1f334d;
   border-color: #58a6ff;
 }
 
-.radar-stage {
+.zoom-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.radar-body {
   display: flex;
   flex: 1;
-  min-height: 280px;
+  min-height: 0;
   min-width: 0;
+}
+
+.radar-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr) auto;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.radar-actions {
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: #09101a;
+  border-top: 1px solid #1f334d;
+}
+
+.radar-stage {
+  display: contents;
 }
 
 .radar-display {
+  position: relative;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px;
-  flex: 1;
+  grid-column: 1;
+  grid-row: 1;
   min-width: 0;
-  min-height: 280px;
+  min-height: 0;
+}
+
+.radar-zoom {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .sensor-report {
+  grid-column: 2;
+  grid-row: 1 / span 2;
   width: 190px;
-  flex-shrink: 0;
   border-left: 1px solid #1f334d;
   background: #0d1520;
   padding: 10px 12px;
@@ -946,21 +1300,30 @@ function toggleLock(entityId: string) {
 }
 
 .radar-svg {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  max-width: 320px;
-  height: auto;
-  aspect-ratio: 1 / 1;
+  height: 100%;
+  display: block;
 }
 
 .radar-ring {
   fill: none;
-  stroke: #1b385a;
+  stroke: #2a4a6e;
   stroke-width: 1;
+  stroke-dasharray: 2 3;
 }
 
-.outer-ring {
-  stroke: #2b5687;
-  stroke-width: 1.5;
+.radar-ring-major {
+  stroke: #4d7399;
+  stroke-width: 1.15;
+  stroke-dasharray: none;
+}
+
+.radar-ring-sensor {
+  stroke: #79c0ff;
+  stroke-width: 1.6;
+  stroke-dasharray: none;
 }
 
 .radar-axis {
@@ -976,17 +1339,13 @@ function toggleLock(entityId: string) {
 }
 
 .range-text {
-  fill: #325e8a;
+  fill: #9fb6cc;
   font-size: 7px;
 }
 
-.heading-vector {
-  stroke: #58a6ff;
-  stroke-width: 2;
-}
-
-.heading-arrow {
-  fill: #58a6ff;
+.range-text-major {
+  fill: #c5d7e8;
+  font-size: 8px;
 }
 
 .desired-heading-vector {
@@ -1065,26 +1424,58 @@ function toggleLock(entityId: string) {
   stroke-width: 1.5;
 }
 
-.contact-label {
-  fill: #c9d1d9;
-  font-size: 7px;
+.contact-callout {
   pointer-events: none;
 }
 
-.contacts-list {
-  border-top: 1px solid #1f334d;
-  background: #09101a;
-  max-height: 180px;
-  overflow-y: auto;
-  padding: 6px;
+.contact-leader {
+  fill: none;
+  stroke: #6e8eae;
+  stroke-width: 0.7;
 }
 
-.contacts-header {
-  display: flex;
-  justify-content: space-between;
-  padding: 4px 6px;
-  font-size: 0.75rem;
-  color: #8b949e;
+.contact-bracket {
+  fill: none;
+  stroke: #9fb6cc;
+  stroke-width: 0.8;
+}
+
+.contact-label {
+  fill: #c9d1d9;
+  font-size: 7px;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.radar-splitter {
+  position: relative;
+  flex-shrink: 0;
+  width: 8px;
+  cursor: col-resize;
+  background: #1f334d;
+  touch-action: none;
+  z-index: 3;
+}
+
+.radar-splitter::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -8px;
+  right: -8px;
+}
+
+.radar-splitter:hover {
+  background: #388bfd;
+}
+
+.contacts-list {
+  flex-shrink: 0;
+  min-height: 0;
+  background: #09101a;
+  overflow-y: auto;
+  padding: 6px;
 }
 
 .no-contacts {
@@ -1096,8 +1487,8 @@ function toggleLock(entityId: string) {
 
 .contact-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   padding: 6px 8px;
   border-radius: 4px;
   cursor: pointer;
@@ -1115,22 +1506,6 @@ function toggleLock(entityId: string) {
 
 .locked-row {
   box-shadow: inset 3px 0 0 #f85149;
-}
-
-.contact-info {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  flex: 1;
-}
-
-.contact-action {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 4px;
-  margin-left: 8px;
 }
 
 .contact-name {
