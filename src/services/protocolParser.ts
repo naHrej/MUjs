@@ -1,10 +1,21 @@
-import type { CodeEditSession, ProtocolEvent } from '../shared/types/events'
+import type { CodeEditSession, ProtocolEnvelope, ProtocolEvent } from '../shared/types/events'
 
 export class ProtocolParser {
   private codeEditSession: CodeEditSession | null = null
 
   parse(data: string): ProtocolEvent {
-    // Extract all "if this data, then do" logic here
+    const trimmed = data.trim()
+    if (trimmed.startsWith('{') && trimmed.endsWith('}') && trimmed.includes('"type"')) {
+      try {
+        const envelope = JSON.parse(trimmed) as ProtocolEnvelope
+        if (envelope && typeof envelope.type === 'string') {
+          return { type: 'protocol-envelope', envelope }
+        }
+      } catch {
+        // Not valid JSON. Keep it as display text.
+      }
+    }
+
     if (data.startsWith("ProgStart > ")) {
       this.codeEditSession = {
         active: true,

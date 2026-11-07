@@ -2,7 +2,7 @@ import { ipcMain, BrowserWindow, Menu, IpcMainEvent, MenuItemConstructorOptions 
 import { deserializeCodeEditPayload, deserializeFromIPC } from '../../shared/utils/serialization'
 import { getWindowsRegistry } from '../menu/menuManager'
 import { setConnectedState } from '../menu/menuManager'
-import { spawnNewWindow } from '../window/windowFactory'
+import { applyWindowHtml, spawnNewWindow } from '../window/windowFactory'
 import { logger } from '../../shared/utils/logger'
 
 export function setupWindowIpcHandlers() {
@@ -15,17 +15,9 @@ export function setupWindowIpcHandlers() {
     }
     const window = windows[id]
     if (window) {
-      if (updateType === 'append') {
-        window.webContents.executeJavaScript(`document.querySelector('.container').innerHTML += \`${html}\``)
-      } else if (updateType === 'replace') {
-        window.webContents.executeJavaScript(`document.querySelector('.container').innerHTML = \`${html}\``)
-      } else if (updateType === 'prepend') {
-        window.webContents.executeJavaScript(`document.querySelector('.container').innerHTML = \`${html}\` + document.querySelector('.container').innerHTML`)
-      } else if (updateType === 'clear') {
-        window.webContents.executeJavaScript(`document.querySelector('.container').innerHTML = ''`)
-      } else if (updateType === 'style') {
-        window.webContents.executeJavaScript(`loadStyleFromURL(\`${html}\`)`)
-      }
+      applyWindowHtml(window, updateType, html).catch((error) => {
+        logger.error(`Failed to update window ${id}:`, error)
+      })
     }
   })
 

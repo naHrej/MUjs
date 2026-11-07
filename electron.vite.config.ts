@@ -70,7 +70,8 @@ export default defineConfig({
         input: {
           index: resolve(__dirname, 'src/renderer/index.html'),
           editor: resolve(__dirname, 'src/renderer/editor.html'),
-          settings: resolve(__dirname, 'src/renderer/settings.html')
+          settings: resolve(__dirname, 'src/renderer/settings.html'),
+          blank: resolve(__dirname, 'src/renderer/blank.html')
         }
       }
     } as any)
